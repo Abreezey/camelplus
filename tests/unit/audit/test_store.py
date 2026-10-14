@@ -5,7 +5,15 @@ from datetime import datetime, timezone
 
 import pytest
 
-from camel.audit import AuditStore, ChainIntegrityError, decision_event, decision_payload, redact
+from camel.audit import (
+    AuditStore,
+    ChainIntegrityError,
+    decision_event,
+    decision_payload,
+    execution_payload,
+    redact,
+)
+from camel.audit.store import AuditContext
 from camel.core.decision import Decision, DecisionOutcome
 from camel.core.effect import CanonicalEffect, EffectType
 from camel.core.events import CanonicalEvent
@@ -59,7 +67,9 @@ def test_tampered_row_detected(store: AuditStore) -> None:
     store.append(_event(2))
     # Simulate an attacker editing a stored row behind the store's back
     # (there is intentionally no public API for this).
-    store._conn.execute("UPDATE audit_events SET event_json = replace(event_json, 'alice', 'mallory') WHERE seq = 1")
+    store._conn.execute(
+        "UPDATE audit_events SET event_json = replace(event_json, 'alice', 'mallory') WHERE seq = 1"
+    )
     store._conn.commit()
     with pytest.raises(ChainIntegrityError):
         store.verify_chain()
@@ -88,7 +98,9 @@ def test_decision_replay_from_stored_event(store: AuditStore) -> None:
         policy_version="sha256:abcd1234",
         contract_id="ic_01",
     )
-    event = decision_event(decision, effect, trace_id="t1", session_id="s1", principal="user:alice", now=NOW)
+    event = decision_event(
+        decision, effect, trace_id="t1", session_id="s1", principal="user:alice", now=NOW
+    )
     store.append(event, payload=decision_payload(decision, effect))
 
     loaded = store.events("t1")[0]
@@ -112,3 +124,58 @@ def test_redact_hides_secret() -> None:
     assert redacted.startswith("sha256:")
     assert "supersecret" not in redacted
     assert redact("sk-live-supersecret") == redact("sk-live-supersecret")
+
+
+def _replay_pair() -> tuple[Decision, CanonicalEffect]:
+    effect = CanonicalEffect(
+        effect_id="fx_ctx",
+        type=EffectType.READ,
+        operation="read_file",
+        resources=("file://workspace/notes.txt",),
+    )
+    decision = Decision(
+        decision=DecisionOutcome.ALLOW,
+        policy_version="sha256:abcd1234",
+        contract_id="ic_01",
+    )
+    return decision, effect
+
+
+def test_decision_payload_with_context() -> None:
+    decision, effect = _replay_pair()
+    ctx = AuditContext(model_version="gpt-4o-2024-08", tool_manifest_digest="sha256:ab", code_commit="9c1f2e")
+    payload = decision_payload(decision, effect, context=ctx)
+    assert payload["context"] == {
+        "model_version": "gpt-4o-2024-08",
+        "tool_manifest_digest": "sha256:ab",
+        "code_commit": "9c1f2e",
+    }
+
+
+def test_decision_payload_context_none_is_explicit() -> None:
+    decision, effect = _replay_pair()
+    payload = decision_payload(decision, effect)
+    assert payload["context"] is None  # honestly record "not provided", never omit the key
+
+
+def test_execution_payload_with_context() -> None:
+    _, effect = _replay_pair()
+    payload = execution_payload(effect, "tk_1", "executed", context=AuditContext(code_commit="9c1f2e"))
+    assert payload["context"]["code_commit"] == "9c1f2e"
+    assert payload["context"]["model_version"] is None
+    assert payload["outcome"] == "executed"
+
+
+def test_from_env_partial(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CAMEL_CODE_COMMIT", "abc123")
+    monkeypatch.delenv("CAMEL_MODEL_VERSION", raising=False)
+    monkeypatch.delenv("CAMEL_TOOL_MANIFEST_DIGEST", raising=False)
+    ctx = AuditContext.from_env()
+    assert ctx.code_commit == "abc123"
+    assert ctx.model_version is None
+    assert ctx.tool_manifest_digest is None
+
+
+def test_from_env_empty_string_treated_as_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CAMEL_MODEL_VERSION", "")
+    assert AuditContext.from_env().model_version is None

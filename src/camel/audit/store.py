@@ -24,11 +24,14 @@ through :meth:`AuditStore.payload_of`.
 import hashlib
 import hmac
 import json
+import os
 import sqlite3
 import threading
 import uuid
 from datetime import datetime
 from pathlib import Path
+
+from pydantic import BaseModel, ConfigDict
 
 from camel.core.decision import Decision
 from camel.core.effect import CanonicalEffect
@@ -64,6 +67,41 @@ def redact(value: str) -> str:
     return "sha256:" + hashlib.sha256(value.encode()).hexdigest()[:16]
 
 
+class AuditContext(BaseModel):
+    """Deployment/origin metadata that plan.md §2.C requires in audit events.
+
+    ``model_version`` (which LLM produced the plan), ``tool_manifest_digest``
+    (which tool set was offered) and ``code_commit`` (which code ran) must be
+    recorded alongside every decision. Their producers are modules B/D and the
+    deployment; until those exist the fields stay ``None`` — the payload
+    honestly records "not provided" instead of omitting the key.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    model_version: str | None = None
+    tool_manifest_digest: str | None = None
+    code_commit: str | None = None
+
+    @classmethod
+    def from_env(cls) -> "AuditContext":
+        """Load the deployment-provided fields from ``CAMEL_*`` env vars.
+
+        Empty strings are treated as missing so ``VAR=`` does not pollute the
+        audit trail with meaningless values.
+        """
+
+        def _get(name: str) -> str | None:
+            value = os.environ.get(name)
+            return value if value else None
+
+        return cls(
+            model_version=_get("CAMEL_MODEL_VERSION"),
+            tool_manifest_digest=_get("CAMEL_TOOL_MANIFEST_DIGEST"),
+            code_commit=_get("CAMEL_CODE_COMMIT"),
+        )
+
+
 def _record_hash(prev_hash: str, seq: int, event_json: str) -> str:
     return "sha256:" + hashlib.sha256(f"{prev_hash}|{seq}|{event_json}".encode()).hexdigest()
 
@@ -91,9 +129,13 @@ def decision_event(
     )
 
 
-def decision_payload(decision: Decision, effect: CanonicalEffect) -> dict:
+def decision_payload(decision: Decision, effect: CanonicalEffect, context: AuditContext | None = None) -> dict:
     """Non-secret payload for a decision event; sufficient to replay it."""
-    return {"decision": decision.model_dump(mode="json"), "effect": effect.model_dump(mode="json")}
+    return {
+        "decision": decision.model_dump(mode="json"),
+        "effect": effect.model_dump(mode="json"),
+        "context": context.model_dump() if context is not None else None,
+    }
 
 
 def execution_event(
@@ -119,12 +161,23 @@ def execution_event(
     )
 
 
-def execution_payload(effect: CanonicalEffect, ticket_id: str, outcome: str, detail: str | None = None) -> dict:
+def execution_payload(
+    effect: CanonicalEffect,
+    ticket_id: str,
+    outcome: str,
+    detail: str | None = None,
+    context: AuditContext | None = None,
+) -> dict:
     """Non-secret payload for an execution event.
 
     ``outcome`` is one of ``executed`` / ``rejected`` / ``failed``.
     """
-    payload: dict = {"effect": effect.model_dump(mode="json"), "ticket_id": ticket_id, "outcome": outcome}
+    payload: dict = {
+        "effect": effect.model_dump(mode="json"),
+        "ticket_id": ticket_id,
+        "outcome": outcome,
+        "context": context.model_dump() if context is not None else None,
+    }
     if detail is not None:
         payload["detail"] = detail
     return payload

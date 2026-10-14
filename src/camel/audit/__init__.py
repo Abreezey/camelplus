@@ -2,6 +2,7 @@
 
 from camel.audit.provenance import ProvenanceDag, ProvenanceService
 from camel.audit.store import (
+    AuditContext,
     AuditStore,
     ChainIntegrityError,
     decision_event,
@@ -13,6 +14,7 @@ from camel.audit.store import (
 from camel.audit.tickets import SQLiteTicketStore
 
 __all__ = [
+    "AuditContext",
     "AuditStore",
     "ChainIntegrityError",
     "ProvenanceDag",
