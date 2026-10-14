@@ -67,9 +67,7 @@ def test_tampered_row_detected(store: AuditStore) -> None:
     store.append(_event(2))
     # Simulate an attacker editing a stored row behind the store's back
     # (there is intentionally no public API for this).
-    store._conn.execute(
-        "UPDATE audit_events SET event_json = replace(event_json, 'alice', 'mallory') WHERE seq = 1"
-    )
+    store._conn.execute("UPDATE audit_events SET event_json = replace(event_json, 'alice', 'mallory') WHERE seq = 1")
     store._conn.commit()
     with pytest.raises(ChainIntegrityError):
         store.verify_chain()
@@ -98,9 +96,7 @@ def test_decision_replay_from_stored_event(store: AuditStore) -> None:
         policy_version="sha256:abcd1234",
         contract_id="ic_01",
     )
-    event = decision_event(
-        decision, effect, trace_id="t1", session_id="s1", principal="user:alice", now=NOW
-    )
+    event = decision_event(decision, effect, trace_id="t1", session_id="s1", principal="user:alice", now=NOW)
     store.append(event, payload=decision_payload(decision, effect))
 
     loaded = store.events("t1")[0]
