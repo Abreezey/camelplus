@@ -63,6 +63,10 @@ audit.verify_chain()                      # 篡改/删行 → ChainIntegrityErro
 
 redact(secret_value)                      # → "sha256:<16hex>"，入审计前脱敏
 
+# ---- 审计上下文（v0.5：审计四字段的模型版本 / manifest digest / 代码提交）----
+audit_context = AuditContext.from_env()   # camel.audit；读 CAMEL_MODEL_VERSION / CAMEL_TOOL_MANIFEST_DIGEST / CAMEL_CODE_COMMIT
+                                          # 或显式 AuditContext(model_version=..., ...)；未供数字段为 None，payload "context" 诚实记 null
+
 provenance = ProvenanceService(audit)
 provenance.timeline(trace_id)             # 时间线
 provenance.dag(trace_id)                  # parent_ids + effect.derived_from 双来源边
@@ -75,11 +79,14 @@ profile.resolve_write(resource)           # parent realpath 后必须在 write d
 
 # ---- 执行代理 ----
 broker = ExecutionBroker(signing_key=key, profile=profile,
-                         ticket_store=SQLiteTicketStore("tickets.db"), audit=audit)
+                         ticket_store=SQLiteTicketStore("tickets.db"), audit=audit,
+                         vault=KeyVault(os.environ["CAMEL_MASTER_KEY"]))  # 可选：短期凭据注入（camel.broker）
 result = broker.execute(effect, ticket, subject=..., trace_id=..., session_id=...,
-                        content=..., parent_ids=...)
-# 校验顺序（不可重排）：静态沙箱 → verify_ticket → IO → 审计
+                        content=..., parent_ids=..., audit_context=audit_context)
+# 校验顺序（不可重排）：静态沙箱 → verify_ticket → 凭据派生 → IO → 审计
 # v0 仅 READ/WRITE；其余效果 UnsupportedEffectError（fail closed + 审计 rejected）
+# 配置 vault 时：票据校验后 HMAC 派生短期凭据（绑定票据、随票据过期），
+#   result.credential_handle 与审计 payload 只记 opaque handle（"cred_" 前缀），secret（SecretBytes）绝不外泄
 
 # ---- 确认流 ----
 confirmations = ConfirmationAuthority(signing_key=key, audit=audit)   # ticket_ttl 默认 5 分钟
@@ -91,7 +98,8 @@ confirmations.deny(req, subject=..., ...)      # 只审计，不签票
 # ---- 集成管道（推荐入口）----
 pipeline = SecureExecutionPipeline(engine=engine, broker=broker, confirmations=confirmations,
                                    audit=audit, signing_key=key)
-result = pipeline.run(effect, subject=..., trace_id=..., session_id=..., contract=..., content=...)
+result = pipeline.run(effect, subject=..., trace_id=..., session_id=..., contract=..., content=...,
+                      audit_context=AuditContext.from_env())  # 可选：decision/confirmation/execution payload 均携带 context
 # DENY → execution=None；ALLOW → execution.output；CONFIRM → confirmation 待 resolve
 pipeline.resolve(result.confirmation, approved=True/False, subject=..., trace_id=..., session_id=..., content=...)
 ```
