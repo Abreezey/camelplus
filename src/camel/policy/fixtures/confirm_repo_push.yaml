@@ -1,0 +1,7 @@
+# Confirm a repository push that the intent contract did not authorize (arch.md §6.5, §8.2).
+id: confirm-repo-push
+when:
+  effect.type: REPO_MUTATE
+  effect.operation: push
+  contract.missing_allowed_effect: true
+then: CONFIRM

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>CaMeL+ 安全内核与架构图</title>
+<style>
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; max-width: 1200px; margin: 0 auto; padding: 24px; color: #1f2328; }
+  h1 { border-bottom: 2px solid #d1d9e0; padding-bottom: 8px; }
+  h2 { margin-top: 48px; border-bottom: 1px solid #d1d9e0; padding-bottom: 6px; }
+  .note { background: #fff8c5; border: 1px solid #eac54f; border-radius: 6px; padding: 10px 14px; font-size: 14px; }
+  .diagram { background: #fff; border: 1px solid #d1d9e0; border-radius: 8px; padding: 16px; margin: 16px 0; overflow-x: auto; }
+  code { background: #eff1f3; border-radius: 4px; padding: 1px 5px; }
+</style>
+</head>
+<body>
+
+<h1>CaMeL+ 安全内核与架构图</h1>
+<p class="note">需要联网加载 mermaid.js（CDN）。图 1 对应代码 <code>src/camel/policy/engine.py</code> + <code>src/camel/core/decision.py</code>；图 2、3 来自 <code>arch.md</code> §4、§7（目标态，含未实现的 B/C/D 模块）。</p>
+
+<h2>图 1 · 安全内核裁决流程（当前 A 模块已实现）</h2>
+<div class="diagram">
+<pre class="mermaid">
+flowchart TD
+    IN["输入: CanonicalEffect<br/>+ IntentContract?(可选)<br/>+ RiskSignal[](可选) + now"] --> S1
+
+    subgraph L1["第 1 层 · 规范化检查 (I6)"]
+        S1{"normalization_confidence<br/>== FAILED?"}
+        S1 -->|"是 + 高影响<br/>(副作用且不可逆)"| H1["+hard reason<br/>normalization_failed_high_impact"]
+        S1 -->|"是 + 低影响"| C1["+confirm reason<br/>normalization_failed_low_impact"]
+        S1 -->|否| S2
+        H1 --> S2
+        C1 --> S2
+    end
+
+    subgraph L2["第 2 层 · IFC 机密性 (I4)"]
+        S2{"destination 存在?"}
+        S2 -->|否| S3
+        S2 -->|是| S2b["DestinationClassifier:<br/>destination → domain → clearance"]
+        S2b --> S2c{"任一 data_ref:<br/>confidentiality > clearance?<br/>且 destination 不在显式 readers 中?<br/>(CaMeL recipients⊆readers 习语)"}
+        S2c -->|是| H2["+hard reason<br/>ifc_confidentiality_violation"]
+        S2c -->|否| S3
+        H2 --> S3
+    end
+
+    subgraph L3["第 3 层 · Intent Contract"]
+        S3{"contract 提供?"}
+        S3 -->|否| S4
+        S3 -->|是| S3a{"已过期? 或<br/>数据含 forbidden_data_class?"}
+        S3a -->|是| H3["+hard reason<br/>contract_expired /<br/>contract_forbidden_data_class"]
+        S3a -->|否| S3b{"效果不在 allowed_effects?<br/>目的地未授权?<br/>副作用预算耗尽?"}
+        S3b -->|是| C3["+confirm reason<br/>contract_missing_allowed_effect /<br/>destination_not_allowed /<br/>budget_exceeded"]
+        S3b -->|否| S4
+        H3 --> S4
+        C3 --> S4
+    end
+
+    subgraph L4["第 4 层 · DSL 规则 (全部命中都生效, 与顺序无关)"]
+        S4 --> R1{"逐条规则:<br/>when 全条件匹配?"}
+        R1 -->|"then: DENY"| H4["+hard reason rule:id"]
+        R1 -->|"then: CONFIRM"| C4["+confirm reason rule:id"]
+        R1 -->|"then: ALLOW"| A4["allowed = true"]
+        H4 --> S5
+        C4 --> S5
+        A4 --> S5
+        R1 -->|不匹配| S5
+    end
+
+    subgraph L5["第 5 层 · DecisionComposer 合并 (I1/I7)"]
+        S5{"hard_reasons<br/>非空?"}
+        S5 -->|是| DENY["🔴 DENY<br/>(风险信号只记录, 不可翻盘 — I1/I7)"]
+        S5 -->|否| S6{"confirm_reasons 非空?<br/>或任一 risk_signal.confidence ≥ 阈值(0.5)?"}
+        S6 -->|是| CONFIRM["🟡 CONFIRM"]
+        S6 -->|否| S7{"allowed == true?"}
+        S7 -->|是| ALLOW["🟢 ALLOW"]
+        S7 -->|否| DENY2["🔴 DENY<br/>default_deny: no_explicit_allow"]
+    end
+
+    CONFIRM -.->|"用户确认后 (C 模块)"| TKT["issue_ticket:<br/>一次性票据<br/>subject+effect_hash+expiry"]
+    TKT -.-> VRF["verify_ticket 通过<br/>才允许执行 (I5)"]
+
+    style DENY fill:#ffebe9,stroke:#cf222e
+    style DENY2 fill:#ffebe9,stroke:#cf222e
+    style CONFIRM fill:#fff8c5,stroke:#bf8700
+    style ALLOW fill:#dafbe1,stroke:#1a7f37
+</pre>
+</div>
+
+<h2>图 2 · 总体架构（arch.md §4，目标态）</h2>
+<div class="diagram">
+<pre class="mermaid">
+flowchart LR
+    U[用户/组织策略] --> IN[Agent Hook / Ingress]
+    EXT[网页/邮件/文档/代码] --> IN
+    MEM[(长期记忆)] <--> MG[Memory Gate]
+    IN --> EV[Canonical Event + Provenance]
+    MG --> EV
+
+    EV --> IC[Intent Compiler]
+    IC --> PLAN[Privileged Planner / TDG]
+    PLAN --> RT[CaMeL Restricted Interpreter]
+    RT <--> QLLM[Quarantined LLM\n仅数据解析]
+
+    EV --> DET[分层检测器\n规则→本地模型→LLM]
+    RT -->|候选调用| GW[MCP Security Gateway]
+    AG[其他 Agent / SDK] -->|候选调用| GW
+    GW --> FX[Effect Normalizer]
+
+    subgraph Enforcement[确定性强制面]
+      IFC[IFC / 来源与敏感性]
+      POL[Typed Policy DSL]
+      CAP[Capability / Delegation]
+      DEC[Decision Composer]
+      IFC --> DEC
+      POL --> DEC
+      CAP --> DEC
+    end
+
+    IC --> DEC
+    PLAN --> DEC
+    FX --> DEC
+    DET -->|只允许升高风险| DEC
+    EV --> IFC
+
+    DEC -->|ALLOW| EB[Execution Broker / Sandbox]
+    DEC -->|CONFIRM| UI[作用域确认]
+    UI -->|一次性能力票据| EB
+    DEC -->|DENY| STOP[阻断 + 安全替代]
+    EB --> SYS[MCP / FS / Shell / Git / Network]
+    SYS -->|结果再次封装| GW
+
+    EV --> AUD[(Append-only Event Store)]
+    DEC --> AUD
+    EB --> AUD
+    AUD --> VIS[攻击 DAG / 时序 / 报告]
+</pre>
+</div>
+
+<h2>图 3 · 固定决策流程（arch.md §7，目标态时序）</h2>
+<div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+    participant A as Agent
+    participant G as Gateway
+    participant N as Normalizer
+    participant P as Policy/IFC
+    participant V as Verifier
+    participant U as User
+    participant B as Broker
+
+    A->>G: 候选工具调用 + trace/context refs
+    G->>N: schema 校验并归约效果
+    N-->>G: CanonicalEffect[] / 失败
+    G->>P: Contract + labels + effects + policy version
+    P-->>G: hard result
+    G->>V: 仅在需要时做语义校验
+    V-->>G: risk signals
+    Note over G: DENY 优先；风险只能升级
+    alt ALLOW
+        G->>B: 执行授权 + effect hash
+    else CONFIRM
+        G->>U: 显示具体资源/接收方/后果
+        U-->>G: 同意或拒绝
+        G->>B: 一次性能力票据
+    else DENY
+        G-->>A: 阻断理由 + 安全替代
+    end
+    B-->>G: 实际效果 + 返回
+    G-->>A: 带标签的工具结果
+</pre>
+</div>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true, theme: 'neutral', flowchart: { htmlLabels: true } });
+</script>
+</body>
+</html>

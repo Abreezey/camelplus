@@ -1,0 +1,12 @@
+# Golden fixture: reproduces the semantics of the legacy
+# make_trusted_fields_policy / "field must come directly from the user"
+# pattern — untrusted data feeding a side-effecting effect is denied.
+id: deny-untrusted-parameters
+when:
+  any_data.integrity_at_most: untrusted
+  effect.type: [WRITE, EXEC, EGRESS, REPO_MUTATE, DELEGATE, MEMORY_WRITE, AUTH_CHANGE]
+then: DENY
+---
+id: allow-rest
+when: {}
+then: ALLOW

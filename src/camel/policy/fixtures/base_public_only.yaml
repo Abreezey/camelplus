@@ -1,0 +1,14 @@
+# Golden fixture: reproduces the semantics of the legacy
+# camel.security_policy.base_security_policy — if any argument is not public,
+# a side-effecting tool call is denied. In the new model "not public" means
+# confidentiality >= internal on any data reference.
+id: deny-non-public-data
+when:
+  any_data.confidentiality_at_least: internal
+then: DENY
+---
+# The legacy engine required an explicit matching policy to allow; the new
+# engine requires an explicit ALLOW rule (default deny).
+id: allow-rest
+when: {}
+then: ALLOW
