@@ -103,12 +103,14 @@ pipeline.resolve(result.confirmation, approved=True/False, subject=..., trace_id
 2. 每个 `DataReference` 内联携带 `TrustLabel`（IFC 裁决不依赖外部值存储）；
 3. 归约失败设 `normalization_confidence=FAILED`（高影响效果会被 I6 硬拒）；
 4. `effect_id` 全局唯一；`derived_from` 填上游事件 `event_id`；
-5. 消息类效果 destination 设为接收方主体标识（如邮箱），才能命中 readers 通道（A 的 v0.2 修正）。
+5. 消息类效果 destination 设为接收方主体标识（如邮箱），才能命中 readers 通道（A 的 v0.2 修正）；
+6. **供审计字段**：每个工具的 manifest digest（plan.md §2.C 验收 3 要求入审计链），随效果或网关上下文传给 C。
 
 **D（规划/检测/评测）必须保证：**
 1. `IntentContract` 只编译自信任输入；LLM 输出过 pydantic 严格校验，不绕过；
 2. `RiskSignal` 只能升风险（I7）；
-3. 评测消费走 `ProvenanceService` / `AuditStore`，不直接读 SQLite 表结构。
+3. 评测消费走 `ProvenanceService` / `AuditStore`，不直接读 SQLite 表结构；
+4. **供审计字段**：LLM 模型版本（plan.md §2.C 验收 3 要求入审计链），随决策请求传给 C。
 
 **C 对 A 的消费（已冻结）：**
 - `verify_ticket` / `issue_ticket` / `hash_effect`（ticket.py）；`PolicyEngine.evaluate`（engine.py）；签名密钥属 TCB 由部署方注入。

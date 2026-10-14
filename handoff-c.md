@@ -5,7 +5,7 @@
 
 ## 1. 干了什么
 
-按 plan.md §2.C 完成执行与审计的**全部首版职责**（arch.md §6.9 Broker、§6.10 Provenance、§13 任务 6–7）：
+按 plan.md §2.C 完成执行与审计的**首版核心链路**（arch.md §6.9 Broker、§6.10 Provenance、§13 任务 6–7）。范围取舍与未达成项见 §6/§7，**不是全部职责**：
 
 1. **审计层 `audit/`**：追加式哈希链事件存储（`AuditStore`，SQLite 落盘、`:memory:` 可测）、可重放决策载荷（`decision_event`/`decision_payload`）、执行事件（`execution_event`/`execution_payload`，三态 outcome：executed / rejected / failed）、脱敏（`redact`：秘密 → sha256 前 16 位受控引用）、链完整性校验（`verify_chain`，篡改/删行必 `ChainIntegrityError`）；
 2. **票据持久化** `SQLiteTicketStore`：实现 A 的 `TicketStore` 协议，`ON CONFLICT DO UPDATE` 原子递增计数，跨进程、跨重启持久；
@@ -48,7 +48,7 @@
 |---|---|---|
 | Broker 之外无路径执行效果（旁路阻断） | `ExecutionBroker.execute` 先 `profile.resolve_*` 再 `verify_ticket`，任一失败 raise 且审计 rejected | `test_executor.py`：伪造票据/错签名 key/错主体/过期/超次数全部拒绝（6 个）+ 沙箱拒绝不烧票据 |
 | 能力票据不可复用（I5） | A 的 `verify_ticket` + C 的 `SQLiteTicketStore` 持久计数 | `test_tickets.py`（3 个，含跨重启持久、与 `verify_ticket` 互操作）+ `test_executor.py` 单次使用即失效 |
-| 事件凭审计链可重放 | `decision_payload` 含重建 Decision 的全部字段（含 policy_version） | `test_secure_pipeline.py::test_decisions_replayable_from_audit_alone` + `test_store.py` 决策重放 |
+| 事件凭审计链可重放 | `decision_payload` 含重建 Decision 的全部字段（含 policy_version） | `test_secure_pipeline.py::test_decisions_replayable_from_audit_alone` + `test_store.py` 决策重放。**部分达成**：模型版本 / 工具 manifest digest / 代码提交三个审计字段未实现，数据源在 B/D/部署方（见 §7.1） |
 | 审计脱敏 | `redact`：秘密值 → `sha256:<16hex>` 受控引用 | `test_store.py::test_redact_*` + `test_provenance.py` 报告内容 |
 | 哈希链防静默篡改 | `record_hash = sha256(prev_hash \| seq \| event_json)` | `test_store.py`：篡改检测、删行检测、链验证 |
 
@@ -107,12 +107,14 @@ pipeline.resolve(result.confirmation, approved=False, subject="user:alice", trac
 
 ## 7. 已知问题与留给后续的事
 
-1. **TOCTOU 残余竞态**：`resolve_read` 的 realpath 检查与实际读 IO 之间理论上存在符号链接替换窗口；写路径已用 `O_NOFOLLOW` 缓解，读路径 v0 未做同等处理。生产建议内核级沙箱。
-2. **无网络隔离（egress 代理）**：arch.md §6.9 的 egress 控制是 v0 非目标；当前"无网"靠效果类型白名单（只放 READ/WRITE）间接保证。
-3. `AuditStore` SQLite 单写者；多进程高并发写需 WAL 模式或外部队列（票据计数已是跨进程安全的原子 SQL）。
-4. `ConfirmationRequest` 不持久化（内存对象），进程重启后未决请求丢失，需用户重新走 `run`。
-5. `ExecutionResult.output` 是 `bytes | None`，大文件读全量载入内存；流式读取留给后续。
-6. `redact` 只做字符串→哈希引用替换，不做内容级 DLP 扫描（那是检测层 D 的地盘）。
+1. **验收 3 部分未达成**：plan.md §2.C 要求审计事件含策略版本、模型版本、工具 manifest digest、代码提交四项。目前仅策略版本（`Decision.policy_version`）入审计；模型版本的数据源在 D（LLM 调用层）、工具 manifest digest 在 B（网关）、代码提交在部署方，三者未开工。B/D 就位后需把这三个字段接入 `decision_payload`（结构已预留：payload 是自由 dict，加键即可，不破坏哈希链）。
+2. **TOCTOU 残余竞态**：`resolve_read` 的 realpath 检查与实际读 IO 之间理论上存在符号链接替换窗口；写路径已用 `O_NOFOLLOW` 缓解，读路径 v0 未做同等处理。生产建议内核级沙箱。
+3. **无网络隔离（egress 代理）**：arch.md §6.9 的 egress 控制是 v0 非目标；当前"无网"靠效果类型白名单（只放 READ/WRITE）间接保证。
+4. **凭据注入未实现**：plan.md §2.C 职责 1 的"Agent 进程不持有长期密钥，Broker 按票据注入短期凭据或 opaque handle"——v0 票据即授权凭据，但未做向工具进程注入短期凭据的机制，等 B 的工具网关定义工具进程模型后再做。
+5. `AuditStore` SQLite 单写者；多进程高并发写需 WAL 模式或外部队列（票据计数已是跨进程安全的原子 SQL）。
+6. `ConfirmationRequest` 不持久化（内存对象），进程重启后未决请求丢失，需用户重新走 `run`。
+7. `ExecutionResult.output` 是 `bytes | None`，大文件读全量载入内存；流式读取留给后续。
+8. `redact` 只做字符串→哈希引用替换，不做内容级 DLP 扫描（那是检测层 D 的地盘）。
 
 ## 8. 下一个 agent 开工前请确认
 
