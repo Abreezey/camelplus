@@ -27,7 +27,7 @@ from datetime import datetime, timezone
 
 from pydantic import BaseModel, ConfigDict
 
-from camel.audit.store import AuditStore, execution_event, execution_payload
+from camel.audit.store import AuditContext, AuditStore, execution_event, execution_payload
 from camel.broker.profile import SandboxProfile, SandboxViolationError
 from camel.core.effect import CanonicalEffect, EffectType
 from camel.policy.ticket import CapabilityTicket, TicketStore, TicketVerificationError, verify_ticket
@@ -79,6 +79,7 @@ class ExecutionBroker:
         session_id: str,
         content: bytes | None = None,
         parent_ids: tuple[str, ...] = (),
+        audit_context: AuditContext | None = None,
     ) -> ExecutionResult:
         """Execute one effect: sandbox-check → verify ticket → do IO → audit.
 
@@ -98,6 +99,7 @@ class ExecutionBroker:
                 session_id=session_id,
                 parent_ids=parent_ids,
                 now=now,
+                audit_context=audit_context,
             )
             raise
         try:
@@ -113,6 +115,7 @@ class ExecutionBroker:
                 session_id=session_id,
                 parent_ids=parent_ids,
                 now=now,
+                audit_context=audit_context,
             )
             raise
         try:
@@ -128,6 +131,7 @@ class ExecutionBroker:
                 session_id=session_id,
                 parent_ids=parent_ids,
                 now=now,
+                audit_context=audit_context,
             )
             raise
         self._audit_attempt(
@@ -140,6 +144,7 @@ class ExecutionBroker:
             session_id=session_id,
             parent_ids=parent_ids,
             now=now,
+            audit_context=audit_context,
         )
         return ExecutionResult(effect_id=effect.effect_id, ticket_id=ticket.ticket_id, output=output)
 
@@ -183,6 +188,7 @@ class ExecutionBroker:
         session_id: str,
         parent_ids: tuple[str, ...],
         now: datetime,
+        audit_context: AuditContext | None = None,
     ) -> None:
         event = execution_event(
             effect,
@@ -193,4 +199,4 @@ class ExecutionBroker:
             now=now,
             parent_ids=parent_ids,
         )
-        self._audit.append(event, payload=execution_payload(effect, ticket_id, outcome, detail))
+        self._audit.append(event, payload=execution_payload(effect, ticket_id, outcome, detail, context=audit_context))

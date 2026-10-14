@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 
 from pydantic import BaseModel, ConfigDict
 
-from camel.audit.store import AuditStore
+from camel.audit.store import AuditContext, AuditStore
 from camel.core.decision import Decision, DecisionOutcome
 from camel.core.effect import CanonicalEffect
 from camel.core.events import CanonicalEvent
@@ -82,6 +82,7 @@ class ConfirmationAuthority:
         trace_id: str,
         session_id: str,
         subject: str,
+        audit_context: AuditContext | None = None,
     ) -> ConfirmationRequest:
         """Build (and audit) the confirmation request for a CONFIRM decision."""
         if decision.decision is not DecisionOutcome.CONFIRM:
@@ -92,7 +93,14 @@ class ConfirmationAuthority:
             decision=decision,
             expires_at=self._now() + self._ttl,
         )
-        self._audit_confirmation(request, "requested", trace_id=trace_id, session_id=session_id, subject=subject)
+        self._audit_confirmation(
+            request,
+            "requested",
+            trace_id=trace_id,
+            session_id=session_id,
+            subject=subject,
+            audit_context=audit_context,
+        )
         return request
 
     def approve(
@@ -102,21 +110,50 @@ class ConfirmationAuthority:
         subject: str,
         trace_id: str,
         session_id: str,
+        audit_context: AuditContext | None = None,
     ) -> CapabilityTicket:
         """Issue the one-time ticket after explicit user approval."""
         now = self._now()
         if now >= request.expires_at:
-            self._audit_confirmation(request, "expired", trace_id=trace_id, session_id=session_id, subject=subject)
+            self._audit_confirmation(
+                request,
+                "expired",
+                trace_id=trace_id,
+                session_id=session_id,
+                subject=subject,
+                audit_context=audit_context,
+            )
             raise ConfirmationExpiredError(f"confirmation request {request.request_id} expired")
         ticket = issue_ticket(self._key, subject=subject, effect=request.effect, expires_at=now + self._ttl)
         self._audit_confirmation(
-            request, "approved", trace_id=trace_id, session_id=session_id, subject=subject, ticket_id=ticket.ticket_id
+            request,
+            "approved",
+            trace_id=trace_id,
+            session_id=session_id,
+            subject=subject,
+            ticket_id=ticket.ticket_id,
+            audit_context=audit_context,
         )
         return ticket
 
-    def deny(self, request: ConfirmationRequest, *, subject: str, trace_id: str, session_id: str) -> None:
+    def deny(
+        self,
+        request: ConfirmationRequest,
+        *,
+        subject: str,
+        trace_id: str,
+        session_id: str,
+        audit_context: AuditContext | None = None,
+    ) -> None:
         """Record the user's refusal; no ticket is issued."""
-        self._audit_confirmation(request, "denied", trace_id=trace_id, session_id=session_id, subject=subject)
+        self._audit_confirmation(
+            request,
+            "denied",
+            trace_id=trace_id,
+            session_id=session_id,
+            subject=subject,
+            audit_context=audit_context,
+        )
 
     def _audit_confirmation(
         self,
@@ -127,6 +164,7 @@ class ConfirmationAuthority:
         session_id: str,
         subject: str,
         ticket_id: str | None = None,
+        audit_context: AuditContext | None = None,
     ) -> None:
         event = CanonicalEvent(
             event_id=f"evt_{uuid.uuid4().hex}",
@@ -142,6 +180,7 @@ class ConfirmationAuthority:
             "outcome": outcome,
             "effect": request.effect.model_dump(mode="json"),
             "confirm_reasons": list(request.decision.confirm_reasons),
+            "context": audit_context.model_dump() if audit_context is not None else None,
         }
         if ticket_id is not None:
             payload["ticket_id"] = ticket_id

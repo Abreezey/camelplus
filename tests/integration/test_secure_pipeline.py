@@ -244,3 +244,46 @@ def test_decisions_replayable_from_audit_alone(env) -> None:
     assert [d.decision for d in replayed] == [DecisionOutcome.ALLOW, DecisionOutcome.DENY]
     report = ProvenanceService(env.audit).report("t_replay")
     assert "ALLOW" in report and "DENY" in report
+
+
+def test_audit_context_threaded_into_all_payloads(env) -> None:
+    """run/resolve 的 audit_context 必须进 decision/execution/confirmation 全部 payload。"""
+    from camel.audit import AuditContext
+
+    ctx = AuditContext(model_version="llm-x", tool_manifest_digest="sha256:ff", code_commit="deadbe")
+    expected = ctx.model_dump()
+
+    # ALLOW branch: decision + execution payloads carry the context
+    env.pipeline.run(
+        _read_effect(env.workspace),
+        subject="user:alice",
+        trace_id="t_ctx",
+        session_id="s1",
+        contract=env.contract,
+        audit_context=ctx,
+    )
+    # CONFIRM branch: resolve carries it into confirmation + execution payloads
+    result = env.pipeline.run(
+        _write_effect(env.scratch),
+        subject="user:alice",
+        trace_id="t_ctx",
+        session_id="s1",
+        audit_context=ctx,
+    )
+    assert result.confirmation is not None
+    env.pipeline.resolve(
+        result.confirmation,
+        approved=True,
+        subject="user:alice",
+        trace_id="t_ctx",
+        session_id="s1",
+        content=b"data",
+        audit_context=ctx,
+    )
+
+    events = env.audit.events("t_ctx")
+    payloads = [env.audit.payload_of(e.event_id) for e in events]
+    assert len(payloads) >= 5  # decision+execution (ALLOW) + decision+confirmation+confirmation+execution
+    for payload in payloads:
+        assert payload["context"] == expected
+    env.audit.verify_chain()
