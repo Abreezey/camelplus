@@ -8,7 +8,13 @@ from types import SimpleNamespace
 import pytest
 
 from camel.audit import AuditStore
-from camel.broker import ExecutionBroker, SandboxProfile, SandboxViolationError, UnsupportedEffectError
+from camel.broker import (
+    ExecutionBroker,
+    KeyVault,
+    SandboxProfile,
+    SandboxViolationError,
+    UnsupportedEffectError,
+)
 from camel.core.effect import CanonicalEffect, EffectType
 from camel.policy.ticket import InMemoryTicketStore, TicketVerificationError, issue_ticket
 
@@ -168,3 +174,67 @@ def test_every_attempt_audited_once(env) -> None:
     events = env.audit.events("t1")
     assert len(events) == 1
     env.audit.verify_chain()
+
+
+def test_execute_with_vault_returns_handle_audits_handle_only(tmp_path: Path) -> None:
+    workspace = tmp_path / "ws"
+    workspace.mkdir()
+    (workspace / "note.txt").write_text("hello")
+    scratch = tmp_path / "scratch"
+    scratch.mkdir()
+    audit = AuditStore(":memory:")
+    vault = KeyVault(b"vault-master")
+    broker = ExecutionBroker(
+        signing_key=KEY,
+        profile=SandboxProfile.workspace(workspace, scratch),
+        ticket_store=InMemoryTicketStore(),
+        audit=audit,
+        vault=vault,
+        now_fn=lambda: NOW,
+    )
+    effect = _read_effect(workspace / "note.txt")
+    ticket = _issue(effect)
+    result = broker.execute(effect, ticket, subject="user:alice", trace_id="t_vault", session_id="s1")
+    assert result.credential_handle is not None
+    assert result.credential_handle.startswith("cred_")
+    # the handle matches what the vault derives for this exact ticket
+    expected = vault.derive(subject="user:alice", ticket_id=ticket.ticket_id, expires_at=ticket.expires_at)
+    assert result.credential_handle == expected.handle
+
+    execution_events = [e for e in audit.events("t_vault") if e.source == "execution"]
+    payload = audit.payload_of(execution_events[0].event_id)
+    assert payload is not None
+    assert payload["credential_handle"] == result.credential_handle
+    assert "secret" not in payload
+    audit.verify_chain()
+
+
+def test_no_vault_behavior_unchanged(env) -> None:
+    effect = _read_effect(env.workspace / "note.txt")
+    result = env.broker.execute(effect, _issue(effect), subject="user:alice", trace_id="t1", session_id="s1")
+    assert result.credential_handle is None
+    payload = env.audit.payload_of(_executions(env)[0].event_id)
+    assert "credential_handle" not in payload
+
+
+def test_vault_write_also_gets_handle(tmp_path: Path) -> None:
+    workspace = tmp_path / "ws"
+    workspace.mkdir()
+    scratch = tmp_path / "scratch"
+    scratch.mkdir()
+    audit = AuditStore(":memory:")
+    broker = ExecutionBroker(
+        signing_key=KEY,
+        profile=SandboxProfile.workspace(workspace, scratch),
+        ticket_store=InMemoryTicketStore(),
+        audit=audit,
+        vault=KeyVault(b"vault-master"),
+        now_fn=lambda: NOW,
+    )
+    effect = _write_effect(scratch / "out.txt")
+    result = broker.execute(
+        effect, _issue(effect), subject="user:alice", trace_id="t_vw", session_id="s1", content=b"data"
+    )
+    assert result.credential_handle is not None and result.credential_handle.startswith("cred_")
+    assert (scratch / "out.txt").read_bytes() == b"data"
+    audit.verify_chain()

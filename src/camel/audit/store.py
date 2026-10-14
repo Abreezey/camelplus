@@ -167,10 +167,13 @@ def execution_payload(
     outcome: str,
     detail: str | None = None,
     context: AuditContext | None = None,
+    credential_handle: str | None = None,
 ) -> dict:
     """Non-secret payload for an execution event.
 
     ``outcome`` is one of ``executed`` / ``rejected`` / ``failed``.
+    ``credential_handle`` is the opaque reference to the injected short-lived
+    credential (the secret itself never appears in any payload).
     """
     payload: dict = {
         "effect": effect.model_dump(mode="json"),
@@ -180,6 +183,8 @@ def execution_payload(
     }
     if detail is not None:
         payload["detail"] = detail
+    if credential_handle is not None:
+        payload["credential_handle"] = credential_handle
     return payload
 
 

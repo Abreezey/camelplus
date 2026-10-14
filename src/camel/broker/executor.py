@@ -28,6 +28,7 @@ from datetime import datetime, timezone
 from pydantic import BaseModel, ConfigDict
 
 from camel.audit.store import AuditContext, AuditStore, execution_event, execution_payload
+from camel.broker.credentials import InjectedCredential, KeyVault
 from camel.broker.profile import SandboxProfile, SandboxViolationError
 from camel.core.effect import CanonicalEffect, EffectType
 from camel.policy.ticket import CapabilityTicket, TicketStore, TicketVerificationError, verify_ticket
@@ -45,6 +46,7 @@ class ExecutionResult(BaseModel):
     effect_id: str
     ticket_id: str
     output: bytes | None = None
+    credential_handle: str | None = None
 
 
 def _utcnow() -> datetime:
@@ -62,12 +64,14 @@ class ExecutionBroker:
         ticket_store: TicketStore,
         audit: AuditStore,
         now_fn: Callable[[], datetime] | None = None,
+        vault: KeyVault | None = None,
     ) -> None:
         self._key = signing_key
         self._profile = profile
         self._tickets = ticket_store
         self._audit = audit
         self._now = now_fn or _utcnow
+        self._vault = vault
 
     def execute(
         self,
@@ -118,6 +122,27 @@ class ExecutionBroker:
                 audit_context=audit_context,
             )
             raise
+        credential: InjectedCredential | None = None
+        if self._vault is not None:
+            try:
+                credential = self._vault.derive(
+                    subject=subject, ticket_id=ticket.ticket_id, expires_at=ticket.expires_at
+                )
+            except Exception as err:  # vault failure must fail closed and be audited
+                self._audit_attempt(
+                    effect,
+                    ticket.ticket_id,
+                    "failed",
+                    f"credential_derivation_error: {err}",
+                    subject=subject,
+                    trace_id=trace_id,
+                    session_id=session_id,
+                    parent_ids=parent_ids,
+                    now=now,
+                    audit_context=audit_context,
+                )
+                raise
+        handle = credential.handle if credential is not None else None
         try:
             output = self._do_execute(effect, content)
         except OSError as err:
@@ -132,6 +157,7 @@ class ExecutionBroker:
                 parent_ids=parent_ids,
                 now=now,
                 audit_context=audit_context,
+                credential_handle=handle,
             )
             raise
         self._audit_attempt(
@@ -145,8 +171,14 @@ class ExecutionBroker:
             parent_ids=parent_ids,
             now=now,
             audit_context=audit_context,
+            credential_handle=handle,
         )
-        return ExecutionResult(effect_id=effect.effect_id, ticket_id=ticket.ticket_id, output=output)
+        return ExecutionResult(
+            effect_id=effect.effect_id,
+            ticket_id=ticket.ticket_id,
+            output=output,
+            credential_handle=handle,
+        )
 
     def _validate(self, effect: CanonicalEffect, content: bytes | None) -> None:
         """Static validation: supported type, resource present, sandbox containment."""
@@ -189,6 +221,7 @@ class ExecutionBroker:
         parent_ids: tuple[str, ...],
         now: datetime,
         audit_context: AuditContext | None = None,
+        credential_handle: str | None = None,
     ) -> None:
         event = execution_event(
             effect,
@@ -199,4 +232,9 @@ class ExecutionBroker:
             now=now,
             parent_ids=parent_ids,
         )
-        self._audit.append(event, payload=execution_payload(effect, ticket_id, outcome, detail, context=audit_context))
+        self._audit.append(
+            event,
+            payload=execution_payload(
+                effect, ticket_id, outcome, detail, context=audit_context, credential_handle=credential_handle
+            ),
+        )
