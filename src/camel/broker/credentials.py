@@ -51,5 +51,5 @@ class KeyVault:
             self._master_key, f"{subject}|{ticket_id}|{expires_at.isoformat()}".encode(), hashlib.sha256
         ).digest()
         return InjectedCredential(
-            handle=handle, secret=secret, subject=subject, ticket_id=ticket_id, expires_at=expires_at
+            handle=handle, secret=SecretBytes(secret), subject=subject, ticket_id=ticket_id, expires_at=expires_at
         )
