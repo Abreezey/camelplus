@@ -99,6 +99,49 @@ def test_delegation_violations_detected() -> None:
     assert "child_expiry_exceeds_parent" in violations
 
 
+def test_child_wider_resource_scope_rejected() -> None:
+    """Parent allows reading one file; child asking for all files expands authority (I2)."""
+    parent = _contract(
+        allowed_effects=(AllowedEffect(effect=EffectType.READ, operation="read_file", resource="repo://a.py"),),
+        delegation=DelegationSpec(allowed=True, max_depth=1),
+    )
+    child = _contract(
+        contract_id="ic_02",
+        allowed_effects=(AllowedEffect(effect=EffectType.READ, operation="read_file", resource="repo://**"),),
+    )
+    violations = validate_child_contract(parent, child, depth=1)
+    assert any(v.startswith("child_effect_scope_exceeds_parent") for v in violations)
+
+
+def test_child_new_effect_type_rejected_with_empty_ceiling() -> None:
+    """An empty child_ceiling must not skip the type check: the parent's own
+    effects remain the outer bound."""
+    parent = _contract(
+        allowed_effects=(AllowedEffect(effect=EffectType.READ),),
+        delegation=DelegationSpec(allowed=True, max_depth=1),
+    )
+    child = _contract(
+        contract_id="ic_02",
+        allowed_effects=(AllowedEffect(effect=EffectType.EXEC, operation="run"),),
+    )
+    violations = validate_child_contract(parent, child, depth=1)
+    assert any(v.startswith("child_effect_types_exceed_ceiling") for v in violations)
+    assert any(v.startswith("child_effect_scope_exceeds_parent") for v in violations)
+
+
+def test_child_narrower_literal_scope_accepted() -> None:
+    """Wildcard parent scope may be narrowed by the child without tripping I2."""
+    parent = _contract(
+        allowed_effects=(AllowedEffect(effect=EffectType.READ),),
+        delegation=DelegationSpec(allowed=True, max_depth=1),
+    )
+    child = _contract(
+        contract_id="ic_02",
+        allowed_effects=(AllowedEffect(effect=EffectType.READ, operation="read_file", resource="repo://a.py"),),
+    )
+    assert validate_child_contract(parent, child, depth=1) == []
+
+
 def test_json_roundtrip() -> None:
     contract = _contract(
         allowed_effects=(AllowedEffect(effect=EffectType.READ, operation="read_*", resource="repo://**"),),

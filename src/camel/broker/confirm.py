@@ -13,7 +13,7 @@ import uuid
 from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from camel.audit.store import AuditContext, AuditStore
 from camel.core.decision import Decision, DecisionOutcome
@@ -33,12 +33,19 @@ def _utcnow() -> datetime:
 class ConfirmationRequest(BaseModel):
     """What the user sees and approves: one effect plus the decision context."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     request_id: str
     effect: CanonicalEffect
     decision: Decision
     expires_at: datetime
+
+    @field_validator("expires_at")
+    @classmethod
+    def _expires_at_must_be_tz_aware(cls, v: datetime) -> datetime:
+        if v.tzinfo is None or v.utcoffset() is None:
+            raise ValueError("expires_at must be timezone-aware")
+        return v
 
     def render(self) -> str:
         """Human-readable summary of what is being approved (CLI/log friendly)."""

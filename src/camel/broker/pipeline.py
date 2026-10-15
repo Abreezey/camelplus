@@ -36,7 +36,7 @@ def _utcnow() -> datetime:
 class PipelineResult(BaseModel):
     """Outcome of one pipeline run or confirmation resolution."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     decision: Decision
     execution: ExecutionResult | None = None

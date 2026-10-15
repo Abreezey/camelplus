@@ -11,6 +11,7 @@ Plus the acceptance replay: every decision can be reconstructed from the
 audit chain alone, and the whole chain verifies.
 """
 
+import threading
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -91,13 +92,18 @@ then: CONFIRM
 class _MemoryTickets:
     def __init__(self) -> None:
         self._uses: dict[str, int] = {}
+        self._lock = threading.Lock()
 
     def uses(self, ticket_id: str) -> int:
         return self._uses.get(ticket_id, 0)
 
-    def record_use(self, ticket_id: str) -> int:
-        self._uses[ticket_id] = self.uses(ticket_id) + 1
-        return self._uses[ticket_id]
+    def try_consume(self, ticket_id: str, max_uses: int) -> bool:
+        with self._lock:
+            current = self._uses.get(ticket_id, 0)
+            if current >= max_uses:
+                return False
+            self._uses[ticket_id] = current + 1
+            return True
 
 
 def _read_effect(workspace: Path) -> CanonicalEffect:

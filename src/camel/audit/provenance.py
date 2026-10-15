@@ -19,7 +19,7 @@ from camel.core.events import CanonicalEvent
 class ProvenanceDag(BaseModel):
     """A causal DAG over the events of one trace."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     nodes: tuple[CanonicalEvent, ...] = ()
     edges: tuple[tuple[str, str], ...] = ()

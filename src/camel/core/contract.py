@@ -10,7 +10,7 @@ import fnmatch
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from camel.core.effect import CanonicalEffect, EffectType
 
@@ -22,7 +22,7 @@ class AllowedEffect(BaseModel):
     ``resource`` is a glob that every resource of the effect must match.
     """
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     effect: EffectType
     operation: str | None = None
@@ -39,7 +39,7 @@ class AllowedEffect(BaseModel):
 class DelegationSpec(BaseModel):
     """Whether and how this contract may be delegated to child agents."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     allowed: bool = False
     max_depth: int = 0
@@ -49,7 +49,7 @@ class DelegationSpec(BaseModel):
 class IntentContract(BaseModel):
     """The compiled, trusted statement of what the agent may do (arch.md §5.2)."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     schema_version: Literal[1] = 1
     contract_id: str
@@ -62,6 +62,15 @@ class IntentContract(BaseModel):
     delegation: DelegationSpec = Field(default_factory=DelegationSpec)
     expires_at: datetime
 
+    @field_validator("expires_at")
+    @classmethod
+    def _expires_at_must_be_tz_aware(cls, v: datetime) -> datetime:
+        """Naive datetimes would crash expiry comparison with a TypeError
+        instead of producing a structured rejection; fail at construction."""
+        if v.tzinfo is None or v.utcoffset() is None:
+            raise ValueError("expires_at must be timezone-aware")
+        return v
+
     def is_expired(self, now: datetime) -> bool:
         return now >= self.expires_at
 
@@ -70,6 +79,23 @@ class IntentContract(BaseModel):
 
     def allows_destination(self, destination: str) -> bool:
         return any(fnmatch.fnmatchcase(destination, pattern) for pattern in self.allowed_destinations)
+
+
+def _allowed_effect_contained(child: AllowedEffect, parent: AllowedEffect) -> bool:
+    """Conservative containment: is ``child``'s scope a subset of ``parent``'s?
+
+    Glob-to-glob subset checks are undecidable in general (see the note on
+    ``validate_child_contract``), so containment is accepted only in
+    obviously-safe cases: the parent pattern is the wildcard (``None``
+    operation / ``**`` resource) or the two patterns are literally identical.
+    Anything else counts as *not* contained — delegation may be wrongly
+    rejected, never wrongly expanded (I2).
+    """
+    if child.effect != parent.effect:
+        return False
+    if parent.operation is not None and parent.operation != child.operation:
+        return False
+    return parent.resource == "**" or parent.resource == child.resource
 
 
 def validate_child_contract(
@@ -82,8 +108,9 @@ def validate_child_contract(
     Returns a list of violations; empty means the delegation is valid.
 
     Note: glob-to-glob subset checks are undecidable in general, so
-    destination containment is approximated: a child destination pattern is
-    accepted only if the parent allows the exact same pattern or ``**``.
+    containment (both for effect scopes and destinations) is approximated: a
+    child pattern is accepted only if the parent allows the exact same
+    pattern or the wildcard.
     """
     violations: list[str] = []
     if not parent.delegation.allowed:
@@ -91,12 +118,22 @@ def validate_child_contract(
         return violations
     if depth > parent.delegation.max_depth:
         violations.append(f"delegation_depth_exceeded:{depth}>{parent.delegation.max_depth}")
-    if parent.delegation.child_ceiling:
-        parent_types = {a.effect for a in parent.allowed_effects}
-        ceiling = parent.delegation.child_ceiling & parent_types
-        child_types = {a.effect for a in child.allowed_effects}
-        if not child_types <= ceiling:
-            violations.append(f"child_effect_types_exceed_ceiling:{sorted(child_types - ceiling)}")
+    # I2: every effect the child may perform must fall inside the parent's
+    # own authority (further narrowed by the declared ceiling, if any). An
+    # empty ceiling means "no narrowing beyond the parent's own effects",
+    # NOT "skip the check" — the parent's allowed_effects are always the
+    # outer bound.
+    parent_types = {a.effect for a in parent.allowed_effects}
+    ceiling = parent.delegation.child_ceiling & parent_types if parent.delegation.child_ceiling else parent_types
+    child_types = {a.effect for a in child.allowed_effects}
+    if not child_types <= ceiling:
+        violations.append(f"child_effect_types_exceed_ceiling:{sorted(child_types - ceiling)}")
+    for child_allowed in child.allowed_effects:
+        if not any(_allowed_effect_contained(child_allowed, p) for p in parent.allowed_effects):
+            violations.append(
+                "child_effect_scope_exceeds_parent:"
+                f"{child_allowed.effect.value}/{child_allowed.operation}/{child_allowed.resource}"
+            )
     for pattern in child.allowed_destinations:
         if pattern not in parent.allowed_destinations and "**" not in parent.allowed_destinations:
             violations.append(f"child_destination_exceeds_parent:{pattern}")

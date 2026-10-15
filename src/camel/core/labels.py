@@ -84,7 +84,7 @@ class LabelPrivilege(BaseModel):
     Must be logged by the audit layer together with the before/after labels.
     """
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     principal: str
     reason: str
@@ -99,7 +99,7 @@ class TrustLabel(BaseModel):
     ``capabilities.readers.Public`` semantics.
     """
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     schema_version: Literal[1] = 1
     provenance: frozenset[str] = Field(default_factory=frozenset)

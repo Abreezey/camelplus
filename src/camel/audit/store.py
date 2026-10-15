@@ -77,7 +77,7 @@ class AuditContext(BaseModel):
     honestly records "not provided" instead of omitting the key.
     """
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     model_version: str | None = None
     tool_manifest_digest: str | None = None

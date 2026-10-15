@@ -41,7 +41,7 @@ class UnsupportedEffectError(Exception):
 class ExecutionResult(BaseModel):
     """Outcome of one successful broker execution."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     effect_id: str
     ticket_id: str

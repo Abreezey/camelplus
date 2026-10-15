@@ -49,6 +49,8 @@ engine.policy_version                               # "sha256:..."，必须进�
 # 票据：HMAC 签名一次性授权（I5）
 ticket = issue_ticket(key, subject=..., effect=..., expires_at=..., max_uses=1)
 verify_ticket(key, ticket, effect, subject=..., store=..., now=...)   # 任何失败必 raise TicketVerificationError
+# v0.6：hash_effect 绑定效果全字段（含 data_refs 标签）；expires_at 必须 tz-aware；
+#       TicketStore 协议为 uses + try_consume（原子检查并消费，不再有 record_use）
 ```
 
 ## 4. 执行与审计接口（C 交付）

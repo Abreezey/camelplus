@@ -75,6 +75,27 @@ def test_unknown_destination_gets_default_low_clearance() -> None:
     assert decision.decision == DecisionOutcome.DENY
 
 
+def test_egress_without_destination_treated_as_untrusted() -> None:
+    """destination=None on EGRESS is an *unknown* destination: fail closed (I4)."""
+    secret = _egress(Confidentiality.SECRET, "https://x/").model_copy(update={"destination": None})
+    decision = _engine().evaluate(secret, now=NOW)
+    assert decision.decision == DecisionOutcome.DENY
+    assert any(r.startswith("ifc_confidentiality_violation") for r in decision.hard_reasons)
+
+
+def test_egress_without_destination_public_data_still_confirmed_under_contract() -> None:
+    """Public data passes IFC, but an egress to an unknown destination is
+    outside any contract's destination scope -> CONFIRM, never silent ALLOW."""
+    public = _egress(Confidentiality.PUBLIC, "https://x/").model_copy(update={"destination": None})
+    contract = _contract(
+        allowed_effects=(AllowedEffect(effect=EffectType.EGRESS, operation="http_post"),),
+        allowed_destinations=("https://*.corp.com/*",),
+    )
+    decision = _engine().evaluate(public, now=NOW, contract=contract)
+    assert decision.decision == DecisionOutcome.CONFIRM
+    assert "contract_destination_not_allowed" in decision.confirm_reasons
+
+
 def test_i6_normalization_failed_high_impact_denied_low_impact_confirmed() -> None:
     high = _effect(type=EffectType.EXEC, operation="run", normalization_confidence=NormalizationConfidence.FAILED)
     assert _engine().evaluate(high, now=NOW).decision == DecisionOutcome.DENY
