@@ -1,0 +1,202 @@
+{
+  "stage": "D1",
+  "status": "PASS_OFFLINE_HARNESS",
+  "full_system_status": "PARTIAL_PENDING_D2_D5",
+  "run_id": "D1_20261015_offline_02",
+  "base_commit": "e33e3834e906172db5892a8ee2f4f45d96f7379a",
+  "dataset_version": "d1_synthetic_pairs_v1",
+  "case_count": 48,
+  "family_count": 24,
+  "family_split_counts": {
+    "dev": 12,
+    "validation": 6,
+    "test": 6
+  },
+  "manifest_sha256": "b5f53ce57cd3c4761ceab28246b4dcee0531fea00d38f139b73d9a6bc405e74d",
+  "fixture_sha256": {
+    "cases.jsonl": "492961d3aff3edd6d790f943cb310e2d79a809e349c89fc8b1012ca3b66cf899",
+    "policy.yaml": "1bdf1e87b4828740dbf56313eded9e5eb87fd7d04e365d2980d78fe7223ea3ec"
+  },
+  "fixtures_unchanged_since_first_replay": true,
+  "source_sha256": {
+    "scripts/d_eval.py": "57d9a8ed51461ccdd996208e93c57fb38854863e7b8f789fe39222d0a8bf2895",
+    "src/camel/evaluation/__init__.py": "f25f12a0e0f6e8fd39ad17a7f2b9c35d2264e7af70e71272e345921adc937047",
+    "src/camel/evaluation/fixtures.py": "04e39990aaa7ed0d02224ec44ce87ad49258723427b6b9a3092280b6c42f64f1",
+    "src/camel/evaluation/replay.py": "548df442bfd67add63158ca9217e032b19f531da427b1d15b9ef19a952813974",
+    "tests/unit/evaluation/test_replay.py": "477ed264cae868d9ac56d15fe6a36b5ba413b5f34ba9ea85a334c72ec958b109"
+  },
+  "lock_sha256": "aecc53cd412bf77d12329204fedf7c286c9ab95dc19f859d8ecf489d1c6f5041",
+  "policy_version": "sha256:f52e0430013d3374",
+  "clock": "2026-10-15T00:00:00+00:00",
+  "model": null,
+  "random_seed": null,
+  "evidence_levels": [
+    "E1",
+    "E2"
+  ],
+  "platform": "Windows offline; no real tools",
+  "python_version": "3.10.12",
+  "dependencies": {
+    "PyYAML": "6.0.2",
+    "pydantic": "2.11.5"
+  },
+  "replay_counts": {
+    "PASS": 44,
+    "FAIL": 0,
+    "BLOCKED": 4
+  },
+  "counts_by_split": {
+    "dev": {
+      "PASS": 24
+    },
+    "test": {
+      "BLOCKED": 4,
+      "PASS": 8
+    },
+    "validation": {
+      "PASS": 12
+    }
+  },
+  "counts_by_source": {
+    "cross_mcp": {
+      "PASS": 4
+    },
+    "direct": {
+      "PASS": 12
+    },
+    "document": {
+      "PASS": 4
+    },
+    "mail_issue": {
+      "PASS": 4
+    },
+    "memory": {
+      "BLOCKED": 4,
+      "PASS": 8
+    },
+    "tool_description": {
+      "PASS": 4
+    },
+    "tool_result": {
+      "PASS": 4
+    },
+    "web": {
+      "PASS": 4
+    }
+  },
+  "metrics": {
+    "attack_blocked": 2,
+    "attack_evaluable": 22,
+    "attack_forbidden_effect_observed": 0,
+    "attack_total": 24,
+    "benign_blocked": 2,
+    "benign_completed": 22,
+    "benign_evaluable": 22,
+    "benign_total": 24,
+    "detection_precision": null,
+    "detection_recall": null,
+    "model_asr": null
+  },
+  "blocked_case_ids": [
+    "memory04-attack",
+    "memory04-benign",
+    "memory06-attack",
+    "memory06-benign"
+  ],
+  "missing_component": "memory_lifecycle_gate",
+  "cross_process_hash_seeds": [
+    17,
+    991
+  ],
+  "cross_process_observation_sha256": "9864cb8ee1618e2afaa04aa786545d9ce1c4d7f71f27436feb5bcc3709b7b383",
+  "different_hash_seeds_identical": true,
+  "unit_tests_passed": 29,
+  "core_policy_and_eval_tests_passed": 133,
+  "full_windows_counts": {
+    "passed": 343,
+    "failed": 6,
+    "errors": 0,
+    "skipped": 0
+  },
+  "known_windows_failures": [
+    "test_confirm_branch_requires_user_approval",
+    "test_audit_context_threaded_into_all_payloads",
+    "test_write_executes_with_private_permissions",
+    "test_vault_write_also_gets_handle",
+    "test_symlink_escape_rejected",
+    "test_to_path_strips_scheme"
+  ],
+  "checks": [
+    {
+      "name": "replay_a",
+      "exit_code": 0,
+      "elapsed_seconds": 0.6409999999996217
+    },
+    {
+      "name": "replay_b",
+      "exit_code": 0,
+      "elapsed_seconds": 0.5779999999995198
+    },
+    {
+      "name": "focused_tests",
+      "exit_code": 0,
+      "elapsed_seconds": 6.218000000000757
+    },
+    {
+      "name": "full_windows",
+      "exit_code": 1,
+      "elapsed_seconds": 8.188000000000102
+    },
+    {
+      "name": "ruff_check",
+      "exit_code": 0,
+      "elapsed_seconds": 0.09399999999914144
+    },
+    {
+      "name": "ruff_format",
+      "exit_code": 0,
+      "elapsed_seconds": 0.10900000000037835
+    },
+    {
+      "name": "pyright",
+      "exit_code": 0,
+      "elapsed_seconds": 5.890999999999622
+    }
+  ],
+  "mutation_controls": {
+    "always_allow_attack_failures": 22,
+    "always_deny_benign_failures": 22,
+    "claimed_deny_does_not_hide_effect": true,
+    "extra_effect_detected": true,
+    "same_id_changed_target_detected": true,
+    "canary_requires_actual_payload_bytes": true
+  },
+  "cli_default_dev_only": true,
+  "unguarded_test_access_exit_code": 2,
+  "test_access_purpose": "harness_validation_only",
+  "d1_linux_run": false,
+  "limitations": "E1/E2 fixed canonical candidates; no semantic planner/detector, model or real tool execution. Memory lifecycle unavailable. Test opened only for harness validation.",
+  "raw_evidence_sha256": {
+    "dev_default/fixture_manifest.json": "b5f53ce57cd3c4761ceab28246b4dcee0531fea00d38f139b73d9a6bc405e74d",
+    "dev_default/observations.json": "bfbc9b87c2f6cafad5ff2f71aef2e256b2201a0f2e2b935518b41e78f1791224",
+    "dev_default/summary.json": "7972f91b4fb820f86ed52097d710b2a38add26465c39c04bbe88fe3997a85a8f",
+    "dev_default_cli.txt": "43755621334c7687e92d080ce464d60aaacb9c1fb955f376d6575a91004ac56f",
+    "focused.xml": "bb385389e8fdbc5a95b8d20d6606f5527b593e4fa64ad5c0c14280d066d74aa3",
+    "focused_tests.txt": "6b79124c11123631eed97d044a941d1ec15a1002c5a18d48462aa139dcfdb905",
+    "full.xml": "08c2e91e507335440cac912c9bcb3bd58093d7ee0318821e7c8ef72dc61003c7",
+    "full_windows.txt": "1937c33a6fddf45a12aac9dac2de4489511786d7210a178b3d4a9d2add8bdd8f",
+    "pyright.txt": "1d044deee37a17d52f4dd31d7de6ebd21c68eb5d08e8b3b0822f58940a3392bb",
+    "replay_a/fixture_manifest.json": "b5f53ce57cd3c4761ceab28246b4dcee0531fea00d38f139b73d9a6bc405e74d",
+    "replay_a/observations.json": "9864cb8ee1618e2afaa04aa786545d9ce1c4d7f71f27436feb5bcc3709b7b383",
+    "replay_a/summary.json": "f5bb4e30024120a2ed2231cac3be76b1b056782cd0efe0047f01ba4f2b44d099",
+    "replay_a.txt": "dd27aae464837f931ec5bcf230ab6da04d9b4f70b1812d5b623c6f636ea42347",
+    "replay_b/fixture_manifest.json": "b5f53ce57cd3c4761ceab28246b4dcee0531fea00d38f139b73d9a6bc405e74d",
+    "replay_b/observations.json": "9864cb8ee1618e2afaa04aa786545d9ce1c4d7f71f27436feb5bcc3709b7b383",
+    "replay_b/summary.json": "a6ae79628fcda4d4bb5aff9b06a842f40a495f0d0130fa5a401a2176158e7e3e",
+    "replay_b.txt": "dd27aae464837f931ec5bcf230ab6da04d9b4f70b1812d5b623c6f636ea42347",
+    "ruff_check.txt": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "ruff_format.txt": "f4d501ad7405c927e0a57b16f24ccd530ee06a8c4da5838f861086d20077e073",
+    "test_guard_cli.txt": "c17a46216cf8c403846fb20f10adef100429c6b987a9656fcfd25fa8e18b68a2",
+    "verification.json": "4948770a8fab243fa1368a235255f5fb941786f4bce5d680697550dbb215e887"
+  }
+}

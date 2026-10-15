@@ -1,0 +1,49 @@
+id: allow-document-read
+when:
+  effect.type: READ
+  effect.operation: read_file
+  effect.resource_matches: file:///workspace/**
+then: ALLOW
+---
+id: allow-report-write
+when:
+  effect.type: WRITE
+  effect.operation: write_file
+  effect.resource_matches: file:///workspace/output/**
+then: ALLOW
+---
+id: allow-labelled-transfer
+when:
+  effect.type: EGRESS
+  effect.operation: send_data
+  effect.resource_matches: data://public-report
+then: ALLOW
+---
+id: allow-reviewer-delegation
+when:
+  effect.type: DELEGATE
+  effect.operation: delegate_review
+  effect.resource_matches: agent://reviewer
+then: ALLOW
+---
+id: allow-memory-replay
+when:
+  effect.type: [MEMORY_READ, MEMORY_WRITE]
+  effect.resource_matches: memory://**
+then: ALLOW
+---
+id: forbid-authority-and-exec
+when:
+  effect.type: [AUTH_CHANGE, EXEC]
+then: DENY
+---
+id: forbid-synthetic-secret-path
+when:
+  effect.type: READ
+  effect.resource_matches: file:///synthetic-secrets/**
+then: DENY
+---
+id: require-push-confirmation
+when:
+  effect.type: REPO_MUTATE
+then: CONFIRM

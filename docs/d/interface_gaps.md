@@ -17,7 +17,7 @@
 | ENV-03/C-05 | Linux 已通过，E1 | 原六项 Windows 平台失败在 Linux 原生文件系统全部通过；Windows 历史失败保留 |
 | LINUX-01 | 已解决，用户终端验收 | source_04 经用户普通终端运行：完整 320 通过、规范/类型全绿；Codex 直接启动限制仍存在，入口可重放 |
 | A-06 | 后续 D3 封装 | RiskSignal 仍为四字段；失败状态和结构化证据由 D 结果封装携带，不复制公共模型 |
-| D-01 | 后续 D1 | fixture loader 必须拒绝缺标签/来源；DataReference 的 DATA_ONLY 默认值不能代替完整真值 |
+| D-01 | D1 已实现，E1 | fixture loader 显式检查来源、标签全部字段及独立真值；48 例冻结，缺失/未知字段回归通过 |
 | C-01 | 后续集成 | pipeline.run 尚无 risk_signals 透传；需后续接入时实施并验证，当前不宣称已接通检测链 |
 | C-03 | 后续 D5 | 当前 Python 路径/票据检查不证明 OS 隔离、禁网或旁路不可绕过 |
 | B-01 | 后续依赖 | normalization/gateway 未就绪，D5 真实联调待接口 |
@@ -31,3 +31,5 @@
 ```
 
 [完整基线](D0_baseline.md)、[实施记录](D0_fix_proposal.md)、[Linux 验收入口](D0_linux_acceptance.md)。D0 整体 PASS，按用户要求在本地完整验收后统一上传；本轮不进入 D1。
+
+D1 离线进展：24 对场景已冻结，回放 44 PASS / 4 BLOCKED；生命周期 4 例待 D4 Memory Gate。协议及真实结果见 [D1_dataset_protocol.md](D1_dataset_protocol.md)，不将离线标签/固定候选回放视为检测器或真实记忆系统已完成。
