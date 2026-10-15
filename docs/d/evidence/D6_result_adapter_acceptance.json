@@ -1,0 +1,252 @@
+{
+  "ABC_modified_this_turn": false,
+  "ASR": null,
+  "actual_agent_episodes": 0,
+  "agentdojo_package": "0.1.34",
+  "benchmark_version": "v1.2",
+  "date": "2026-10-15",
+  "downloads": 0,
+  "environment_loads": 0,
+  "evidence_sha256": {
+    "artifacts/d/D6_results_format.txt": "3f4bc01295722e49a865b0199cc73320a50730efffc2d8bcaf1597047012ac4c",
+    "artifacts/d/D6_results_independent_verification.json": "fccc7dc125e468b727202e8bb3fe8b9ad50fbbcab9ce3a7fc27f1ef4ec600444",
+    "artifacts/d/D6_results_linux_02/dependency.json": "cdcf8e761f6ff9d03cb5005b03ba1890b21de49dbc2d04b9f7099bf1ebe4c802",
+    "artifacts/d/D6_results_linux_02/freeze.json": "a833128265130306e96db5fbc4a6c713dc64c54ced2a3794ffb191ff41d0ae50",
+    "artifacts/d/D6_results_linux_02/input_freeze.json": "9204bfcc1a0a5beca9783031e4ab8fe6d8b12735ddb7f9322ff9e5689296b98f",
+    "artifacts/d/D6_results_linux_02/metrics.json": "4ed5781ed57b47d77599c5727f57cd3b39c63de12b21dd1b322a1efc96262be8",
+    "artifacts/d/D6_results_linux_02/normalized.json": "e1cfb7a4d666ef4a99281ca9c95106d2ea0ea6cb8dafe5ff806aefe7e498d018",
+    "artifacts/d/D6_results_linux_02/summary.json": "a44d74fcbb9e1c8024fe57822cfa67aa0f9f8bbeb9154a25faf42c7f95d5e979",
+    "artifacts/d/D6_results_linux_tests_final.xml": "dde30aa90e469b42dca919516da790ec3bc24ae3ff98d131342061cb4f13412b",
+    "artifacts/d/D6_results_pyright_final.txt": "a01f30bbac57d739f13300f0e539b797bbaecdfdee20a5c793619124604feb41",
+    "artifacts/d/D6_results_reimport_02/freeze.json": "ff298ee6b24f75c8eff1c5be2919b247b6730e2631b4128a581c75e0297b7e0e",
+    "artifacts/d/D6_results_reimport_02/input_freeze.json": "44cc365b086aa1c54bf0aa979d910b74ac77e981b3a9a8e6ba5744756dbd9d72",
+    "artifacts/d/D6_results_reimport_02/metrics.json": "6b3f20bd736e3afd4212a130607665682458a5bc83be6ea6fc6dd1302dd3042d",
+    "artifacts/d/D6_results_reimport_02/normalized.json": "dd5cc171394e354e0ec893538577d6dd885728490128b388e08ff93c259e9bb1",
+    "artifacts/d/D6_results_reimport_02/summary.json": "5013013aa411adf74636020fe969c90aeb14df3c377680b0af935e68ecd5187b",
+    "artifacts/d/D6_results_ruff.txt": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
+    "artifacts/d/D6_results_windows_02/dependency.json": "891353aa073d9f0ee2b1db5c2df7f48d8e5db9dbbd29f0a29cdb977236c44210",
+    "artifacts/d/D6_results_windows_02/freeze.json": "ff298ee6b24f75c8eff1c5be2919b247b6730e2631b4128a581c75e0297b7e0e",
+    "artifacts/d/D6_results_windows_02/input_freeze.json": "44cc365b086aa1c54bf0aa979d910b74ac77e981b3a9a8e6ba5744756dbd9d72",
+    "artifacts/d/D6_results_windows_02/metrics.json": "6b3f20bd736e3afd4212a130607665682458a5bc83be6ea6fc6dd1302dd3042d",
+    "artifacts/d/D6_results_windows_02/normalized.json": "dd5cc171394e354e0ec893538577d6dd885728490128b388e08ff93c259e9bb1",
+    "artifacts/d/D6_results_windows_02/summary.json": "34aecc94c9413f6413ec4ecbf1ddf4e4018eed8ff033bdaa9acb0a502f8f7f10",
+    "artifacts/d/D6_results_windows_tests_final2.xml": "8bc89ec65c138c3f8d4bc4a3136effc7d7fac15e8498ed61034fb7e3e398e367",
+    "docs/d/D6_result_adapter.md": "501d2013ab37682bd27f9dbe880e5bf6f6255dc7b6323b28967bea1c3643952e",
+    "docs/d/evidence/D6_result_adapter_protocol.json": "e8760acdd9f40e442a35c5af345abed25c6c864d32141c5471db1f8f6c4e8fbc"
+  },
+  "focused_full_tests_this_turn": false,
+  "formal_runs": [
+    "artifacts/d/D6_results_windows_02",
+    "artifacts/d/D6_results_linux_02",
+    "artifacts/d/D6_results_reimport_02"
+  ],
+  "full_D6_accepted": false,
+  "full_project_tests_this_turn": false,
+  "git_committed": false,
+  "independent_verification": {
+    "ABC_snapshot_files_unchanged": 25,
+    "D6_oracle_precheck_acceptance.json_historical_evidence_verified": 15,
+    "D6_preparation_acceptance.json_historical_evidence_verified": 21,
+    "D7_representation_acceptance.json_historical_evidence_verified": 19,
+    "D_offline_workflow_acceptance.json_historical_evidence_verified": 14,
+    "cross_platform_metrics_equal": true,
+    "cross_platform_semantic_rows_equal": true,
+    "environment_loads": 0,
+    "linux": {
+      "input_files_verified": 13,
+      "output_files_verified": 5,
+      "source_files_verified": 6,
+      "tests": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 48
+      }
+    },
+    "model_requests": 0,
+    "original_model_cache_files_unchanged": 61,
+    "raw_input_byte_equal_files": 1,
+    "raw_input_line_endings_only": [
+      "manifest.json"
+    ],
+    "raw_log_differences": {
+      "synthetic-no-model/workspace/injection_task_0/none/none.json": [
+        ".evaluation_timestamp"
+      ],
+      "synthetic-no-model/workspace/user_task_0/none/none.json": [
+        ".evaluation_timestamp"
+      ],
+      "synthetic-no-model/workspace/user_task_1/important_instructions/injection_task_0.json": [
+        ".evaluation_timestamp"
+      ],
+      "synthetic-no-model/workspace/user_task_10/important_instructions/injection_task_0.json": [
+        ".evaluation_timestamp"
+      ],
+      "synthetic-no-model/workspace/user_task_12/important_instructions/injection_task_0.json": [
+        ".evaluation_timestamp"
+      ],
+      "synthetic-no-model/workspace/user_task_2/important_instructions/injection_task_0.json": [
+        ".evaluation_timestamp"
+      ],
+      "synthetic-no-model/workspace/user_task_3/important_instructions/injection_task_0.json": [
+        ".evaluation_timestamp"
+      ],
+      "synthetic-no-model/workspace/user_task_4/important_instructions/injection_task_0.json": [
+        ".evaluation_timestamp"
+      ],
+      "synthetic-no-model/workspace/user_task_5/important_instructions/injection_task_0.json": [
+        ".evaluation_timestamp"
+      ],
+      "synthetic-no-model/workspace/user_task_8/important_instructions/injection_task_0.json": [
+        ".evaluation_timestamp"
+      ],
+      "synthetic-no-model/workspace/user_task_9/important_instructions/injection_task_0.json": [
+        ".evaluation_timestamp"
+      ]
+    },
+    "real_tool_calls": 0,
+    "same_input_reimport_identical": true,
+    "status": "PASS_OFFLINE_RESULT_ADAPTER",
+    "windows": {
+      "input_files_verified": 13,
+      "output_files_verified": 5,
+      "source_files_verified": 6,
+      "tests": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 48
+      }
+    }
+  },
+  "live_controller_integrated": false,
+  "model_requests": 0,
+  "observer_authenticated": false,
+  "pyright": {
+    "errors": 0,
+    "informations": 0,
+    "warnings": 0
+  },
+  "real_tool_calls": 0,
+  "remaining": [
+    "host runtime/controller integration",
+    "actual timeout and all-role budget enforcement",
+    "trusted independent observer binding",
+    "model and tool calling compatibility",
+    "B/C integration",
+    "formal D6 model evaluation"
+  ],
+  "ruff_check": "PASS",
+  "ruff_format": {
+    "files": 167,
+    "status": "PASS"
+  },
+  "source_sha256": {
+    "docs/d/evidence/D6_preparation_acceptance.json": "7884e343c07c2ef80aab74f1b7beabc63080cf30f30ed9d8e62fdfa8a1da9cd7",
+    "docs/d/evidence/D6_result_adapter_protocol.json": "e8760acdd9f40e442a35c5af345abed25c6c864d32141c5471db1f8f6c4e8fbc",
+    "scripts/d6_result_adapter.py": "60ec2644c68add90e7eb9125c137097a6bdf071f30d4de79839e1a216fcda2f8",
+    "src/camel/adapters/agentdojo/results.py": "d5726e91d04742431de82eadf8f1f3341eb95d6003dc855016af2050ab051ace",
+    "src/camel/evaluation/ablation.py": "2da22a37f0cc22373c27af21d2a3c47c5b8bbcc8159037dae32b44357fbbed1d",
+    "tests/unit/evaluation/test_agentdojo_results.py": "5755ad50506d02021d529b3a4d9158be0bf5b48f0aec76f1d5da01a96e2aff65"
+  },
+  "stage": "D6_offline_result_adapter",
+  "status": "PASS_OFFLINE_RESULT_ADAPTER",
+  "synthetic_controls": 14,
+  "synthetic_metrics": {
+    "HARNESS_ONLY": {
+      "attack_extra_effect_positives": 4,
+      "attack_goal": {
+        "bounds": [
+          0.08333333333333333,
+          0.8333333333333334
+        ],
+        "ci95": null,
+        "completed_subset": {
+          "ci95": [
+            0.06149194472039621,
+            0.7923403991979522
+          ],
+          "denominator": 3,
+          "numerator": 1,
+          "rate": 0.3333333333333333
+        },
+        "false": 2,
+        "planned": 12,
+        "rate": null,
+        "true": 1,
+        "unknown": 9
+      },
+      "benign_utility": {
+        "bounds": [
+          1.0,
+          1.0
+        ],
+        "ci95": [
+          0.20654931437723745,
+          1.0
+        ],
+        "completed_subset": {
+          "ci95": [
+            0.20654931437723745,
+            1.0
+          ],
+          "denominator": 1,
+          "numerator": 1,
+          "rate": 1.0
+        },
+        "false": 0,
+        "planned": 1,
+        "rate": 1.0,
+        "true": 1,
+        "unknown": 0
+      },
+      "goal_control_episodes": 1,
+      "independent_goal": {
+        "bounds": [
+          0.25,
+          0.8333333333333334
+        ],
+        "ci95": null,
+        "false": 2,
+        "observed_subset": {
+          "ci95": [
+            0.2307242812760128,
+            0.882379225767352
+          ],
+          "denominator": 5,
+          "numerator": 3,
+          "rate": 0.6
+        },
+        "planned": 12,
+        "rate": null,
+        "true": 3,
+        "unknown": 7
+      },
+      "statuses": {
+        "COMPLETED": 5,
+        "INCOMPLETE": 2,
+        "INVALID": 2,
+        "NATIVE_ERROR": 1,
+        "NOT_RUN": 1,
+        "ORACLE_DISAGREEMENT": 1,
+        "TIMEOUT": 1,
+        "TOOL_ERROR": 1
+      }
+    }
+  },
+  "tests": {
+    "linux": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 48
+    },
+    "windows": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 48
+    }
+  },
+  "user_tool_error_choice": "ANY_TOOL_ERROR_UNSCORED"
+}

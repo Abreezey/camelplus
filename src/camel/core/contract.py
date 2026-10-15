@@ -42,7 +42,7 @@ class DelegationSpec(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     allowed: bool = False
-    max_depth: int = 0
+    max_depth: int = Field(default=0, strict=True, ge=0)
     child_ceiling: frozenset[EffectType] = Field(default_factory=frozenset)
 
 
@@ -58,7 +58,7 @@ class IntentContract(BaseModel):
     allowed_effects: tuple[AllowedEffect, ...] = ()
     forbidden_data_classes: frozenset[str] = Field(default_factory=frozenset)
     allowed_destinations: tuple[str, ...] = ()
-    side_effect_budget: int = 0
+    side_effect_budget: int = Field(default=0, strict=True, ge=0)
     delegation: DelegationSpec = Field(default_factory=DelegationSpec)
     expires_at: datetime
 
@@ -81,21 +81,13 @@ class IntentContract(BaseModel):
         return any(fnmatch.fnmatchcase(destination, pattern) for pattern in self.allowed_destinations)
 
 
-def _allowed_effect_contained(child: AllowedEffect, parent: AllowedEffect) -> bool:
-    """Conservative containment: is ``child``'s scope a subset of ``parent``'s?
-
-    Glob-to-glob subset checks are undecidable in general (see the note on
-    ``validate_child_contract``), so containment is accepted only in
-    obviously-safe cases: the parent pattern is the wildcard (``None``
-    operation / ``**`` resource) or the two patterns are literally identical.
-    Anything else counts as *not* contained — delegation may be wrongly
-    rejected, never wrongly expanded (I2).
-    """
-    if child.effect != parent.effect:
+def _pattern_contained(child: str, parent: str) -> bool:
+    """Prove only equality, universal parents, or concrete child membership."""
+    if parent in {"*", "**"} or child == parent:
+        return True
+    if any(char in child for char in "*?["):
         return False
-    if parent.operation is not None and parent.operation != child.operation:
-        return False
-    return parent.resource == "**" or parent.resource == child.resource
+    return fnmatch.fnmatchcase(child, parent)
 
 
 def validate_child_contract(
@@ -107,10 +99,9 @@ def validate_child_contract(
 
     Returns a list of violations; empty means the delegation is valid.
 
-    Note: glob-to-glob subset checks are undecidable in general, so
-    containment (both for effect scopes and destinations) is approximated: a
-    child pattern is accepted only if the parent allows the exact same
-    pattern or the wildcard.
+    Effect patterns use conservative containment proofs; unproven glob
+    subsets are rejected. Destination containment retains the existing
+    exact-pattern or universal-parent approximation.
     """
     violations: list[str] = []
     if not parent.delegation.allowed:
@@ -118,22 +109,24 @@ def validate_child_contract(
         return violations
     if depth > parent.delegation.max_depth:
         violations.append(f"delegation_depth_exceeded:{depth}>{parent.delegation.max_depth}")
-    # I2: every effect the child may perform must fall inside the parent's
-    # own authority (further narrowed by the declared ceiling, if any). An
-    # empty ceiling means "no narrowing beyond the parent's own effects",
-    # NOT "skip the check" — the parent's allowed_effects are always the
-    # outer bound.
     parent_types = {a.effect for a in parent.allowed_effects}
-    ceiling = parent.delegation.child_ceiling & parent_types if parent.delegation.child_ceiling else parent_types
+    ceiling = parent_types
+    if parent.delegation.child_ceiling:
+        ceiling = ceiling & parent.delegation.child_ceiling
     child_types = {a.effect for a in child.allowed_effects}
     if not child_types <= ceiling:
         violations.append(f"child_effect_types_exceed_ceiling:{sorted(child_types - ceiling)}")
-    for child_allowed in child.allowed_effects:
-        if not any(_allowed_effect_contained(child_allowed, p) for p in parent.allowed_effects):
-            violations.append(
-                "child_effect_scope_exceeds_parent:"
-                f"{child_allowed.effect.value}/{child_allowed.operation}/{child_allowed.resource}"
+    for index, effect in enumerate(child.allowed_effects):
+        if not any(
+            effect.effect == allowed.effect
+            and _pattern_contained(
+                effect.operation if effect.operation is not None else "**",
+                allowed.operation if allowed.operation is not None else "**",
             )
+            and _pattern_contained(effect.resource, allowed.resource)
+            for allowed in parent.allowed_effects
+        ):
+            violations.append(f"child_effect_scope_exceeds_parent:{index}")
     for pattern in child.allowed_destinations:
         if pattern not in parent.allowed_destinations and "**" not in parent.allowed_destinations:
             violations.append(f"child_destination_exceeds_parent:{pattern}")

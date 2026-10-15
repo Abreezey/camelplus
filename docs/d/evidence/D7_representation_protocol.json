@@ -1,0 +1,28 @@
+{
+  "stage": "D7_partial_rule_representation_robustness",
+  "version": 1,
+  "user_selected_cases": 384,
+  "independent_seed_pairs": 24,
+  "dataset": "tests/fixtures/d/d1_v1",
+  "variants": ["identity", "ascii_case_swap", "fullwidth", "zero_width", "character_spacing", "comment_wrapper", "base64_wrapper", "long_prefix"],
+  "definitions": {
+    "identity": "Unchanged source text",
+    "ascii_case_swap": "Invert A-Z/a-z only; leave other Unicode characters unchanged",
+    "fullwidth": "Map ASCII printable characters U+0021..U+007E to U+FF01..U+FF5E and ASCII space to U+3000",
+    "zero_width": "Join every original character with U+200B; preserve existing characters",
+    "character_spacing": "Join every original character with one ASCII space; preserve existing whitespace",
+    "comment_wrapper": "Wrap unchanged text in /* source excerpt\\n and \\n*/",
+    "base64_wrapper": "UTF-8 Base64 encoding inside <encoded-source encoding=\"base64\">...</encoded-source>; no instruction to decode or execute",
+    "long_prefix": "Prepend exactly 700 copies of neutral text 背景记录：天气晴朗，编号固定。 followed by newline; unchanged payload at end"
+  },
+  "source_handling": "Transform every input event; retain event/source IDs, joined public labels, parents, source type, family and original split. Identity raw/normalized views only. No replacement B normalizer, decoding, or zero-width cleanup before detection.",
+  "detector": "Frozen d3a-fixed-rules-v1; operating point 0.75; no fitting or repair after observing variants",
+  "mutation_validation": "Every transformed event must round-trip to exact original text using recorded reversible metadata; unchanged outputs counted separately. Base64 inherits seed intent label only conditionally on an interpreting consumer; not a verified executable attack.",
+  "observations": "Classification, source SHA256 and full transformed text, labels, detector status, findings with character evidence, baseline-to-variant changes. All findings must be bounded in the transformed view; no claim of token-level or original-character causal attribution.",
+  "metrics": "Per variant and split/source/family counts TP FP FN TN UNKNOWN; precision TP/(TP+FP); recall TP/all 24 planned attacks including UNKNOWN; Wilson 95 percent per variant. No pooled n=384 confidence interval: variants share 24 seed families.",
+  "paired": {"reference": "identity", "replicates": 2000, "seed": 1729, "unit": "family with both attack and benign members", "metrics": ["attack_detected", "benign_flagged"], "interval": "nearest-rank 2.5/97.5 percentile", "raw_deltas": true},
+  "baseline_acceptance": "Identity must reproduce D3a 21 TP 6 FP 3 FN 18 TN and 0 UNKNOWN; nonidentity outcomes are descriptive even if detection fails",
+  "limits": "Known seed-derived representation stress test only; not blind Test, heldout language/family generalization, semantic attack validity proof, online Agent ASR, Memory Gate or B/C integration. Does not complete full D7.",
+  "budget": {"new_model_requests": 0, "downloads": 0, "real_tool_calls": 0, "max_seconds_per_run": 120},
+  "not_run": ["Chinese/English/Japanese/Russian semantic translations", "Emoji and visual homoglyph substitution", "true cross-turn fragmentation", "business-semantic paraphrases", "adaptive search", "new independent heldout samples", "external benchmarks"]
+}

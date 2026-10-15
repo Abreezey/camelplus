@@ -1,0 +1,154 @@
+{
+  "stage": "D2",
+  "status": "PASS_RESTRICTED_OFFLINE",
+  "base_commit": "bbd2a4516da4eaaa8a846dae62c7ae07a8b09f72",
+  "run_id": "D2_20261015_offline_01",
+  "models_called": false,
+  "training_performed": false,
+  "normalization_backend": "fixture_stub",
+  "evidence_levels": [
+    "E1",
+    "E2"
+  ],
+  "templates": [
+    "read_document",
+    "review_code"
+  ],
+  "source_sha256": {
+    "scripts/d2_eval.py": "9eb964bb009d79ff79782adc8df92d0aa7b3aceee5875558c6e860a210b73dd4",
+    "src/camel/planner/__init__.py": "a9f3132b237020dd1c1390e3119743932dd7cf9a4d2e31b2a4a80866406a9139",
+    "src/camel/planner/compiler.py": "50561c8992278faf144006299618143e665107c6372205db4431662fef85a07e",
+    "src/camel/planner/fixture_adapter.py": "43eac0a56752fb2411a01aa9c9c4b2b129b7a54f34bae6ed7e8214ce47da6af2",
+    "src/camel/planner/models.py": "74bf5581ccfbfcf3e7ffb30a9671e4a4e54347279cd60e20cc2b6537a8fc893a",
+    "src/camel/planner/validation.py": "91475147d833b49962a247ba6459a4ed86e16dd3e1b5c29d031ebb2e73a45b0b",
+    "tests/unit/planner/test_planner.py": "93d868addfb580a8ae36be8465175e0642881b6da85b56a926d71e2979949f8c"
+  },
+  "fixture_sha256": {
+    "cases.jsonl": "492961d3aff3edd6d790f943cb310e2d79a809e349c89fc8b1012ca3b66cf899",
+    "policy.yaml": "1bdf1e87b4828740dbf56313eded9e5eb87fd7d04e365d2980d78fe7223ea3ec"
+  },
+  "manifest_sha256": "b5f53ce57cd3c4761ceab28246b4dcee0531fea00d38f139b73d9a6bc405e74d",
+  "policy_version": "sha256:f52e0430013d3374",
+  "clock": "2026-10-15T00:00:00+00:00",
+  "dependencies": {
+    "PyYAML": "6.0.2",
+    "pydantic": "2.11.5"
+  },
+  "d1_case_counts": {
+    "DENIED": 2,
+    "INVALID": 12,
+    "READY": 14,
+    "UNSUPPORTED": 20
+  },
+  "d1_check_counts": {
+    "PASS": 28,
+    "UNSUPPORTED": 20
+  },
+  "supported_benign_completed": 14,
+  "supported_attack_rejected": 14,
+  "controls_passed": 16,
+  "unit_tests_passed": 64,
+  "focused_tests_passed": 197,
+  "full_windows_counts": {
+    "passed": 407,
+    "failed": 6,
+    "errors": 0,
+    "skipped": 0
+  },
+  "known_windows_failures": [
+    "test_confirm_branch_requires_user_approval",
+    "test_audit_context_threaded_into_all_payloads",
+    "test_write_executes_with_private_permissions",
+    "test_vault_write_also_gets_handle",
+    "test_symlink_escape_rejected",
+    "test_to_path_strips_scheme"
+  ],
+  "different_hash_seeds_identical": true,
+  "hash_seeds": [
+    17,
+    991
+  ],
+  "result_sha256": {
+    "observations.json": "7d913606e7b094bc2a5962afc218be26ead6bd0db141b3166dc656e854d73870",
+    "controls.json": "7e6f9e50b5b1ff95003b7ba9c7689759ff9124bcbc48a094aaf4063218dc2912"
+  },
+  "d1_observations_unchanged": true,
+  "d1_fixtures_match_committed_bytes": true,
+  "default_replay_split": "dev",
+  "loader_reads_complete_frozen_file_for_validation": true,
+  "unguarded_test_replay_exit_code": 2,
+  "checks": [
+    {
+      "name": "replay_a",
+      "exit_code": 0,
+      "elapsed_seconds": 0.7180000000007567
+    },
+    {
+      "name": "replay_b",
+      "exit_code": 0,
+      "elapsed_seconds": 0.6719999999986612
+    },
+    {
+      "name": "d1_regression",
+      "exit_code": 0,
+      "elapsed_seconds": 0.6559999999990396
+    },
+    {
+      "name": "focused_tests",
+      "exit_code": 0,
+      "elapsed_seconds": 14.282000000002881
+    },
+    {
+      "name": "full_windows",
+      "exit_code": 1,
+      "elapsed_seconds": 27.5779999999977
+    },
+    {
+      "name": "ruff_check",
+      "exit_code": 0,
+      "elapsed_seconds": 0.25
+    },
+    {
+      "name": "ruff_format",
+      "exit_code": 0,
+      "elapsed_seconds": 0.1720000000022992
+    },
+    {
+      "name": "pyright",
+      "exit_code": 0,
+      "elapsed_seconds": 18.67199999999866
+    }
+  ],
+  "git_staged": false,
+  "git_commit_performed": false,
+  "git_push_performed": false,
+  "linux_d2_run": false,
+  "limitations": "E1/E2 only. Explicit typed trusted ingress, two read-only templates, fixed candidate plans and B stub. No LLM planning, real normalization, actual tools, OS containment, or memory lifecycle validation.",
+  "raw_evidence_sha256": {
+    "d1_regression/fixture_manifest.json": "b5f53ce57cd3c4761ceab28246b4dcee0531fea00d38f139b73d9a6bc405e74d",
+    "d1_regression/observations.json": "9864cb8ee1618e2afaa04aa786545d9ce1c4d7f71f27436feb5bcc3709b7b383",
+    "d1_regression/summary.json": "6a1befc9e44e3d240ee10d1f3faaa409850d44e787cc7c577498e2adecde7cb2",
+    "d1_regression.txt": "dd27aae464837f931ec5bcf230ab6da04d9b4f70b1812d5b623c6f636ea42347",
+    "dev_default/controls.json": "7e6f9e50b5b1ff95003b7ba9c7689759ff9124bcbc48a094aaf4063218dc2912",
+    "dev_default/observations.json": "1b6559a928084a840b04db5b167f0fb32d8cfee2201a66ceaab0fc18c33deac8",
+    "dev_default/summary.json": "c26e6dfbf4426952b43a9a32aa859e0668307a425102a0b194619d587bb5ed75",
+    "dev_default_cli.txt": "974bed44da2465ba704a988fafe787a407175a184aadc94444d79b1cb6ee71ce",
+    "focused.xml": "526e60127618ac16b59ac52bcb18067c904ffa974484f76efb84a552c815502d",
+    "focused_tests.txt": "de5fa78f58f4c31b8e7946902548354fcf82f33c18b6f5c1837785e3b24cdfc1",
+    "full.xml": "a211c9382074961f63c45831bb7db86a3179100bf04afcdb27a6f7ca69b6c744",
+    "full_windows.txt": "a09f6aa3333a88a2f87996c723a89e891d46506166f3f94b0032f0ad71e6e372",
+    "pyright.txt": "1d044deee37a17d52f4dd31d7de6ebd21c68eb5d08e8b3b0822f58940a3392bb",
+    "replay_a/controls.json": "7e6f9e50b5b1ff95003b7ba9c7689759ff9124bcbc48a094aaf4063218dc2912",
+    "replay_a/observations.json": "7d913606e7b094bc2a5962afc218be26ead6bd0db141b3166dc656e854d73870",
+    "replay_a/summary.json": "6cbfbff27693a3baa6553a806c3042ef6682436c13ca723ef18ca9cd2c2aa163",
+    "replay_a.txt": "e63b06dc1d4a25aca8edf0dc125648a6af3a183db27cfe52d6e1935cb9202677",
+    "replay_b/controls.json": "7e6f9e50b5b1ff95003b7ba9c7689759ff9124bcbc48a094aaf4063218dc2912",
+    "replay_b/observations.json": "7d913606e7b094bc2a5962afc218be26ead6bd0db141b3166dc656e854d73870",
+    "replay_b/summary.json": "382ec4cf514793f9730a33c6f87f59e3e4694583b09afca8fe6c5c0b4df7e3b8",
+    "replay_b.txt": "e63b06dc1d4a25aca8edf0dc125648a6af3a183db27cfe52d6e1935cb9202677",
+    "ruff_check.txt": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "ruff_format.txt": "c5a4909ec8a84e44730b4256783b14051126fb075707f5b49a7464277251ff97",
+    "test_guard_cli.txt": "1bb1d42ca987706584d3d655f4aeb94327816cdfa598d9f956b3dd3fe41a9741",
+    "verification.json": "edda921e3813907df26a5956f0dabfe812f021a4e918dcdbc6f53ea01324994a"
+  }
+}

@@ -11,6 +11,7 @@ Plus the acceptance replay: every decision can be reconstructed from the
 audit chain alone, and the whole chain verifies.
 """
 
+import json
 import threading
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -40,12 +41,13 @@ def env(tmp_path: Path):
     scratch = tmp_path / "scratch"
     scratch.mkdir()
 
+    read_scope = f"file://{workspace / '**'}"
     rules = load_rules(
         f"""
 id: allow-workspace-read
 when:
   effect.type: READ
-  effect.resource_matches: "file://{workspace}/**"
+  effect.resource_matches: {json.dumps(read_scope)}
 then: ALLOW
 ---
 id: confirm-any-write
@@ -76,7 +78,7 @@ then: CONFIRM
         contract_id="ic_01",
         principal="user:alice",
         goal="review_current_repository",
-        allowed_effects=(AllowedEffect(effect=EffectType.READ, resource=f"file://{workspace}/**"),),
+        allowed_effects=(AllowedEffect(effect=EffectType.READ, resource=read_scope),),
         side_effect_budget=5,
         expires_at=LATER,
     )
@@ -149,9 +151,10 @@ def test_allow_branch_executes_and_audits(env) -> None:
 
     events = env.audit.events("t_allow")
     sources = [e.source for e in events]
-    assert sources == ["decision", "execution"]
+    assert sources == ["decision", "execution_intent", "execution"]
     assert env.audit.payload_of(events[0].event_id)["decision"]["decision"] == "ALLOW"
-    assert env.audit.payload_of(events[1].event_id)["outcome"] == "executed"
+    assert env.audit.payload_of(events[1].event_id)["outcome"] == "prepared"
+    assert env.audit.payload_of(events[2].event_id)["outcome"] == "executed"
     env.audit.verify_chain()
 
 
@@ -202,7 +205,7 @@ def test_confirm_branch_requires_user_approval(env) -> None:
     assert (env.scratch / "out.txt").read_bytes() == b"approved data"
 
     sources = [e.source for e in env.audit.events("t_confirm")]
-    assert sources == ["decision", "confirmation", "confirmation", "execution"]
+    assert sources == ["decision", "confirmation", "confirmation", "execution_intent", "execution"]
     env.audit.verify_chain()
 
 

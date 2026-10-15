@@ -1,0 +1,151 @@
+{
+  "ABC_modified_this_turn": false,
+  "ASR": null,
+  "C_execution_integrated": false,
+  "atomic_refresh_and_execute": false,
+  "blocked_controls_per_platform": 11,
+  "controller_subprocess_integrated": false,
+  "controls_per_platform": 13,
+  "date": "2026-10-15",
+  "downloads": 0,
+  "evidence_sha256": {
+    "artifacts/d/D_connected_format_final.txt": "b0814c1cf17637553b4edd4069b8cdc6125e8873de3fad2fb08ebea7e9af6cdd",
+    "artifacts/d/D_connected_independent_verification.json": "f68dd6171a15420eee3b89172922ce79388dfeb3a5d3038044da94dc51ac3a14",
+    "artifacts/d/D_connected_linux_02/freeze.json": "a0eebd5a37ff40aab4d950e1ea97dec6e5d2949a3b53c43492d8799d5d7fe46a",
+    "artifacts/d/D_connected_linux_02/inputs.json": "0ced4103ce1753a0452f63de118037caba1349b7f8744786ee6ed053f2e57c35",
+    "artifacts/d/D_connected_linux_02/observations.json": "e61f57d40be0a28a902e8ae8306af317916360311592da2ecb6563e417b3e039",
+    "artifacts/d/D_connected_linux_02/summary.json": "47bd19cd052642bf0f53a69f3b32ecf47fb50cdb2d2d8f2582b3bc3477e96e59",
+    "artifacts/d/D_connected_linux_tests_final.xml": "99031a7021c3da2bd2b72197f76da3ecfac75e701816c9109493b2b22e2c8edc",
+    "artifacts/d/D_connected_pyright_final.txt": "58782b3d775540bca8e6e54152a1451d72666ac6dd0143cc8e95b9b9e9f4809d",
+    "artifacts/d/D_connected_ruff_final.txt": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
+    "artifacts/d/D_connected_windows_02/freeze.json": "ff227745554f0242910309974696b51961344fdf23095429fd5ebb18024140b3",
+    "artifacts/d/D_connected_windows_02/inputs.json": "fe42def53a7785d492dcf6e3e1967dba486139fc798ef3dc4997b0184d5d176a",
+    "artifacts/d/D_connected_windows_02/observations.json": "3b0bfc374af24cde980960fbc185ca05270be5d014250ae2466decca551e705a",
+    "artifacts/d/D_connected_windows_02/summary.json": "95069549d0113d70b6e83b5fd2da4a00f118883375aa1ac27be1b5486c0ce359",
+    "artifacts/d/D_connected_windows_tests_final.xml": "4a53735af8bc77d1b1567909c7fc96bc17d92e3ec0b4290639dcdf461021eaaf",
+    "docs/d/D_connected_flow.md": "2c925eebab22fc9c6579b2156284a69d5421b4c747e289391a27c7226d37aead",
+    "docs/d/evidence/D_connected_protocol.json": "9d9d6192d881b9b41f999626e593d560eb88eccc04e427113edc009887536d98"
+  },
+  "focused_full_tests_this_turn": false,
+  "formal_runs": [
+    "artifacts/d/D_connected_windows_02",
+    "artifacts/d/D_connected_linux_02"
+  ],
+  "full_D6_D7_D8_accepted": false,
+  "full_project_tests_this_turn": false,
+  "git_committed": false,
+  "independent_verification": {
+    "ABC_snapshot_files_unchanged": 25,
+    "D1_frozen_fixture_files_unchanged": 3,
+    "cross_platform_db_hash_equal": 13,
+    "cross_platform_freeze_equal": true,
+    "cross_platform_inputs_equal": true,
+    "cross_platform_observations_equal": true,
+    "linux": {
+      "output_files_verified": 16,
+      "source_files_verified": 36,
+      "sqlite_databases": 13,
+      "tests": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 24
+      }
+    },
+    "original_model_cache_files_unchanged": 61,
+    "previous_evidence_verified": {
+      "D6_controller_acceptance.json": 34,
+      "D6_oracle_precheck_acceptance.json": 15,
+      "D6_preparation_acceptance.json": 21,
+      "D6_result_adapter_acceptance.json": 25,
+      "D7_representation_acceptance.json": 19,
+      "D_offline_workflow_acceptance.json": 14
+    },
+    "status": "PASS_CONNECTED_OFFLINE_CONTROLS",
+    "windows": {
+      "output_files_verified": 16,
+      "source_files_verified": 36,
+      "sqlite_databases": 13,
+      "tests": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 24
+      }
+    }
+  },
+  "known_negative_results": [
+    "benign quoted example quarantined",
+    "zero-width injection text missed by frozen rules and recorded as data-only READ"
+  ],
+  "model_requests": 0,
+  "new_heldout_data": false,
+  "production_B_normalizer": false,
+  "pyright": {
+    "errors": 0,
+    "informations": 0,
+    "warnings": 0
+  },
+  "real_tool_calls": 0,
+  "ruff_check": "PASS",
+  "ruff_format": {
+    "files": 174,
+    "status": "PASS"
+  },
+  "source_sha256": {
+    "docs/d/evidence/D3a_rule_freeze.json": "ee9ffd7c317c1f559bbb55063803fcbf0fa898a5d4d057c257b5ffaaf8229e5b",
+    "docs/d/evidence/D_connected_protocol.json": "9d9d6192d881b9b41f999626e593d560eb88eccc04e427113edc009887536d98",
+    "scripts/d_connected_eval.py": "ed670dacd233ce106ecad7b2996e21260ec26d1be2705a586b568b4a1625095a",
+    "src/camel/core/__init__.py": "ec10ded0b6e8e566d35aff9e25ea9cf2f6c313bb2dca4a81565e99714e460ade",
+    "src/camel/core/contract.py": "e1b0c0cfb06fa2cc351b712d7701c0b4260f6e818fdd9a7bb8ec8084f9236aad",
+    "src/camel/core/decision.py": "2e6015b8f9b5dd0d9bbff056a280de4fefb9779483b33d2bf0aa433178f0b637",
+    "src/camel/core/effect.py": "640d1316f534f4242b53f64dce42f61c5f8d055471d48341b5cff3628ae72a6e",
+    "src/camel/core/events.py": "7776104e3931a0a7327abb3ffc84ee151b4bff96433822c30190c8173d58e0e0",
+    "src/camel/core/labels.py": "0b67f3d0b183cf70d23ab79a0f5bcf7ec82c69a17eb9c5d1f1179887d6948d5a",
+    "src/camel/detection/__init__.py": "9c7435d815b3617dc9dfaca6639f27a7cf048f6bdd22b7950e37ef04b3c490f5",
+    "src/camel/detection/gate.py": "05f972982336b3eb4e87019cd6b6e6292227c6fd74ad020b1a3ab20086cbbfa5",
+    "src/camel/detection/models.py": "5765daca78b5c485442ca41552bcaa185f4ecef768281d399ea1c4f2b277a179",
+    "src/camel/detection/parsing.py": "2770e1ce423eab135d5dbea9729f9dfe27f8041f620f1422dea12cb21d00c8ae",
+    "src/camel/detection/remote/__init__.py": "edff3ef0902681aac6fffaaf4599b36e36687ef17e63c9438d844999bbf37194",
+    "src/camel/detection/remote/client.py": "f359fc7014d393c1cbb413d4831997cfcc316506887a36590d5f708f955b67fa",
+    "src/camel/detection/remote/http_worker.py": "650c723a1f71bed5bede2e7920a009b507611975c9f2fc1e90a67c136f4892b8",
+    "src/camel/detection/remote/scoring.py": "2e3accc06a7909ce2e14ad990d53a3987832412ba061ecc2cb4b6acd4b2f1d3f",
+    "src/camel/detection/rules.py": "cd852d3881cb70bf60fd98d5d094f797492b3d2af2d0d266af9ded823288b4bd",
+    "src/camel/detection/worker.py": "9c06cd7c363d342a9156f40ff6c35cf80d6eee9d6b4ba129427d3c95a0e5576e",
+    "src/camel/evaluation/connected.py": "5803d6927b023eb4d69afbd0de69239394cf6b39f8d45f18d83ae1a9be3c62b5",
+    "src/camel/evaluation/replay.py": "548df442bfd67add63158ca9217e032b19f531da427b1d15b9ef19a952813974",
+    "src/camel/memory/__init__.py": "a6539ace7df10f0dbbf5e8c41a1f4442fc8de897a7e0bac859ca77b1d328fb08",
+    "src/camel/memory/adapter.py": "245e8e772acadc841d34e331561086b1f116b5412440b7804aac3991f5cf3e3b",
+    "src/camel/memory/models.py": "a3b3e0cdba1286bb29363e87fb882f4694dbccf9abd3b982884ff51643acfd76",
+    "src/camel/memory/store.py": "fe92148372ccb233e1aac34c3467a227faad02ef22c6ae036c43185f8d9136ae",
+    "src/camel/planner/__init__.py": "a9f3132b237020dd1c1390e3119743932dd7cf9a4d2e31b2a4a80866406a9139",
+    "src/camel/planner/compiler.py": "50561c8992278faf144006299618143e665107c6372205db4431662fef85a07e",
+    "src/camel/planner/fixture_adapter.py": "43eac0a56752fb2411a01aa9c9c4b2b129b7a54f34bae6ed7e8214ce47da6af2",
+    "src/camel/planner/models.py": "74bf5581ccfbfcf3e7ffb30a9671e4a4e54347279cd60e20cc2b6537a8fc893a",
+    "src/camel/planner/validation.py": "91475147d833b49962a247ba6459a4ed86e16dd3e1b5c29d031ebb2e73a45b0b",
+    "src/camel/policy/__init__.py": "77748d99d77c8d7593c42e4c4fe1b4d3ea58c31fa5ed2fce6aa87bd9fb8251bd",
+    "src/camel/policy/compat.py": "9536718bd985b127a67a21873fdf47a7a4b2adb98a4fd54195c2c1903584450a",
+    "src/camel/policy/dsl.py": "9b130e0d6b758bd8414ead3ea402c2b1ed9fe615acab8afda53ad1eb49e89a4a",
+    "src/camel/policy/engine.py": "2f8e5032a731f9f16fc3103033bf8ce09630a0a99ca0b95c84bf92b3e5afe987",
+    "src/camel/policy/ticket.py": "3d7b130c7f47a231b8023825f78930a99da665fad5786c69dcd0521b7df9c6e7",
+    "tests/unit/evaluation/test_connected.py": "8d29379bf798db53d34d010d80ac0635f343d843e07f44a9d68d59a3e4ba259a"
+  },
+  "stage": "D_connected_offline_flow",
+  "status": "PASS_CONNECTED_OFFLINE_CONTROLS",
+  "synthetic_recorded_reads_per_platform": 2,
+  "task_utility": null,
+  "tests": {
+    "linux": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 24
+    },
+    "windows": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 24
+    }
+  }
+}

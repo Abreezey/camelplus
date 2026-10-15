@@ -53,6 +53,11 @@ CREATE TABLE IF NOT EXISTS audit_payloads (
     event_id TEXT PRIMARY KEY,
     payload_json TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS confirmations (
+    request_id TEXT PRIMARY KEY,
+    record_json TEXT NOT NULL,
+    state TEXT NOT NULL CHECK (state IN ('pending', 'approved', 'denied', 'expired'))
+);
 """
 
 GENESIS_HASH = "sha256:" + "0" * 64
@@ -60,6 +65,10 @@ GENESIS_HASH = "sha256:" + "0" * 64
 
 class ChainIntegrityError(Exception):
     """Raised when the audit hash chain does not verify."""
+
+
+class ConfirmationStateError(ValueError):
+    """Unknown, altered, or already resolved confirmation; no ticket may escape."""
 
 
 def redact(value: str) -> str:
@@ -205,32 +214,78 @@ class AuditStore:
         every event is stored at most once.
         """
         with self._lock, self._conn:
-            prev = self._conn.execute("SELECT record_hash FROM audit_events ORDER BY seq DESC LIMIT 1").fetchone()
-            prev_hash = prev[0] if prev else GENESIS_HASH
-            seq = self._conn.execute("SELECT COALESCE(MAX(seq), 0) FROM audit_events").fetchone()[0] + 1
-            event_json = event.model_dump_json()
-            record_hash = _record_hash(prev_hash, seq, event_json)
+            self._conn.execute("BEGIN IMMEDIATE")
+            return self._append_uncommitted(event, payload=payload)
+
+    def _append_uncommitted(self, event: CanonicalEvent, *, payload: dict | None = None) -> str:
+        """Caller must hold the lock and an IMMEDIATE transaction."""
+        prev = self._conn.execute("SELECT record_hash FROM audit_events ORDER BY seq DESC LIMIT 1").fetchone()
+        prev_hash = prev[0] if prev else GENESIS_HASH
+        seq = self._conn.execute("SELECT COALESCE(MAX(seq), 0) FROM audit_events").fetchone()[0] + 1
+        event_json = event.model_dump_json()
+        record_hash = _record_hash(prev_hash, seq, event_json)
+        self._conn.execute(
+            "INSERT INTO audit_events"
+            " (event_id, trace_id, session_id, source, ts, event_json, prev_hash, record_hash)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                event.event_id,
+                event.trace_id,
+                event.session_id,
+                event.source,
+                event.timestamp.isoformat(),
+                event_json,
+                prev_hash,
+                record_hash,
+            ),
+        )
+        if payload is not None:
             self._conn.execute(
-                "INSERT INTO audit_events"
-                " (event_id, trace_id, session_id, source, ts, event_json, prev_hash, record_hash)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (
-                    event.event_id,
-                    event.trace_id,
-                    event.session_id,
-                    event.source,
-                    event.timestamp.isoformat(),
-                    event_json,
-                    prev_hash,
-                    record_hash,
-                ),
+                "INSERT INTO audit_payloads (event_id, payload_json) VALUES (?, ?)",
+                (event.event_id, json.dumps(payload, sort_keys=True)),
             )
-            if payload is not None:
-                self._conn.execute(
-                    "INSERT INTO audit_payloads (event_id, payload_json) VALUES (?, ?)",
-                    (event.event_id, json.dumps(payload, sort_keys=True)),
-                )
         return record_hash
+
+    def create_confirmation(self, request_id: str, record: dict, event: CanonicalEvent, *, payload: dict) -> None:
+        """Persist the bound request and its audit event in one transaction."""
+        with self._lock, self._conn:
+            self._conn.execute("BEGIN IMMEDIATE")
+            self._conn.execute(
+                "INSERT INTO confirmations (request_id, record_json, state) VALUES (?, ?, 'pending')",
+                (request_id, json.dumps(record, sort_keys=True)),
+            )
+            self._append_uncommitted(event, payload=payload)
+
+    def confirmation_record(self, request_id: str) -> dict:
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT record_json FROM confirmations WHERE request_id = ?", (request_id,)
+            ).fetchone()
+        if row is None:
+            raise ConfirmationStateError("confirmation_unknown")
+        return json.loads(row[0])
+
+    def resolve_confirmation(
+        self, request_id: str, record: dict, outcome: str, event: CanonicalEvent, *, payload: dict
+    ) -> None:
+        """CAS pending → terminal plus audit; serializes independent connections."""
+        if outcome not in {"approved", "denied", "expired"}:
+            raise ValueError("invalid_confirmation_outcome")
+        with self._lock, self._conn:
+            self._conn.execute("BEGIN IMMEDIATE")
+            changed = self._conn.execute(
+                "UPDATE confirmations SET state = ? WHERE request_id = ? AND record_json = ? AND state = 'pending'",
+                (outcome, request_id, json.dumps(record, sort_keys=True)),
+            ).rowcount
+            if changed != 1:
+                raise ConfirmationStateError("confirmation_altered_or_resolved")
+            self._append_uncommitted(event, payload=payload)
+
+    def pending_executions(self, trace_id: str | None = None) -> list[CanonicalEvent]:
+        """Prepared operations lacking a terminal event. Never automatically replay."""
+        events = self.events(trace_id)
+        finished = {parent for event in events if event.source == "execution" for parent in event.parent_ids}
+        return [event for event in events if event.source == "execution_intent" and event.event_id not in finished]
 
     def events(self, trace_id: str | None = None) -> list[CanonicalEvent]:
         """Return events in append order, optionally filtered by trace."""

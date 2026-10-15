@@ -1,0 +1,46 @@
+{
+  "base_commit": "e33e3834e906172db5892a8ee2f4f45d96f7379a",
+  "case_counts": {
+    "dev": 24,
+    "test": 12,
+    "validation": 12
+  },
+  "clock": "2026-10-15T00:00:00+00:00",
+  "created_utc": "2026-10-15T04:17:19.509981+00:00",
+  "dataset_version": "d1_synthetic_pairs_v1",
+  "family_split": {
+    "description01": "dev",
+    "description02": "test",
+    "direct01": "dev",
+    "direct02": "validation",
+    "direct03": "dev",
+    "direct04": "validation",
+    "direct05": "dev",
+    "direct06": "test",
+    "document01": "dev",
+    "document02": "validation",
+    "mail01": "dev",
+    "mail02": "validation",
+    "mcp01": "dev",
+    "mcp02": "test",
+    "memory01": "dev",
+    "memory02": "validation",
+    "memory03": "dev",
+    "memory04": "test",
+    "memory05": "dev",
+    "memory06": "test",
+    "tool01": "dev",
+    "tool02": "test",
+    "web01": "dev",
+    "web02": "validation"
+  },
+  "schema_version": 1,
+  "sha256": {
+    "cases.jsonl": "492961d3aff3edd6d790f943cb310e2d79a809e349c89fc8b1012ca3b66cf899",
+    "policy.yaml": "1bdf1e87b4828740dbf56313eded9e5eb87fd7d04e365d2980d78fe7223ea3ec"
+  },
+  "split_unit": "independent seed family; paired benign and all future variants must stay together",
+  "supported_evidence": "fixed-candidate kernel/label replay only; memory lifecycle explicitly blocked",
+  "test_access": "D1 harness validation only; not blind model testing",
+  "truth_authorship": "Human-readable synthetic protocol authored before first kernel replay; no model labels or outcome-driven relabeling."
+}

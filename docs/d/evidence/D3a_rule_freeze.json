@@ -1,0 +1,9 @@
+{
+  "before_first_D3a_corpus_replay": true,
+  "frozen_utc": "2026-10-15T05:20:42.180038+00:00",
+  "no_quote_suppression": true,
+  "operating_point": 0.75,
+  "rules_sha256": "cd852d3881cb70bf60fd98d5d094f797492b3d2af2d0d266af9ded823288b4bd",
+  "test_previously_opened_in_D1": true,
+  "version": "d3a-fixed-rules-v1"
+}

@@ -9,13 +9,16 @@ committed).
 Every request/approval/denial is audited as a ``confirmation`` event.
 """
 
+import hashlib
+import hmac
+import json
 import uuid
 from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from camel.audit.store import AuditContext, AuditStore
+from camel.audit.store import AuditContext, AuditStore, ConfirmationStateError
 from camel.core.decision import Decision, DecisionOutcome
 from camel.core.effect import CanonicalEffect
 from camel.core.events import CanonicalEvent
@@ -39,6 +42,10 @@ class ConfirmationRequest(BaseModel):
     effect: CanonicalEffect
     decision: Decision
     expires_at: datetime
+    audit_context: AuditContext | None = None
+
+    def event_id(self, outcome: str) -> str:
+        return f"confirmation:{self.request_id}:{outcome}"
 
     @field_validator("expires_at")
     @classmethod
@@ -90,24 +97,33 @@ class ConfirmationAuthority:
         session_id: str,
         subject: str,
         audit_context: AuditContext | None = None,
+        parent_ids: tuple[str, ...] = (),
+        expires_at: datetime | None = None,
     ) -> ConfirmationRequest:
         """Build (and audit) the confirmation request for a CONFIRM decision."""
         if decision.decision is not DecisionOutcome.CONFIRM:
             raise ValueError("request() expects a CONFIRM decision")
+        now = self._now()
+        expiry = min(now + self._ttl, expires_at) if expires_at is not None else now + self._ttl
+        if expiry <= now:
+            raise ConfirmationExpiredError("confirmation_expired_before_request")
         request = ConfirmationRequest(
             request_id=f"cfm_{uuid.uuid4().hex}",
             effect=effect,
             decision=decision,
-            expires_at=self._now() + self._ttl,
-        )
-        self._audit_confirmation(
-            request,
-            "requested",
-            trace_id=trace_id,
-            session_id=session_id,
-            subject=subject,
+            expires_at=expiry,
             audit_context=audit_context,
         )
+        record = dict(
+            request=request.model_dump(mode="json"),
+            subject=subject,
+            trace_id=trace_id,
+            session_id=session_id,
+            context=audit_context.model_dump() if audit_context is not None else None,
+        )
+        record["signature"] = self._sign(record)
+        event, payload = self._confirmation_event(request, "requested", record, parent_ids=parent_ids)
+        self._audit.create_confirmation(request.request_id, record, event, payload=payload)
         return request
 
     def approve(
@@ -120,27 +136,17 @@ class ConfirmationAuthority:
         audit_context: AuditContext | None = None,
     ) -> CapabilityTicket:
         """Issue the one-time ticket after explicit user approval."""
+        record = self._validate(
+            request, subject=subject, trace_id=trace_id, session_id=session_id, audit_context=audit_context
+        )
         now = self._now()
         if now >= request.expires_at:
-            self._audit_confirmation(
-                request,
-                "expired",
-                trace_id=trace_id,
-                session_id=session_id,
-                subject=subject,
-                audit_context=audit_context,
-            )
+            self._resolve(request, record, "expired")
             raise ConfirmationExpiredError(f"confirmation request {request.request_id} expired")
-        ticket = issue_ticket(self._key, subject=subject, effect=request.effect, expires_at=now + self._ttl)
-        self._audit_confirmation(
-            request,
-            "approved",
-            trace_id=trace_id,
-            session_id=session_id,
-            subject=subject,
-            ticket_id=ticket.ticket_id,
-            audit_context=audit_context,
+        ticket = issue_ticket(
+            self._key, subject=subject, effect=request.effect, expires_at=min(now + self._ttl, request.expires_at)
         )
+        self._resolve(request, record, "approved", ticket_id=ticket.ticket_id)
         return ticket
 
     def deny(
@@ -153,31 +159,63 @@ class ConfirmationAuthority:
         audit_context: AuditContext | None = None,
     ) -> None:
         """Record the user's refusal; no ticket is issued."""
-        self._audit_confirmation(
-            request,
-            "denied",
-            trace_id=trace_id,
-            session_id=session_id,
-            subject=subject,
-            audit_context=audit_context,
+        record = self._validate(
+            request, subject=subject, trace_id=trace_id, session_id=session_id, audit_context=audit_context
         )
+        self._resolve(request, record, "denied")
 
-    def _audit_confirmation(
+    def _sign(self, record: dict) -> str:
+        body = {key: value for key, value in record.items() if key != "signature"}
+        encoded = json.dumps(body, sort_keys=True).encode()
+        return hmac.new(self._key, b"camel-confirmation-v1:" + encoded, hashlib.sha256).hexdigest()
+
+    def _validate(
+        self,
+        request: ConfirmationRequest,
+        *,
+        subject: str,
+        trace_id: str,
+        session_id: str,
+        audit_context: AuditContext | None,
+    ) -> dict:
+        record = self._audit.confirmation_record(request.request_id)
+        signature = record.get("signature")
+        if not isinstance(signature, str) or not hmac.compare_digest(signature, self._sign(record)):
+            raise ConfirmationStateError("confirmation_signature_invalid")
+        # Public models contain frozensets: compare validated values rather
+        # than JSON list order, which may differ after a process restart.
+        if ConfirmationRequest.model_validate(record["request"]) != request:
+            raise ConfirmationStateError("confirmation_request_changed")
+        if any(
+            record[key] != value
+            for key, value in dict(subject=subject, trace_id=trace_id, session_id=session_id).items()
+        ):
+            raise ConfirmationStateError("confirmation_scope_mismatch")
+        if audit_context is not None and record["context"] != audit_context.model_dump():
+            raise ConfirmationStateError("confirmation_context_changed")
+        return record
+
+    def _resolve(self, request: ConfirmationRequest, record: dict, outcome: str, *, ticket_id: str | None = None):
+        event, payload = self._confirmation_event(
+            request, outcome, record, parent_ids=(request.event_id("requested"),), ticket_id=ticket_id
+        )
+        self._audit.resolve_confirmation(request.request_id, record, outcome, event, payload=payload)
+
+    def _confirmation_event(
         self,
         request: ConfirmationRequest,
         outcome: str,
+        record: dict,
         *,
-        trace_id: str,
-        session_id: str,
-        subject: str,
+        parent_ids: tuple[str, ...],
         ticket_id: str | None = None,
-        audit_context: AuditContext | None = None,
-    ) -> None:
+    ) -> tuple[CanonicalEvent, dict]:
         event = CanonicalEvent(
-            event_id=f"evt_{uuid.uuid4().hex}",
-            trace_id=trace_id,
-            session_id=session_id,
-            principal=subject,
+            event_id=request.event_id(outcome),
+            trace_id=record["trace_id"],
+            session_id=record["session_id"],
+            principal=record["subject"],
+            parent_ids=parent_ids,
             source="confirmation",
             payload_ref=f"confirmation:{request.request_id}",
             timestamp=self._now(),
@@ -187,8 +225,8 @@ class ConfirmationAuthority:
             "outcome": outcome,
             "effect": request.effect.model_dump(mode="json"),
             "confirm_reasons": list(request.decision.confirm_reasons),
-            "context": audit_context.model_dump() if audit_context is not None else None,
+            "context": record["context"],
         }
         if ticket_id is not None:
             payload["ticket_id"] = ticket_id
-        self._audit.append(event, payload=payload)
+        return event, payload

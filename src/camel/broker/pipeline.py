@@ -23,7 +23,7 @@ from camel.audit.store import AuditContext, AuditStore, decision_event, decision
 from camel.broker.confirm import ConfirmationAuthority, ConfirmationRequest
 from camel.broker.executor import ExecutionBroker, ExecutionResult
 from camel.core.contract import IntentContract
-from camel.core.decision import Decision, DecisionOutcome
+from camel.core.decision import Decision, DecisionOutcome, RiskSignal
 from camel.core.effect import CanonicalEffect
 from camel.policy.engine import PolicyEngine
 from camel.policy.ticket import issue_ticket
@@ -75,10 +75,16 @@ class SecureExecutionPipeline:
         contract: IntentContract | None = None,
         content: bytes | None = None,
         audit_context: AuditContext | None = None,
+        risk_signals: tuple[RiskSignal, ...] = (),
+        side_effects_used: int = 0,
     ) -> PipelineResult:
         """Evaluate one effect and follow its branch; every decision is audited."""
         now = self._now()
-        decision = self._engine.evaluate(effect, now=now, contract=contract)
+        if type(side_effects_used) is not int or side_effects_used < 0:
+            raise ValueError("side_effects_used must be a nonnegative integer")
+        decision = self._engine.evaluate(
+            effect, now=now, contract=contract, risk_signals=risk_signals, side_effects_used=side_effects_used
+        )
         event = decision_event(decision, effect, trace_id=trace_id, session_id=session_id, principal=subject, now=now)
         self._audit.append(event, payload=decision_payload(decision, effect, context=audit_context))
 
@@ -92,6 +98,8 @@ class SecureExecutionPipeline:
                 session_id=session_id,
                 subject=subject,
                 audit_context=audit_context,
+                parent_ids=(event.event_id,),
+                expires_at=contract.expires_at if contract is not None else None,
             )
             return PipelineResult(decision=decision, confirmation=request)
 
@@ -120,6 +128,11 @@ class SecureExecutionPipeline:
         audit_context: AuditContext | None = None,
     ) -> PipelineResult:
         """Resolve a CONFIRM request with the user's decision; execute on approval."""
+        if type(approved) is not bool:
+            raise ValueError("approved must be an explicit boolean")
+        if request.decision.policy_version != self._engine.policy_version:
+            raise ValueError("confirmation_policy_changed")
+        audit_context = audit_context if audit_context is not None else request.audit_context
         if not approved:
             self._confirmations.deny(
                 request, subject=subject, trace_id=trace_id, session_id=session_id, audit_context=audit_context
@@ -136,5 +149,6 @@ class SecureExecutionPipeline:
             session_id=session_id,
             content=content,
             audit_context=audit_context,
+            parent_ids=(request.event_id("approved"),),
         )
         return PipelineResult(decision=request.decision, execution=execution)

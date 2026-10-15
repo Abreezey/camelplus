@@ -34,6 +34,13 @@
 | `Decision` | `camel.core.decision` | frozen：outcome/hard_reasons/confirm_reasons/risk_signals/policy_version/contract_id/evidence/safe_alternative |
 | `CanonicalEvent` | `camel.core.events` | 必填 event_id/trace_id/session_id/principal/source/payload_ref/timestamp；可选 parent_ids/span_map/labels |
 
+2026-10-15 本地修复约束（沿用 v1 字段布局，收紧输入校验；依赖未知字段或宽松类型转换的调用方需要调整）：
+
+- `RiskSignal`、`IntentContract`、`AllowedEffect`、`DelegationSpec` 拒绝未知字段；这不是身份/授权来源验证。
+- `RiskSignal.confidence` 接受有限 JSON 数字，范围 [0, 1]；拒绝字符串和布尔转换。
+- `side_effect_budget` 与 `max_depth` 必须为非负整数，拒绝字符串、布尔和小数转换。
+- 子合同效果类型始终在父合同范围内；非空 child_ceiling 进一步收窄。操作/资源必须同时被同一父条目覆盖；仅证明相同 pattern、全局父 pattern 或具体子值命中父 glob，无法证明的复杂 glob 子集拒绝。
+
 ## 3. 策略与裁决接口（A 交付）
 
 ```python
@@ -52,6 +59,8 @@ verify_ticket(key, ticket, effect, subject=..., store=..., now=...)   # 任何�
 # v0.6：hash_effect 绑定效果全字段（含 data_refs 标签）；expires_at 必须 tz-aware；
 #       TicketStore 协议为 uses + try_consume（原子检查并消费，不再有 record_use）
 ```
+
+Composer 的风险合成：硬 DENY 优先；确定性 confirm_reasons 保留确认路径；风险信号只能把已显式允许的效果升级为 CONFIRM，不能将默认 DENY 改为 CONFIRM。策略版本仍表示规则/分类器配置，重放还必须匹配代码版本。
 
 ## 4. 执行与审计接口（C 交付）
 
@@ -87,6 +96,7 @@ result = broker.execute(effect, ticket, subject=..., trace_id=..., session_id=..
                         content=..., parent_ids=..., audit_context=audit_context)
 # 校验顺序（不可重排）：静态沙箱 → verify_ticket → 凭据派生 → IO → 审计
 # v0 仅 READ/WRITE；其余效果 UnsupportedEffectError（fail closed + 审计 rejected）
+# WRITE 需要 POSIX O_NOFOLLOW；缺少该能力时在票据消费和 IO 前 UnsupportedEffectError，审计 rejected
 # 配置 vault 时：票据校验后 HMAC 派生短期凭据（绑定票据、随票据过期），
 #   result.credential_handle 与审计 payload 只记 opaque handle（"cred_" 前缀），secret（SecretBytes）绝不外泄
 

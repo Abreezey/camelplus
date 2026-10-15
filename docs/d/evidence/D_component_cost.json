@@ -1,0 +1,108 @@
+{
+  "ABC_production_unchanged_from_D5_Linux_snapshot": true,
+  "Windows_full": {
+    "errors": 0,
+    "known_platform_failures": 6,
+    "passed": 667,
+    "skipped": 0
+  },
+  "downloads": 0,
+  "evidence_sha256": {
+    "artifacts/d/D_component_cost_full.xml": "5d7386e0206d1c3a2121aa274341ca5a7ccabf17807e5c166bd78b0e335d5f9e",
+    "artifacts/d/D_component_cost_linux_02/contract_compile_samples.json": "1d11082d0d6ee6eab8bfe0203798f2b7ed265096b00b1534fbba2309f28f1a30",
+    "artifacts/d/D_component_cost_linux_02/fixed_rules_samples.json": "2571323cda1e09d2e6c8fdd7f78e23e4b96fe58834a9c48f864633b2f20503f2",
+    "artifacts/d/D_component_cost_linux_02/memory_get_samples.json": "1ce156933d545f0b629746e2f4d8fa99efd524d14093fa4ca8644b2d16e0f48e",
+    "artifacts/d/D_component_cost_linux_02/summary.json": "72f1f5797c982a2465867e8f63bc454193a0f3e689b6c4c65e4534fb7be8189e",
+    "artifacts/d/D_component_cost_linux_02/tdg_validate_samples.json": "f4bdecea4a43f5a3c807d2d0377c66cda12d49c8d25ca01c711ef0f552bfe073",
+    "artifacts/d/D_component_cost_linux_tests.xml": "2d938baae466d55bb2cfde0e7da0cf54bb6b3d95f29ed22a507840455840e7fc",
+    "artifacts/d/D_component_cost_pyright_final.txt": "58782b3d775540bca8e6e54152a1451d72666ac6dd0143cc8e95b9b9e9f4809d",
+    "artifacts/d/D_component_cost_tests_final.xml": "e576b9cca3081eb12a140ade32479e4dc3662c9a48d993806bd1ddc302bbac70",
+    "docs/d/D_component_cost.md": "09ee89cd73c899e9cf06b07e4777a8877078d9c84ae188bf8134afe60d314ff1"
+  },
+  "experiment": "D-only component cost",
+  "fixture_sha256": {
+    "cases.jsonl": "492961d3aff3edd6d790f943cb310e2d79a809e349c89fc8b1012ca3b66cf899",
+    "manifest.json": "b5f53ce57cd3c4761ceab28246b4dcee0531fea00d38f139b73d9a6bc405e74d",
+    "policy.yaml": "1bdf1e87b4828740dbf56313eded9e5eb87fd7d04e365d2980d78fe7223ea3ec"
+  },
+  "foreground_checks_not_concurrent_with_formal_timing": true,
+  "formal_run": "artifacts/d/D_component_cost_linux_02",
+  "git_committed": false,
+  "hardware": {
+    "cpu_model": "Intel(R) Core(TM) Ultra X7 358H",
+    "memory_total_kb": 16142228
+  },
+  "limits": "D-only microbenchmark. D2 uses two read templates and prepared B fixtures, D3 uses known 48-case source views, D4 uses 3 seeded entries with root/depth-2 reads and SQLite audit commits. No model/whole-Gateway latency, independent attack trials or full D6/D7 acceptance.",
+  "logical_cpus": 16,
+  "measured_per_component": 1000,
+  "memory_events": 1104,
+  "metrics": [
+    {
+      "case_count": 2,
+      "includes_io": false,
+      "name": "contract_compile",
+      "p50_ms": 0.06917,
+      "p95_ms": 0.150787
+    },
+    {
+      "case_count": 2,
+      "includes_io": false,
+      "name": "tdg_validate",
+      "p50_ms": 0.267999,
+      "p95_ms": 0.533568
+    },
+    {
+      "case_count": 48,
+      "includes_io": false,
+      "name": "fixed_rules",
+      "p50_ms": 0.025507,
+      "p95_ms": 0.089068
+    },
+    {
+      "case_count": 2,
+      "includes_io": true,
+      "name": "memory_get",
+      "p50_ms": 23.8127,
+      "p95_ms": 30.185175
+    }
+  ],
+  "model_requests": 0,
+  "new_full_Linux_suite_run": false,
+  "new_tests": {
+    "Linux": 11,
+    "Windows": 11
+  },
+  "outliers_removed": 0,
+  "percentile": "nearest_rank",
+  "prior_Linux_snapshot_full_passed": 662,
+  "pyright_errors": 0,
+  "ruff_check": true,
+  "ruff_format": true,
+  "source_sha256": {
+    "scripts/d_component_cost.py": "5e1d0c11b9c9cff2e549aa8f854749479af76c0669c7485acab81551242fd771",
+    "src/camel/detection/__init__.py": "9c7435d815b3617dc9dfaca6639f27a7cf048f6bdd22b7950e37ef04b3c490f5",
+    "src/camel/detection/gate.py": "05f972982336b3eb4e87019cd6b6e6292227c6fd74ad020b1a3ab20086cbbfa5",
+    "src/camel/detection/models.py": "5765daca78b5c485442ca41552bcaa185f4ecef768281d399ea1c4f2b277a179",
+    "src/camel/detection/parsing.py": "2770e1ce423eab135d5dbea9729f9dfe27f8041f620f1422dea12cb21d00c8ae",
+    "src/camel/detection/rules.py": "cd852d3881cb70bf60fd98d5d094f797492b3d2af2d0d266af9ded823288b4bd",
+    "src/camel/detection/worker.py": "9c06cd7c363d342a9156f40ff6c35cf80d6eee9d6b4ba129427d3c95a0e5576e",
+    "src/camel/evaluation/__init__.py": "f25f12a0e0f6e8fd39ad17a7f2b9c35d2264e7af70e71272e345921adc937047",
+    "src/camel/evaluation/component_cost.py": "d6189d9e0d67d6547f6963eee6e8f406090cad299862b6846c7986ec95c27b85",
+    "src/camel/evaluation/fixtures.py": "04e39990aaa7ed0d02224ec44ce87ad49258723427b6b9a3092280b6c42f64f1",
+    "src/camel/evaluation/integration.py": "4abb2716d179ab3439d22fd7b41998e84145a4d124f55474c48b7db7eb9f11ec",
+    "src/camel/evaluation/replay.py": "548df442bfd67add63158ca9217e032b19f531da427b1d15b9ef19a952813974",
+    "src/camel/memory/__init__.py": "a6539ace7df10f0dbbf5e8c41a1f4442fc8de897a7e0bac859ca77b1d328fb08",
+    "src/camel/memory/adapter.py": "245e8e772acadc841d34e331561086b1f116b5412440b7804aac3991f5cf3e3b",
+    "src/camel/memory/models.py": "a3b3e0cdba1286bb29363e87fb882f4694dbccf9abd3b982884ff51643acfd76",
+    "src/camel/memory/store.py": "fe92148372ccb233e1aac34c3467a227faad02ef22c6ae036c43185f8d9136ae",
+    "src/camel/planner/__init__.py": "a9f3132b237020dd1c1390e3119743932dd7cf9a4d2e31b2a4a80866406a9139",
+    "src/camel/planner/compiler.py": "50561c8992278faf144006299618143e665107c6372205db4431662fef85a07e",
+    "src/camel/planner/fixture_adapter.py": "43eac0a56752fb2411a01aa9c9c4b2b129b7a54f34bae6ed7e8214ce47da6af2",
+    "src/camel/planner/models.py": "74bf5581ccfbfcf3e7ffb30a9671e4a4e54347279cd60e20cc2b6537a8fc893a",
+    "src/camel/planner/validation.py": "91475147d833b49962a247ba6459a4ed86e16dd3e1b5c29d031ebb2e73a45b0b"
+  },
+  "status": "PASS",
+  "total_raw_samples": 4000,
+  "total_result_checks": 4400,
+  "warmup_per_component": 100
+}
