@@ -1,0 +1,1 @@
+"""Module B gateway tests."""

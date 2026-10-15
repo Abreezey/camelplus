@@ -1,7 +1,7 @@
 # 公共接口契约（跨模块合作说明）
 
 > 维护规则：本文是 A/B/C/D 四个模块之间的**接口单一事实来源**。任何跨模块签名的变更必须先改本文、在群里同步、再改代码。各模块内部私有函数不在契约范围内。
-> 当前状态：A（安全内核）、C（执行与审计）已交付；B（归约/网关）、D（规划/检测/评测）待开工。
+> 当前状态：A/C 已有接口与部分实现；B 已实现并完成自身缺陷修复，待 C 真实执行联调；D 状态由负责人维护。
 
 ## 1. 端到端数据流
 
@@ -125,7 +125,68 @@ pipeline.resolve(result.confirmation, approved=True/False, subject=..., trace_id
 **C 对 A 的消费（已冻结）：**
 - `verify_ticket` / `issue_ticket` / `hash_effect`（ticket.py）；`PolicyEngine.evaluate`（engine.py）；签名密钥属 TCB 由部署方注入。
 
-## 6. 破坏性变更流程
+## 6. B 的增量接口（v0.1，2026-10-15）
+
+> 状态：实现草案，尚未完成 B/C 执行职责对齐，不代表已获得协作方确认。
+> 当前阻塞项及最小复现见 [B 模块复查](module-b-review.md)。本节记录现有代码，不能据此绕过第 3 节的 Broker 执行要求。
+
+独立修复约定（2026-10-15）：`connect_stdio(..., expected_identity=...)` 必须接收部署批准的
+`stdio_identity(command, args, env)`，先比较再启动；该 pin 不包含初始化后的 serverInfo。
+决策审计保存效果摘要及经认证加密的原始 decision payload，可信重放方使用
+`camel.gateway.audit.recover_decision_payload(payload, signing_key=..., event_id=...)` 恢复原始输入。
+加密密钥从部署签票密钥按独立用途派生；须保护并保留相应历史密钥。普通报告不得调用解密入口。
+这只调整 B 自有接口和 B 写入的 payload，不修改 A/C 公共模型、存储 API 或真实执行入口。
+
+本节不修改 A/C 已冻结的模型或函数签名。完整部署示例及边界见 `handoff-b.md`。
+
+```python
+from camel.normalization import (
+    IngressNormalizer, NormalizationContext, EffectNormalizer, ToolBinding, EffectSpec,
+)
+from camel.gateway import (
+    MCPSecurityGateway, CallContext, connect_stdio, connect_http,
+    serve_stdio, streamable_http_app,
+)
+
+view = IngressNormalizer().normalize(text)
+# original: 取证；normalized/decoded_views: 检测匹配；suspicious_positions: 原文字符下标
+context = NormalizationContext(workspace=root, cwd=root, parent_ids=event_ids,
+                               data_refs=references, resource_labels=trusted_file_labels)
+result = EffectNormalizer(network=network_policy).normalize(binding, arguments, context)
+# effects: CanonicalEffect[]；blocked: 整次调用禁止执行；arguments: 上游实际应接收的规范参数
+```
+
+| 适配器 | 归约 | 约束 |
+|---|---|---|
+| fs | READ / WRITE，operation=`file_read` 等 | 每路径一个效果；绝对 realpath；工作区包含；未知文件密级默认 SECRET |
+| shell | EXEC + READ / WRITE / EGRESS / REPO_MUTATE | bashlex AST；静态子集；参数摘要绑定；动态展开、编码执行、未知命令产生 FAILED EXEC |
+| net | EGRESS，operation=`http_get` 等 | 精确主机/端口允许列表；全部 DNS 地址检查；重定向重新授权 |
+| git | READ / REPO_MUTATE，联网额外 EGRESS | `working_tree` / `commit` / `remote_change` / `push` 等；远端别名只来自可信配置 |
+| mcp | 配置中的 EffectSpec[] | 配置属于 TCB；资源按字段展开；邮件等 destination 保留主体标识，URL 必须用 net 适配器 |
+
+`ToolBinding(adapter, operation, argument_map, effects, result_label)` 定义工具真实语义，不能从工具描述推断。
+`argument_map` 为「上游参数名 → 适配器参数名」。`NormalizationResult.arguments` 是反向映射后的上游参数；
+执行方不得执行原始参数代替该结果。Shell 原文不重写，执行隔离仍由 C 提供。
+
+`MCPSecurityGateway.register(server_id, transport, expected_identity=..., expected_digest=..., bindings=..., context=...)`
+只由可信宿主调用。身份/manifest 不符即拒绝；首次信任仅允许显式开发开关。发现和每次调用前重新检查 manifest，
+变化暂停整台 server，记录 `tool_manifest_changed`。自动恢复或接受新 digest 均不提供。
+
+`call_tool(server_id, tool, arguments, context=...)` 返回 `GatewayResult`：
+DENY/FAILED 无执行；CONFIRM 只有 confirmation_id/text；ALLOW 在签发并消费全部效果的单次票据后调用上游。
+`resolve(id, approved=..., context=...)` 只由可信确认界面调用；绑定主体、session、参数、manifest、策略版本和有效期。
+MCP 仅公开 `server_id__tool` 的发现/调用，既无注册/确认工具，也无原始 transport 引用。
+
+`ToolResultEnvelope` v1 含来源、manifest_digest、event_id、保守合并后的 labels、原始 payload、
+按 JSON Pointer 索引的 `text_views` 和 suspicious_content。工具内容始终 UNTRUSTED / DATA_ONLY，默认 SECRET；
+`result_sink(envelope)` 在交给 Agent 前 await，D 在此读取规范化视图并接检测器。sink 缺省表示检测器尚未接入，
+不代表检测已完成。敏感原文保留在受控 envelope 内，审计只记录参数/结果摘要及带标签的效果。
+
+HTTP 下游使用每请求认证的无状态 JSON Streamable HTTP；必须配置 Host，Origin 默认为不允许，GET SSE/DELETE 返回 405。
+上游 HTTP 禁代理、禁重定向，校验 DNS 后连接已批准 IP，并保留 Host/TLS SNI。
+上游 stdio 绑定可执行文件及显式绝对脚本文件摘要、参数和环境。部署方负责代码、依赖、凭据与进程隔离。
+
+## 7. 破坏性变更流程
 
 1. 提出方在群里贴变更点 + 影响面（哪些模块的哪些调用）；
 2. 更新本文对应小节（含版本注记）；

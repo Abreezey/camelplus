@@ -1,0 +1,9 @@
+# Project dependencies are locked in uv.lock, including the dev group.
+name: camelplus
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.10.12
+  - pip
+  - uv=0.11.7
