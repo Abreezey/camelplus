@@ -38,6 +38,14 @@ class UnsupportedEffectError(Exception):
     """Raised for effect types the broker cannot execute safely (fail closed)."""
 
 
+def _write_flags() -> int:
+    """Require the POSIX no-follow primitive rather than silently dropping it."""
+    nofollow = getattr(os, "O_NOFOLLOW", None)
+    if not isinstance(nofollow, int) or nofollow <= 0:
+        raise UnsupportedEffectError("secure WRITE requires POSIX O_NOFOLLOW support")
+    return os.O_WRONLY | os.O_CREAT | nofollow
+
+
 class ExecutionResult(BaseModel):
     """Outcome of one successful broker execution."""
 
@@ -192,6 +200,7 @@ class ExecutionBroker:
             if content is None:
                 raise ValueError("WRITE effect requires content")
             self._profile.resolve_write(effect.resources[0])
+            _write_flags()
         else:
             raise UnsupportedEffectError(
                 f"effect type {effect.type.value} is not executable in broker v0 (fail closed)"
@@ -203,7 +212,7 @@ class ExecutionBroker:
         if content is None:
             raise ValueError("WRITE effect requires content")
         target = self._profile.resolve_write(effect.resources[0])
-        fd = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+        fd = os.open(target, _write_flags(), 0o600)
         with os.fdopen(fd, "wb") as handle:
             handle.write(content)
         return None

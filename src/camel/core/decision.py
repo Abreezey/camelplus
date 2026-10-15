@@ -4,7 +4,8 @@ Composition rules (fixed, not configurable per call):
 
 1. Any hard reason => DENY (I1).
 2. Otherwise, any confirm reason, or any risk signal at or above the
-   confirmation threshold => CONFIRM.
+   confirmation threshold on an explicitly allowed effect => CONFIRM.
+   Risk alone cannot create a confirmation route from default DENY.
 3. Otherwise, ALLOW only if a deterministic layer explicitly allowed.
 4. Otherwise DENY (default deny).
 
@@ -27,10 +28,10 @@ class DecisionOutcome(str, enum.Enum):
 class RiskSignal(BaseModel):
     """Output of a detector/verifier. Purely advisory; see module docstring."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     name: str
-    confidence: float = Field(ge=0.0, le=1.0)
+    confidence: float = Field(strict=True, ge=0.0, le=1.0, allow_inf_nan=False)
     detector_version: str
     evidence: tuple[str, ...] = ()
 
@@ -85,7 +86,9 @@ class DecisionComposer:
         if verdict.hard_reasons:
             outcome = DecisionOutcome.DENY
             hard_reasons = verdict.hard_reasons
-        elif verdict.confirm_reasons or any(s.confidence >= self._confirm_threshold for s in risk_signals):
+        elif verdict.confirm_reasons or (
+            verdict.allowed and any(s.confidence >= self._confirm_threshold for s in risk_signals)
+        ):
             outcome = DecisionOutcome.CONFIRM
             hard_reasons = ()
         elif verdict.allowed:

@@ -1,0 +1,2 @@
+# Keep Linux acceptance scripts runnable after a Windows checkout.
+scripts/*.sh text eol=lf

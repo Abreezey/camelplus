@@ -11,6 +11,7 @@ Plus the acceptance replay: every decision can be reconstructed from the
 audit chain alone, and the whole chain verifies.
 """
 
+import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -39,12 +40,13 @@ def env(tmp_path: Path):
     scratch = tmp_path / "scratch"
     scratch.mkdir()
 
+    read_scope = f"file://{workspace / '**'}"
     rules = load_rules(
         f"""
 id: allow-workspace-read
 when:
   effect.type: READ
-  effect.resource_matches: "file://{workspace}/**"
+  effect.resource_matches: {json.dumps(read_scope)}
 then: ALLOW
 ---
 id: confirm-any-write
@@ -75,7 +77,7 @@ then: CONFIRM
         contract_id="ic_01",
         principal="user:alice",
         goal="review_current_repository",
-        allowed_effects=(AllowedEffect(effect=EffectType.READ, resource=f"file://{workspace}/**"),),
+        allowed_effects=(AllowedEffect(effect=EffectType.READ, resource=read_scope),),
         side_effect_budget=5,
         expires_at=LATER,
     )

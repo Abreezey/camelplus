@@ -22,7 +22,7 @@ class AllowedEffect(BaseModel):
     ``resource`` is a glob that every resource of the effect must match.
     """
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     effect: EffectType
     operation: str | None = None
@@ -39,17 +39,17 @@ class AllowedEffect(BaseModel):
 class DelegationSpec(BaseModel):
     """Whether and how this contract may be delegated to child agents."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     allowed: bool = False
-    max_depth: int = 0
+    max_depth: int = Field(default=0, strict=True, ge=0)
     child_ceiling: frozenset[EffectType] = Field(default_factory=frozenset)
 
 
 class IntentContract(BaseModel):
     """The compiled, trusted statement of what the agent may do (arch.md §5.2)."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     schema_version: Literal[1] = 1
     contract_id: str
@@ -58,7 +58,7 @@ class IntentContract(BaseModel):
     allowed_effects: tuple[AllowedEffect, ...] = ()
     forbidden_data_classes: frozenset[str] = Field(default_factory=frozenset)
     allowed_destinations: tuple[str, ...] = ()
-    side_effect_budget: int = 0
+    side_effect_budget: int = Field(default=0, strict=True, ge=0)
     delegation: DelegationSpec = Field(default_factory=DelegationSpec)
     expires_at: datetime
 
@@ -72,6 +72,15 @@ class IntentContract(BaseModel):
         return any(fnmatch.fnmatchcase(destination, pattern) for pattern in self.allowed_destinations)
 
 
+def _pattern_contained(child: str, parent: str) -> bool:
+    """Prove only equality, universal parents, or concrete child membership."""
+    if parent in {"*", "**"} or child == parent:
+        return True
+    if any(char in child for char in "*?["):
+        return False
+    return fnmatch.fnmatchcase(child, parent)
+
+
 def validate_child_contract(
     parent: IntentContract,
     child: IntentContract,
@@ -81,9 +90,9 @@ def validate_child_contract(
 
     Returns a list of violations; empty means the delegation is valid.
 
-    Note: glob-to-glob subset checks are undecidable in general, so
-    destination containment is approximated: a child destination pattern is
-    accepted only if the parent allows the exact same pattern or ``**``.
+    Effect patterns use conservative containment proofs; unproven glob
+    subsets are rejected. Destination containment retains the existing
+    exact-pattern or universal-parent approximation.
     """
     violations: list[str] = []
     if not parent.delegation.allowed:
@@ -91,12 +100,24 @@ def validate_child_contract(
         return violations
     if depth > parent.delegation.max_depth:
         violations.append(f"delegation_depth_exceeded:{depth}>{parent.delegation.max_depth}")
+    parent_types = {a.effect for a in parent.allowed_effects}
+    ceiling = parent_types
     if parent.delegation.child_ceiling:
-        parent_types = {a.effect for a in parent.allowed_effects}
-        ceiling = parent.delegation.child_ceiling & parent_types
-        child_types = {a.effect for a in child.allowed_effects}
-        if not child_types <= ceiling:
-            violations.append(f"child_effect_types_exceed_ceiling:{sorted(child_types - ceiling)}")
+        ceiling = ceiling & parent.delegation.child_ceiling
+    child_types = {a.effect for a in child.allowed_effects}
+    if not child_types <= ceiling:
+        violations.append(f"child_effect_types_exceed_ceiling:{sorted(child_types - ceiling)}")
+    for index, effect in enumerate(child.allowed_effects):
+        if not any(
+            effect.effect == allowed.effect
+            and _pattern_contained(
+                effect.operation if effect.operation is not None else "**",
+                allowed.operation if allowed.operation is not None else "**",
+            )
+            and _pattern_contained(effect.resource, allowed.resource)
+            for allowed in parent.allowed_effects
+        ):
+            violations.append(f"child_effect_scope_exceeds_parent:{index}")
     for pattern in child.allowed_destinations:
         if pattern not in parent.allowed_destinations and "**" not in parent.allowed_destinations:
             violations.append(f"child_destination_exceeds_parent:{pattern}")

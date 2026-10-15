@@ -1,0 +1,134 @@
+{
+  "stage": "D0",
+  "status": "PASS",
+  "evidence_level": [
+    "E0",
+    "E1"
+  ],
+  "run_id": "D0_linux_20261015T033310Z",
+  "returned_directory": "artifacts/d/D0_wsl_return_20261015T032226Z",
+  "base_commit": "de78b715ebc0b90584b3a9b21fff15325b718e14",
+  "source_bundle": "D0_linux_source_04.tar.gz",
+  "source_bundle_sha256": "cfb42e902de714ad1e3d30b65be770a830d75561401c1023f3fe809754beb1b4",
+  "source_files_verified_before_report_update": 117,
+  "git_checks_run_in_linux": false,
+  "native_source_and_test_snapshots_match": true,
+  "python_version": "3.10.12",
+  "platform": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "runtime_tools": {
+    "uv": "0.13.1",
+    "uv_sha256": "696dcf6d807d85da978f4db8472da81dccc1254b18b52cbd1367c4d923c421e0",
+    "node": "v24.22.0",
+    "node_sha256": "cc2f601cee82d9a5a233302fe307abc600727035fd7d2c3a3571755989e95008"
+  },
+  "installed_package_count": 214,
+  "installed_versions_absent_from_lock": {},
+  "test_counts": {
+    "core_policy": {
+      "passed": 104,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "full_suite": {
+      "passed": 320,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "d0_subset": {
+    "boundary_probes": 21,
+    "download_regressions": 8
+  },
+  "checks": [
+    {
+      "name": "core_policy",
+      "exit_code": 0,
+      "elapsed_seconds": 13.178477853999993
+    },
+    {
+      "name": "full_suite",
+      "exit_code": 0,
+      "elapsed_seconds": 11.089995061999957
+    },
+    {
+      "name": "ruff_check",
+      "exit_code": 0,
+      "elapsed_seconds": 0.12824324300004264
+    },
+    {
+      "name": "ruff_format",
+      "exit_code": 0,
+      "elapsed_seconds": 0.11342143100000612
+    },
+    {
+      "name": "pyright",
+      "exit_code": 0,
+      "elapsed_seconds": 12.268758180000077
+    },
+    {
+      "name": "policy_import",
+      "exit_code": 0,
+      "elapsed_seconds": 0.7391626300000098
+    },
+    {
+      "name": "d0_probes",
+      "exit_code": 0,
+      "elapsed_seconds": 0.508721921000074
+    },
+    {
+      "name": "platform_features",
+      "exit_code": 0,
+      "elapsed_seconds": 0.038103051000007326
+    }
+  ],
+  "acceptance_started_utc": "2026-10-15T03:33:11.433262+00:00",
+  "acceptance_finished_utc": "2026-10-15T03:33:50.067011+00:00",
+  "acceptance_elapsed_seconds": 38.633749,
+  "setup_and_acceptance_elapsed_seconds": 684.972021,
+  "posix_tests_previously_failed_on_windows": [
+    "test_write_executes_with_private_permissions",
+    "test_vault_write_also_gets_handle",
+    "test_confirm_branch_requires_user_approval",
+    "test_audit_context_threaded_into_all_payloads",
+    "test_symlink_escape_rejected",
+    "test_to_path_strips_scheme"
+  ],
+  "policy_probe": {
+    "empty_policy_version": "sha256:a1c53591629fdf4f",
+    "no_allow_high_risk": "DENY",
+    "expired_contract": "DENY"
+  },
+  "syntax": {
+    "files": 105,
+    "errors": [],
+    "evidence_level": "E0"
+  },
+  "model": null,
+  "benchmark_run": false,
+  "limits": "Fixed E0/E1 tests on WSL2; not a model-security result or OS containment guarantee. Windows historical failures retained. Report-only edits follow source bundle validation.",
+  "raw_evidence_sha256": {
+    "D0_linux_20261015T033310Z/core_policy.txt": "47cab14a65c442823ab2161df0d7b690387eac5479b4d02d0a6bf033b5d80d69",
+    "D0_linux_20261015T033310Z/core_policy.xml": "646b941b6ce56a56009a3b95ceaa09312f81a348c07eec79b5e7abcf32dd5b2a",
+    "D0_linux_20261015T033310Z/d0_probes.txt": "fbe26c0a0b45aae9ebebbd8c3abb320117c7e2af33e542acbf3227de32939693",
+    "D0_linux_20261015T033310Z/full_suite.txt": "465ec86bf06d0ccf19e5aa15f8bafb86568b84e0bb4ca3a99e4f7e7355c32395",
+    "D0_linux_20261015T033310Z/full_suite.xml": "e59ba17cffd19ba99fe22eac453a0c57d4a4658933741d7e4a7d2b30ec189dab",
+    "D0_linux_20261015T033310Z/installed_packages.json": "858a57914f2bed7cb52213e02a4a2e85077ca7dd75f2ea648d58c32fccfd8d5d",
+    "D0_linux_20261015T033310Z/platform_features.txt": "4935e83a2668f8f9875431991541d5551e3a569f791f72465d179f63c348a3d8",
+    "D0_linux_20261015T033310Z/policy_import.txt": "249b96d4df697c3dad15350b9fec0831d52676460d7f7d7f1ae347ea558477fc",
+    "D0_linux_20261015T033310Z/public_fields.json": "d21adc1667c800a0e7be692ef49f5e5ac7f4112b53a771729c28f00c163ac972",
+    "D0_linux_20261015T033310Z/public_schemas.json": "f57011315e86363dbc99e17efd02087f9f92d05497f5295c5f5ce9a34beb206d",
+    "D0_linux_20261015T033310Z/pyright.txt": "cb8ecb032b440bdf4db0234a6aed202c7eed15e8ebc8de2887afbf489ef6b84c",
+    "D0_linux_20261015T033310Z/ruff_check.txt": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "D0_linux_20261015T033310Z/ruff_format.txt": "1b2a949c4425b6097242b1e28a12a597d352c04edc11185a9a3012a5f542e9d6",
+    "D0_linux_20261015T033310Z/run.json": "253cc7209e2c6bddc90e5c0d9860077dec5c8f7410c20d09308f7020fc3e2c1b",
+    "D0_linux_20261015T033310Z/source/scripts/d0_baseline.py.txt": "e0c08726ec4437894fd60cab3fa527b94b99d82644c94d455d18ad23dac89fd8",
+    "D0_linux_20261015T033310Z/source/tests/unit/d0/test_boundaries.py.txt": "6f3bc4a5ebbe0ecd150648da00471285067c0180a03fc41b7dd62bbb569db343",
+    "D0_linux_20261015T033310Z/source_manifest.json": "57c49514ac591bc64162a42772edeaaaf82d4d73c82255869bdaaa0aa183dd78",
+    "D0_linux_20261015T033310Z/working_tree.patch": "ff48d9c40b60e24046d5051499a1f81579118f1a8af73443b0de73914405254e",
+    "downloads.jsonl": "e85e4e85671e2e865c0bb92a5d4dd26394d789bf17549486a3f91011e55f5f66",
+    "launcher.txt": "f74f45331786bb83da70584a02b1c4f14e1d0d2abc157b34752b558cc49d978c",
+    "receipt.json": "e6b74976f51a2c5011d7d75360e2b863d9e1cef766236f4bd99b586c124de6ac"
+  }
+}
