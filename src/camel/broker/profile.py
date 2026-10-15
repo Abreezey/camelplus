@@ -55,7 +55,7 @@ def _contained(path: Path, root: Path) -> bool:
 class SandboxProfile(BaseModel):
     """Declarative v0 sandbox: what an executed effect may touch."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     read_roots: tuple[Path, ...] = ()
     write_dirs: tuple[Path, ...] = ()

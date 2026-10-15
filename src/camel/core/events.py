@@ -17,7 +17,7 @@ from camel.core.labels import TrustLabel
 class CanonicalEvent(BaseModel):
     """One ingress/derivation event in the provenance DAG."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     schema_version: Literal[1] = 1
     event_id: str

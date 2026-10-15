@@ -44,16 +44,21 @@ class NormalizationConfidence(str, enum.Enum):
 class DataReference(BaseModel):
     """A reference to a value used by an effect, with its trust label."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     ref: str
     label: TrustLabel = Field(default_factory=TrustLabel)
 
 
 class CanonicalEffect(BaseModel):
-    """A normalized external effect, the unit of policy decisions."""
+    """A normalized external effect, the unit of policy decisions.
 
-    model_config = ConfigDict(frozen=True)
+    ``extra="forbid"`` is load-bearing for I6: a misspelled field (e.g.
+    ``normalization_confidnce``) must fail validation, not silently fall
+    back to a safe-looking default like ``NormalizationConfidence.EXACT``.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     schema_version: Literal[1] = 1
     effect_id: str

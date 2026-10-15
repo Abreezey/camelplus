@@ -16,7 +16,7 @@ import uuid
 from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from camel.audit.store import AuditContext, AuditStore, ConfirmationStateError
 from camel.core.decision import Decision, DecisionOutcome
@@ -46,6 +46,13 @@ class ConfirmationRequest(BaseModel):
 
     def event_id(self, outcome: str) -> str:
         return f"confirmation:{self.request_id}:{outcome}"
+
+    @field_validator("expires_at")
+    @classmethod
+    def _expires_at_must_be_tz_aware(cls, v: datetime) -> datetime:
+        if v.tzinfo is None or v.utcoffset() is None:
+            raise ValueError("expires_at must be timezone-aware")
+        return v
 
     def render(self) -> str:
         """Human-readable summary of what is being approved (CLI/log friendly)."""

@@ -21,19 +21,26 @@ import hashlib
 import hmac
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, SecretBytes
+from pydantic import BaseModel, ConfigDict, SecretBytes, field_validator
 
 
 class InjectedCredential(BaseModel):
     """One short-lived credential derived for a verified ticket."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     handle: str
     secret: SecretBytes
     subject: str
     ticket_id: str
     expires_at: datetime
+
+    @field_validator("expires_at")
+    @classmethod
+    def _expires_at_must_be_tz_aware(cls, v: datetime) -> datetime:
+        if v.tzinfo is None or v.utcoffset() is None:
+            raise ValueError("expires_at must be timezone-aware")
+        return v
 
     def is_expired(self, now: datetime) -> bool:
         return now >= self.expires_at

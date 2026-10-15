@@ -33,15 +33,21 @@ class SQLiteTicketStore:
         row = self._conn.execute("SELECT uses FROM ticket_uses WHERE ticket_id = ?", (ticket_id,)).fetchone()
         return row[0] if row else 0
 
-    def record_use(self, ticket_id: str) -> int:
-        """Atomically consume one use and return the new count."""
+    def try_consume(self, ticket_id: str, max_uses: int) -> bool:
+        """Atomically consume one use iff under the limit (single conditional upsert).
+
+        The limit check lives in the ``WHERE`` clause of the upsert, so the
+        check and the increment are one indivisible statement — concurrent
+        verifiers cannot both spend the last use of a ticket (I5).
+        """
         with self._lock, self._conn:
-            self._conn.execute(
+            cursor = self._conn.execute(
                 "INSERT INTO ticket_uses (ticket_id, uses) VALUES (?, 1)"
-                " ON CONFLICT(ticket_id) DO UPDATE SET uses = uses + 1",
-                (ticket_id,),
+                " ON CONFLICT(ticket_id) DO UPDATE SET uses = uses + 1"
+                " WHERE ticket_uses.uses < ?",
+                (ticket_id, max_uses),
             )
-        return self.uses(ticket_id)
+        return cursor.rowcount == 1
 
     def close(self) -> None:
         """Close the underlying connection."""

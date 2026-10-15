@@ -8,7 +8,7 @@
 按 plan.md §2.C 完成执行与审计的**首版核心链路**（arch.md §6.9 Broker、§6.10 Provenance、§13 任务 6–7），并于 v0.5 补齐验收 3 审计字段与凭据注入机制（见 §4/§7 的范围边界）：
 
 1. **审计层 `audit/`**：追加式哈希链事件存储（`AuditStore`，SQLite 落盘、`:memory:` 可测）、可重放决策载荷（`decision_event`/`decision_payload`）、执行事件（`execution_event`/`execution_payload`，三态 outcome：executed / rejected / failed）、脱敏（`redact`：秘密 → sha256 前 16 位受控引用）、链完整性校验（`verify_chain`，篡改/删行必 `ChainIntegrityError`）；
-2. **票据持久化** `SQLiteTicketStore`：实现 A 的 `TicketStore` 协议，`ON CONFLICT DO UPDATE` 原子递增计数，跨进程、跨重启持久；
+2. **票据持久化** `SQLiteTicketStore`：实现 A 的 `TicketStore` 协议，跨进程、跨重启持久（v0.6：`try_consume` 单条条件 upsert，检查+消费原子化，并发双花测试覆盖）；
 3. **溯源** `ProvenanceService`：`timeline(trace_id)` 时间线、`dag(trace_id)` 双来源边（事件 `parent_ids` + 效果 `derived_from`）、`report(trace_id)` 脱敏 markdown 报告；
 4. **沙箱 profile v0** `SandboxProfile`：只读工作区根 + 可写 scratch 目录；`realpath` 全解析后包含检查（防 `..` 与 symlink 逃逸），写路径 `O_NOFOLLOW + 0o600`；
 5. **执行代理** `ExecutionBroker`：v0 仅支持 `READ` / `WRITE`，其余效果类型 fail closed（`UnsupportedEffectError`）；固定校验顺序 **静态沙箱 → verify_ticket → IO → 审计**，每次执行尝试（无论成败）都落一条审计事件；
@@ -34,7 +34,7 @@
 | 文件 | 内容 |
 |---|---|
 | `src/camel/audit/store.py` | `AuditStore(path)`（`append` 返回 record_hash、`events(trace_id)`、`payload_of(event_id)`、`verify_chain()`）；两张表 `audit_events`（seq/event_id/trace_id/…/prev_hash/record_hash 哈希链）+ `audit_payloads`（payload 与事件分离）；`redact`；`decision_event`/`decision_payload`（可重放决策，含 policy_version）；`execution_event`/`execution_payload`；`ChainIntegrityError` |
-| `src/camel/audit/tickets.py` | `SQLiteTicketStore`（A 的 `TicketStore` 协议持久实现：`uses`/`record_use`，原子递增） |
+| `src/camel/audit/tickets.py` | `SQLiteTicketStore`（A 的 `TicketStore` 协议持久实现：`uses`/`try_consume`，条件 upsert 原子消费） |
 | `src/camel/audit/provenance.py` | `ProvenanceService(store)`：`timeline` / `dag`（parent_ids + derived_from 双来源边）/ `report`（markdown，脱敏） |
 | `src/camel/broker/profile.py` | `SandboxProfile.workspace(root, scratch)`、`resolve_read`/`resolve_write`（realpath 包含检查）、`to_path`（剥 `file://`、拒相对路径）、`SandboxViolationError` |
 | `src/camel/broker/credentials.py` | `KeyVault(master_key)`：`derive(subject, ticket_id, expires_at) -> InjectedCredential`（HMAC 派生、无状态幂等）；`InjectedCredential`（frozen：handle/`SecretBytes` secret/subject/ticket_id/expires_at，`is_expired`）——master key 只在 TCB，secret 绝不进审计/结果 |

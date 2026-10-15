@@ -1,4 +1,9 @@
 # Keep Linux acceptance scripts runnable after a Windows checkout.
+.gitattributes text eol=lf
 scripts/*.sh text eol=lf
+# Keep source digests stable across Windows and Linux checkouts.
+*.py text eol=lf
+# Preserve the original bytes of experiment reports, protocols and evidence.
+docs/d/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 # Preserve frozen fixture bytes, including their original line endings.
 tests/fixtures/d/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

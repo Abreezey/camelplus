@@ -28,7 +28,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from camel.core.contract import IntentContract
 from camel.core.decision import Decision, DecisionComposer, DecisionOutcome, HardVerdict, RiskSignal
-from camel.core.effect import CanonicalEffect, NormalizationConfidence
+from camel.core.effect import CanonicalEffect, EffectType, NormalizationConfidence
 from camel.core.labels import Confidentiality
 from camel.policy.dsl import PolicyRule
 
@@ -41,7 +41,7 @@ class DestinationClassifier(BaseModel):
     ``default_domain`` with ``default_clearance`` — unknown means untrusted.
     """
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     domains: dict[str, str] = Field(default_factory=dict)
     domain_clearance: dict[str, Confidentiality] = Field(default_factory=dict)
@@ -121,12 +121,20 @@ class PolicyEngine:
         #       the core CaMeL policy idiom (recipients ⊆ readers, e.g. send_email).
         #    Channel (b) requires an explicit readers set: readers=None (public) only
         #    uses channel (a), so unknown destinations stay default-deny.
-        if effect.destination is not None:
+        #    An EGRESS effect without a destination has an *unknown* destination:
+        #    classify it via ``domain_of(None)`` (the untrusted default) instead of
+        #    skipping the check — otherwise secret data could egress unaudited.
+        #    READ/MEMORY_READ are exempt: their data flows into the agent, not out.
+        if effect.destination is not None or effect.type is EffectType.EGRESS:
             domain = self._classifier.domain_of(effect.destination)
             clearance = self._classifier.clearance_of(domain)
             for data in effect.data_refs:
                 via_clearance = data.label.flows_to(clearance)
-                via_readers = data.label.readers is not None and data.label.readable_by(effect.destination)
+                via_readers = (
+                    effect.destination is not None
+                    and data.label.readers is not None
+                    and data.label.readable_by(effect.destination)
+                )
                 if not (via_clearance or via_readers):
                     hard.append(f"ifc_confidentiality_violation:{data.ref}->{domain}")
 
@@ -140,7 +148,11 @@ class PolicyEngine:
                     hard.append(f"contract_forbidden_data_class:{sorted(bad)}")
             if not contract.allows_effect(effect):
                 confirm.append("contract_missing_allowed_effect")
-            if effect.destination is not None and not contract.allows_destination(effect.destination):
+            if effect.destination is not None:
+                if not contract.allows_destination(effect.destination):
+                    confirm.append("contract_destination_not_allowed")
+            elif effect.type is EffectType.EGRESS:
+                # An egress to an unknown destination cannot be within contract scope.
                 confirm.append("contract_destination_not_allowed")
             if effect.is_side_effecting and side_effects_used >= contract.side_effect_budget:
                 confirm.append("contract_side_effect_budget_exceeded")

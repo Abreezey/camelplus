@@ -39,7 +39,7 @@ class RiskSignal(BaseModel):
 class Decision(BaseModel):
     """The final, auditable outcome for one candidate effect (arch.md §5.4)."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     schema_version: Literal[1] = 1
     decision: DecisionOutcome
@@ -55,7 +55,7 @@ class Decision(BaseModel):
 class HardVerdict(BaseModel):
     """Intermediate output of the deterministic layers, before risk merging."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     hard_reasons: tuple[str, ...] = ()
     confirm_reasons: tuple[str, ...] = ()

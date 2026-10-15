@@ -10,7 +10,7 @@ import fnmatch
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from camel.core.effect import CanonicalEffect, EffectType
 
@@ -61,6 +61,15 @@ class IntentContract(BaseModel):
     side_effect_budget: int = Field(default=0, strict=True, ge=0)
     delegation: DelegationSpec = Field(default_factory=DelegationSpec)
     expires_at: datetime
+
+    @field_validator("expires_at")
+    @classmethod
+    def _expires_at_must_be_tz_aware(cls, v: datetime) -> datetime:
+        """Naive datetimes would crash expiry comparison with a TypeError
+        instead of producing a structured rejection; fail at construction."""
+        if v.tzinfo is None or v.utcoffset() is None:
+            raise ValueError("expires_at must be timezone-aware")
+        return v
 
     def is_expired(self, now: datetime) -> bool:
         return now >= self.expires_at

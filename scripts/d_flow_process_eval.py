@@ -1,6 +1,7 @@
 """Run fixed D workflows under host process controls, with zero model requests."""
 
 import argparse
+import hashlib
 import sys
 from collections import Counter
 from pathlib import Path
@@ -12,6 +13,23 @@ from camel.evaluation.flow_process import FlowProcessController, ProcessJob, Pro
 
 ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL = ROOT / "docs/d/evidence/D_flow_process_protocol.json"
+
+
+def source_reference(root: Path, pin: Path):
+    """Explicit reviewed baseline, portable across Git LF/CRLF checkout settings."""
+    value = bounded_json(pin)
+    if value.get("format") != "sha256_lf_v1" or not isinstance(value.get("sha256_lf"), dict) or not value["sha256_lf"]:
+        raise ValueError("invalid_source_reference")
+    hashes = {}
+    for name, expected in value["sha256_lf"].items():
+        path = (root / name).resolve()
+        if not path.is_relative_to(root.resolve()):
+            raise ValueError("source_reference_outside_root")
+        body = path.read_bytes()
+        if hashlib.sha256(body.replace(b"\r\n", b"\n")).hexdigest() != expected:
+            raise ValueError("source_reference_mismatch:" + name)
+        hashes[name] = hashlib.sha256(body).hexdigest()
+    return hashes
 
 
 def limits(**changes):
@@ -111,10 +129,17 @@ def run_controls(output) -> dict[str, Any]:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--source-pin", type=Path, help="explicit current source reference after a reviewed upstream merge"
+    )
     args = parser.parse_args()
     output = args.output.resolve()
     if not output.is_relative_to(ROOT / "artifacts/d") or output.exists():
         parser.error("fresh output under artifacts/d required")
+    if args.source_pin is not None and (
+        not args.source_pin.resolve().is_relative_to(ROOT / "docs/d/evidence") or not args.source_pin.is_file()
+    ):
+        parser.error("source pin must be an existing file under docs/d/evidence")
 
     def guard(event, arguments):
         if event in {"socket.connect", "socket.getaddrinfo", "socket.sendto", "urllib.Request"}:
@@ -122,7 +147,11 @@ def main():
 
     sys.addaudithook(guard)
     previous = ROOT / "docs/d/evidence/D_connected_acceptance.json"
-    hashes = bounded_json(previous)["source_sha256"]
+    hashes = (
+        source_reference(ROOT, args.source_pin)
+        if args.source_pin is not None
+        else bounded_json(previous)["source_sha256"]
+    )
     if any(file_digest(ROOT / name) != digest for name, digest in hashes.items()):
         raise ValueError("connected_flow_sources_changed")
     paths = [
@@ -136,6 +165,8 @@ def main():
         ROOT / "src/camel/evaluation/ablation.py",
         ROOT / "tests/unit/evaluation/test_flow_process.py",
     ]
+    if args.source_pin is not None:
+        paths.append(args.source_pin.resolve())
     hashes.update({path.relative_to(ROOT).as_posix(): file_digest(path) for path in paths})
     output.mkdir(parents=True)
     write_json(output / "freeze.json", dict(protocol=bounded_json(PROTOCOL), source_sha256=hashes))

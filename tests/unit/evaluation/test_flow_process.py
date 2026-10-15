@@ -1,5 +1,8 @@
 """Real D subprocess outcomes must not erase errors or persisted observations."""
 
+import hashlib
+import importlib.util
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -255,3 +258,36 @@ def test_completed_policy_block_is_separate_from_task_success(regular):
     row = regular[1][1]
     assert row["status"] == "COMPLETED" and row["completed_flow_terminal"] == "RISK_BLOCKED"
     assert row["observation"]["records"] == [] and row["task_utility"] is None
+
+
+@pytest.fixture
+def evaluator():
+    spec = importlib.util.spec_from_file_location(
+        "flow_process_eval_tests", Path(__file__).resolve().parents[3] / "scripts/d_flow_process_eval.py"
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_explicit_reference_allows_checkout_line_endings_but_rejects_code_change(tmp_path, evaluator):
+    source, pin = tmp_path / "example.py", tmp_path / "pin.json"
+    body = b"value = 1\n"
+    write_json(pin, dict(format="sha256_lf_v1", sha256_lf={"example.py": hashlib.sha256(body).hexdigest()}))
+    source.write_bytes(body.replace(b"\n", b"\r\n"))
+    hashes = evaluator.source_reference(tmp_path, pin)
+    assert hashes["example.py"] == hashlib.sha256(source.read_bytes()).hexdigest()
+    source.write_bytes(b"value = 2\n")
+    with pytest.raises(ValueError, match="mismatch"):
+        evaluator.source_reference(tmp_path, pin)
+
+
+def test_reference_cannot_read_outside_workspace_or_silently_omit_all_sources(tmp_path, evaluator):
+    pin = tmp_path / "pin.json"
+    write_json(pin, dict(format="sha256_lf_v1", sha256_lf={"../outside": "invalid"}))
+    with pytest.raises(ValueError, match="outside_root"):
+        evaluator.source_reference(tmp_path, pin)
+    write_json(pin, dict(format="sha256_lf_v1", sha256_lf={}))
+    with pytest.raises(ValueError, match="invalid_source_reference"):
+        evaluator.source_reference(tmp_path, pin)

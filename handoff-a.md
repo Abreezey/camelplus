@@ -95,7 +95,7 @@ decision = engine.evaluate(effect, now=datetime.now(timezone.utc))  # DENY
 1. **发现旧代码 bug（未修，外科式原则）**：`security_policy.py` 的 `base_security_policy` 把 `get_all_readers` 返回的整个 `(readers, visited)` 元组与 `Public()` 比较，导致对任何非无副作用工具**无条件 DENY**。实际生效路径是 `check_policy` 里的 `is_public` 检查，所以没暴露。建议另开 issue。
 2. **四套 AgentDojo 旧策略只做了语义等价黄金测试**（`base` 公开性门禁 + `make_trusted_fields_policy` 可信字段模式，fixture 见 `base_public_only.yaml` / `trusted_parameters_only.yaml`）。需要查 AgentDojo 环境的策略（如 workspace 的附件共享名单）**无法用 DSL v0 表达**——等 B 的 Normalizer 把这些信息归约进 `CanonicalEffect` 后再转换，届时把旧 fixture 扩展为全量黄金测试。
 3. `verify_ticket` 的 `destination_mismatch` 分支不可达（destination 已含在 effect_hash 内，会先触发 `effect_mismatch`），保留作纵深防御。
-4. `InMemoryTicketStore` 非线程安全，仅供 v0/测试。
+4. ~~`InMemoryTicketStore` 非线程安全~~（v0.6 已修复：`TicketStore` 协议改为 `uses` + `try_consume` 原子检查并消费，内存实现加锁、SQLite 实现单条条件 upsert；`record_use` 已移除）。
 5. 本机 agentdojo 包有跨版本循环导入，涉及它的测试文件须先 `import agentdojo.task_suite`（见 `test_compat.py` 头部注释）。
 6. 性质测试用全枚举代替 hypothesis（不在依赖中），格公理（交换/结合/幂等/单调）已全覆盖。
 
