@@ -172,7 +172,10 @@ def test_every_attempt_audited_once(env) -> None:
     effect = _read_effect(env.workspace / "note.txt")
     env.broker.execute(effect, _issue(effect), subject="user:alice", trace_id="t1", session_id="s1")
     events = env.audit.events("t1")
-    assert len(events) == 1
+    assert [event.source for event in events] == ["execution_intent", "execution"]
+    assert env.audit.payload_of(events[0].event_id)["outcome"] == "prepared"
+    assert env.audit.payload_of(events[1].event_id)["outcome"] == "executed"
+    assert events[1].parent_ids == (events[0].event_id,)
     env.audit.verify_chain()
 
 

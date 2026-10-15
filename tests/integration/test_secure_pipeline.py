@@ -145,9 +145,10 @@ def test_allow_branch_executes_and_audits(env) -> None:
 
     events = env.audit.events("t_allow")
     sources = [e.source for e in events]
-    assert sources == ["decision", "execution"]
+    assert sources == ["decision", "execution_intent", "execution"]
     assert env.audit.payload_of(events[0].event_id)["decision"]["decision"] == "ALLOW"
-    assert env.audit.payload_of(events[1].event_id)["outcome"] == "executed"
+    assert env.audit.payload_of(events[1].event_id)["outcome"] == "prepared"
+    assert env.audit.payload_of(events[2].event_id)["outcome"] == "executed"
     env.audit.verify_chain()
 
 
@@ -198,7 +199,7 @@ def test_confirm_branch_requires_user_approval(env) -> None:
     assert (env.scratch / "out.txt").read_bytes() == b"approved data"
 
     sources = [e.source for e in env.audit.events("t_confirm")]
-    assert sources == ["decision", "confirmation", "confirmation", "execution"]
+    assert sources == ["decision", "confirmation", "confirmation", "execution_intent", "execution"]
     env.audit.verify_chain()
 
 

@@ -1,0 +1,18 @@
+{
+  "stage": "D_only_reproduction_workflow",
+  "version": 1,
+  "purpose": "Local engineering acceptance plus indexed independent component demonstrations; partial D8 preparation only",
+  "default_steps": ["D and shared core/policy unit tests", "D2 fixed candidate templates and controls", "D3a frozen rules and mock parser faults", "D4 Memory Gate", "D7 known-seed representation stress test"],
+  "optional_cached_step": "--with-cached-models adds existing D3b cache verification and D7 component ablation, without new requests",
+  "unit_groups": ["core", "policy", "planner", "detection", "memory", "evaluation"],
+  "max_step_seconds": 180,
+  "max_total_seconds": 600,
+  "model_requests": 0,
+  "downloads": 0,
+  "known_test_access": "Explicit --harness-validation; no blind Test claim",
+  "defaults": "Fresh output only, fixed inputs, no auto install/retry, fail on child failure/timeout, nonempty unit groups with zero fail/error/skip, validate observations in addition to child exit, freeze inputs and verify unchanged",
+  "demonstrations": ["normal read candidate", "review unregistered push rejected in IR", "indirect injection detection and A DENY", "review A CONFIRM with no execution", "benign cross-session memory", "expired memory denial and local audit parent chain"],
+  "negative_results": "Preserve original D3a FP=6/FN=3, D2 unsupported=20, D7 representation misses and earlier integration defects. Engineering PASS is not a security-quality threshold or whole-system acceptance.",
+  "not_run": ["production connected Agent workflow", "B normalizer/Gateway/MCP integration", "C approval/execution or OS sandbox acceptance", "fresh model inference or paid API", "AgentDojo/ASB/MSB", "new independent/adaptive attacks", "full D5-D8 acceptance", "Git stage/commit/push"],
+  "constraints": "Separate child runs reuse original D scripts unmodified; output is indexed component evidence, not stitched execution causality. Network hooks are process checks, not OS containment. Prerequisites must already be locally installed. Git is used read-only by existing runners. SQLite and parser fault subprocesses are local."
+}

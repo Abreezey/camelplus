@@ -38,6 +38,14 @@ class UnsupportedEffectError(Exception):
     """Raised for effect types the broker cannot execute safely (fail closed)."""
 
 
+class ExecutionAuditError(OSError):
+    """I/O may have happened; inspect the durable intent, never blindly retry."""
+
+    def __init__(self, intent_event_id: str):
+        self.intent_event_id = intent_event_id
+        super().__init__(f"execution completion audit failed; inspect intent {intent_event_id}; do not retry")
+
+
 def _write_flags() -> int:
     """Require the POSIX no-follow primitive rather than silently dropping it."""
     nofollow = getattr(os, "O_NOFOLLOW", None)
@@ -93,9 +101,10 @@ class ExecutionBroker:
         parent_ids: tuple[str, ...] = (),
         audit_context: AuditContext | None = None,
     ) -> ExecutionResult:
-        """Execute one effect: sandbox-check → verify ticket → do IO → audit.
+        """Validate → consume ticket → persist intent → IO → persist result.
 
-        Raises without executing on any failure; every attempt is audited.
+        Intent failure prevents IO. Completion failure leaves an unresolved
+        intent and raises without delivering output; IO cannot be rolled back.
         """
         now = self._now()
         try:
@@ -151,14 +160,48 @@ class ExecutionBroker:
                 )
                 raise
         handle = credential.handle if credential is not None else None
+        intent = execution_event(
+            effect,
+            ticket_id=ticket.ticket_id,
+            trace_id=trace_id,
+            session_id=session_id,
+            principal=subject,
+            now=now,
+            parent_ids=parent_ids,
+        ).model_copy(update={"source": "execution_intent"})
+        self._audit.append(
+            intent,
+            payload=execution_payload(
+                effect, ticket.ticket_id, "prepared", context=audit_context, credential_handle=handle
+            ),
+        )
+        parent_ids = (intent.event_id,)
         try:
             output = self._do_execute(effect, content)
         except OSError as err:
+            try:
+                self._audit_attempt(
+                    effect,
+                    ticket.ticket_id,
+                    "failed",
+                    str(err),
+                    subject=subject,
+                    trace_id=trace_id,
+                    session_id=session_id,
+                    parent_ids=parent_ids,
+                    now=now,
+                    audit_context=audit_context,
+                    credential_handle=handle,
+                )
+            except Exception as audit_error:
+                raise ExecutionAuditError(intent.event_id) from audit_error
+            raise
+        try:
             self._audit_attempt(
                 effect,
                 ticket.ticket_id,
-                "failed",
-                str(err),
+                "executed",
+                None,
                 subject=subject,
                 trace_id=trace_id,
                 session_id=session_id,
@@ -167,20 +210,8 @@ class ExecutionBroker:
                 audit_context=audit_context,
                 credential_handle=handle,
             )
-            raise
-        self._audit_attempt(
-            effect,
-            ticket.ticket_id,
-            "executed",
-            None,
-            subject=subject,
-            trace_id=trace_id,
-            session_id=session_id,
-            parent_ids=parent_ids,
-            now=now,
-            audit_context=audit_context,
-            credential_handle=handle,
-        )
+        except Exception as error:
+            raise ExecutionAuditError(intent.event_id) from error
         return ExecutionResult(
             effect_id=effect.effect_id,
             ticket_id=ticket.ticket_id,

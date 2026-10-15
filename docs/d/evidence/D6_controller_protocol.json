@@ -1,0 +1,19 @@
+{
+  "stage": "D6_offline_controller",
+  "version": 1,
+  "profile": "SYNTHETIC_ONLY",
+  "worker": "Only fixed camel.adapters.agentdojo.control_worker in a separate local Python process. No model/environment/tool or arbitrary command entrypoint.",
+  "accounting": "Before dispatch, atomically reserve all calls in the fixed episode plan against global and per-role request, input-token, max-output-token and integer simulated-cost limits. No refunds, retries or resume. Reserved units are conservative synthetic upper bounds, never actual model usage or currency.",
+  "roles": ["planner", "quarantined", "detector", "embedding"],
+  "limits": "Fresh single-owner sequential run; max 128 planned episodes, 8 call reservations per episode. These are harness limits, not new real-model authorization.",
+  "time": "Monotonic total and per-episode deadlines include launch time. Parent terminates/kills and waits for fixed child to exit before continuing. No process-tree or OS containment claim.",
+  "cancellation": "Host callback cancels current worker and stops subsequent dispatch; no model-text cancellation. Missing/excess usage aborts current episode and stops subsequent dispatch.",
+  "persistence": "Write full planned population first; fsync temporary JSON then replace ledger before process launch, and save terminal state/result. Failures are not automatically retried; existing output directory is refused. Parent crash may leave RUNNING or RESERVED state, which is unresolved, not safe or resumed.",
+  "results": "Reuse frozen offline result adapter and user-selected any-tool-error-unscored policy. Errors/timeouts remain unknown in primary planned denominators. Observe synthetic state separately and retain positives after timeout.",
+  "evidence_limits": "Actual subprocess scheduling and stopping with inert workers only; not AgentDojo task episodes, ASR, trusted observer, model request/token/currency enforcement, production integration or OS isolation.",
+  "real_model_requests": 0,
+  "environment_loads": 0,
+  "real_tool_calls": 0,
+  "downloads": 0,
+  "full_D6_accepted": false
+}

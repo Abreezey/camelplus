@@ -13,11 +13,14 @@
 # limitations under the License.
 
 import time
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 import pydantic_ai
 from pydantic import BaseModel, Field, create_model
 from pydantic_ai import models
+
+if TYPE_CHECKING:
+    from camel.detection.models import ContentView, ParseOutcome, ParserLimits, ParseTask, ProviderSettings
 
 _T = TypeVar("_T")
 
@@ -101,3 +104,19 @@ def query_quarantined_llm(
     if issubclass(output_schema, BaseModel):
         return res  # type: ignore
     return res.output  # type: ignore
+
+
+def query_quarantined_llm_bounded(
+    source: "ContentView",
+    task: "ParseTask",
+    *,
+    provider: "ProviderSettings",
+    limits: "ParserLimits | None" = None,
+) -> "ParseOutcome":
+    """D3 boundary: explicit source window, fixed schema, bounded worker and literal grounding.
+
+    The original API above remains unchanged. No provider/model is selected implicitly.
+    """
+    from camel.detection.parsing import parse_bounded
+
+    return parse_bounded(source, task, provider=provider, limits=limits)

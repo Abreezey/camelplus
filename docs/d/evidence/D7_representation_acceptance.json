@@ -1,0 +1,1544 @@
+{
+  "deployment_choice": "Unchanged fixed rules from original validation retention criterion",
+  "development_run": {
+    "path": "artifacts/d/D7_representation_20261015_01",
+    "reason": "Windows platform.platform spawned subprocess blocked by offline guard; replaced metadata query without relaxing guard",
+    "status": "FAILED_ENVIRONMENT_METADATA"
+  },
+  "downloads": 0,
+  "evidence_sha256": {
+    "artifacts/d/D7_representation_20261015_02/freeze.json": "4524159ac16300ce93d24454ce386a71a7d1ea3db850dcfc0ffaa02395077682",
+    "artifacts/d/D7_representation_20261015_02/observations.json": "55184e874d9f38507397d8e4f564b0abf8331be6b71eaa94225fe3b6cd43401e",
+    "artifacts/d/D7_representation_20261015_02/paired_bootstrap.json": "09662fab1f047721b19746ce60c65f8334451d76f68b25ad11c2d2955e80c25b",
+    "artifacts/d/D7_representation_20261015_02/summary.json": "bfd3f9bb6432fe02a364a26c482c2eebc6bcf5554562c59ed362354de718cac5",
+    "artifacts/d/D7_representation_20261015_02/timing.json": "657044b204ba3287f9655990c559f8b86647878671e7fc9b26059e6f4d04bd58",
+    "artifacts/d/D7_representation_20261015_03/freeze.json": "b47f07912417667d16f7c01d24b5e2ddc83dcd074444dfbcb91c30c7aca8209e",
+    "artifacts/d/D7_representation_20261015_03/observations.json": "55184e874d9f38507397d8e4f564b0abf8331be6b71eaa94225fe3b6cd43401e",
+    "artifacts/d/D7_representation_20261015_03/paired_bootstrap.json": "09662fab1f047721b19746ce60c65f8334451d76f68b25ad11c2d2955e80c25b",
+    "artifacts/d/D7_representation_20261015_03/summary.json": "bfd3f9bb6432fe02a364a26c482c2eebc6bcf5554562c59ed362354de718cac5",
+    "artifacts/d/D7_representation_20261015_03/timing.json": "f08c3adfe0ebfe7c17bf828258eadf2cddb0649fd3b90a2b0adfd3310e2069cd",
+    "artifacts/d/D7_representation_full.xml": "08ba40f4a7d689791d94ebd35b5fb608c1fd9009681f5e2d1509f2fa0ad3e94f",
+    "artifacts/d/D7_representation_independent_verification.json": "4a02a05c6c8a4796fbd5a37e65b34432d9738326aacdd2b1300db033cf514b1a",
+    "artifacts/d/D7_representation_linux_tests.xml": "2c54c5491c051111174c4a3995185244e273b6c8e764826175dfd4ffaff2e58a",
+    "artifacts/d/D7_representation_pyright_final.txt": "a01f30bbac57d739f13300f0e539b797bbaecdfdee20a5c793619124604feb41",
+    "docs/d/D7_representation_robustness.md": "f24354dad119a7c17e3384a7064990c09acbbaf9e8aa30d68327ce5cf3b5f767",
+    "docs/d/evidence/D7_representation_protocol.json": "1a3e51b969309a3d8df405b229a496ac9e4329c2650cc00f1811fe0e95e82944",
+    "scripts/d7_representation_eval.py": "0437db33bc47f763499c1522b5fdb6cecb7bf0103535915fffdb9b282314f9ad",
+    "src/camel/evaluation/representation.py": "c6c0d1dccb131d7ce366258cc861f043596142244dc3add6a12620d9960e4af0",
+    "tests/unit/evaluation/test_representation.py": "62931a42b268e183c564406ebbdc6b02e7c8a863eb0652d0999b12c83d51bbd8"
+  },
+  "fixture_sha256": {
+    "cases.jsonl": "492961d3aff3edd6d790f943cb310e2d79a809e349c89fc8b1012ca3b66cf899",
+    "manifest.json": "b5f53ce57cd3c4761ceab28246b4dcee0531fea00d38f139b73d9a6bc405e74d",
+    "policy.yaml": "1bdf1e87b4828740dbf56313eded9e5eb87fd7d04e365d2980d78fe7223ea3ec"
+  },
+  "formal_runs": [
+    {
+      "path": "artifacts/d/D7_representation_20261015_02",
+      "pythonhashseed": 17
+    },
+    {
+      "path": "artifacts/d/D7_representation_20261015_03",
+      "pythonhashseed": 991
+    }
+  ],
+  "full_D7_accepted": false,
+  "git_committed": false,
+  "independent_families": 24,
+  "independent_verification": {
+    "ABC_python_file_set_unchanged": true,
+    "ABC_snapshot_files_verified": 25,
+    "fixture_sha256": {
+      "cases.jsonl": "492961d3aff3edd6d790f943cb310e2d79a809e349c89fc8b1012ca3b66cf899",
+      "manifest.json": "b5f53ce57cd3c4761ceab28246b4dcee0531fea00d38f139b73d9a6bc405e74d",
+      "policy.yaml": "1bdf1e87b4828740dbf56313eded9e5eb87fd7d04e365d2980d78fe7223ea3ec"
+    },
+    "formal_artifacts_byte_identical": {
+      "observations.json": true,
+      "paired_bootstrap.json": true,
+      "summary.json": true
+    },
+    "frozen_cache_files_unchanged": 61,
+    "independent_families": 24,
+    "observation_count": 384,
+    "source_files_verified": 26,
+    "source_observations": 416,
+    "tests": {
+      "D7_representation_full.xml": {
+        "errors": 0,
+        "failures": [
+          "test_confirm_branch_requires_user_approval",
+          "test_audit_context_threaded_into_all_payloads",
+          "test_write_executes_with_private_permissions",
+          "test_vault_write_also_gets_handle",
+          "test_symlink_escape_rejected",
+          "test_to_path_strips_scheme"
+        ],
+        "new_passed": 23,
+        "passed": 713,
+        "skipped": 0,
+        "total": 719
+      },
+      "D7_representation_linux_tests.xml": {
+        "errors": 0,
+        "failures": [],
+        "new_passed": 23,
+        "passed": 23,
+        "skipped": 0,
+        "total": 23
+      }
+    }
+  },
+  "limits": "Known seed-derived representation stress test only; not blind Test, heldout language/family generalization, semantic attack validity proof, online Agent ASR, Memory Gate or B/C integration. Does not complete full D7.",
+  "linux_full_suite_this_turn": false,
+  "model_requests": 0,
+  "not_run": [
+    "Chinese/English/Japanese/Russian semantic translations",
+    "Emoji and visual homoglyph substitution",
+    "true cross-turn fragmentation",
+    "business-semantic paraphrases",
+    "adaptive search",
+    "new independent heldout samples",
+    "external benchmarks"
+  ],
+  "offline_execution": "PASS",
+  "paired_bootstrap": {
+    "ascii_case_swap": {
+      "families": 24,
+      "left_minus_identity": {
+        "attack_detected": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "point": 0.0
+        },
+        "benign_flagged": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "point": 0.0
+        }
+      },
+      "replicates": 2000,
+      "seed": 1729
+    },
+    "base64_wrapper": {
+      "families": 24,
+      "left_minus_identity": {
+        "attack_detected": {
+          "ci95": [
+            -1.0,
+            -0.75
+          ],
+          "point": -0.875
+        },
+        "benign_flagged": {
+          "ci95": [
+            -0.4166666666666667,
+            -0.08333333333333333
+          ],
+          "point": -0.25
+        }
+      },
+      "replicates": 2000,
+      "seed": 1729
+    },
+    "character_spacing": {
+      "families": 24,
+      "left_minus_identity": {
+        "attack_detected": {
+          "ci95": [
+            -1.0,
+            -0.75
+          ],
+          "point": -0.875
+        },
+        "benign_flagged": {
+          "ci95": [
+            -0.4166666666666667,
+            -0.08333333333333333
+          ],
+          "point": -0.25
+        }
+      },
+      "replicates": 2000,
+      "seed": 1729
+    },
+    "comment_wrapper": {
+      "families": 24,
+      "left_minus_identity": {
+        "attack_detected": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "point": 0.0
+        },
+        "benign_flagged": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "point": 0.0
+        }
+      },
+      "replicates": 2000,
+      "seed": 1729
+    },
+    "fullwidth": {
+      "families": 24,
+      "left_minus_identity": {
+        "attack_detected": {
+          "ci95": [
+            -0.125,
+            0.0
+          ],
+          "point": -0.041666666666666664
+        },
+        "benign_flagged": {
+          "ci95": [
+            -0.125,
+            0.0
+          ],
+          "point": -0.041666666666666664
+        }
+      },
+      "replicates": 2000,
+      "seed": 1729
+    },
+    "long_prefix": {
+      "families": 24,
+      "left_minus_identity": {
+        "attack_detected": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "point": 0.0
+        },
+        "benign_flagged": {
+          "ci95": [
+            0.0,
+            0.0
+          ],
+          "point": 0.0
+        }
+      },
+      "replicates": 2000,
+      "seed": 1729
+    },
+    "zero_width": {
+      "families": 24,
+      "left_minus_identity": {
+        "attack_detected": {
+          "ci95": [
+            -1.0,
+            -0.75
+          ],
+          "point": -0.875
+        },
+        "benign_flagged": {
+          "ci95": [
+            -0.4166666666666667,
+            -0.08333333333333333
+          ],
+          "point": -0.25
+        }
+      },
+      "replicates": 2000,
+      "seed": 1729
+    }
+  },
+  "pyright": {
+    "errors": 0,
+    "informations": 0,
+    "warnings": 0
+  },
+  "real_tool_calls": 0,
+  "representations": {
+    "ascii_case_swap": {
+      "all": {
+        "benign_flagged": {
+          "ci95": [
+            0.11999366228595004,
+            0.44899444005154004
+          ],
+          "denominator": 24,
+          "numerator": 6,
+          "rate": 0.25
+        },
+        "cases": 48,
+        "changed_cases": 35,
+        "counts": {
+          "FN": 3,
+          "FP": 6,
+          "TN": 18,
+          "TP": 21,
+          "UNKNOWN": 0
+        },
+        "precision": {
+          "ci95": [
+            0.5924307113336742,
+            0.8939276054763996
+          ],
+          "denominator": 27,
+          "numerator": 21,
+          "rate": 0.7777777777777778
+        },
+        "recall": {
+          "ci95": [
+            0.6899611872949993,
+            0.9565566591987655
+          ],
+          "denominator": 24,
+          "numerator": 21,
+          "rate": 0.875
+        },
+        "unknown_case_ids": []
+      },
+      "by_split": {
+        "dev": {
+          "benign_flagged": {
+            "ci95": [
+              0.13812009109121315,
+              0.6093779111272004
+            ],
+            "denominator": 12,
+            "numerator": 4,
+            "rate": 0.3333333333333333
+          },
+          "cases": 24,
+          "changed_cases": 13,
+          "counts": {
+            "FN": 2,
+            "FP": 4,
+            "TN": 8,
+            "TP": 10,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.4535091567010681,
+              0.8827862135542308
+            ],
+            "denominator": 14,
+            "numerator": 10,
+            "rate": 0.7142857142857143
+          },
+          "recall": {
+            "ci95": [
+              0.5519691377470266,
+              0.9530348578161463
+            ],
+            "denominator": 12,
+            "numerator": 10,
+            "rate": 0.8333333333333334
+          },
+          "unknown_case_ids": []
+        },
+        "test": {
+          "benign_flagged": {
+            "ci95": [
+              0.030053369748306635,
+              0.5635028221864702
+            ],
+            "denominator": 6,
+            "numerator": 1,
+            "rate": 0.16666666666666666
+          },
+          "cases": 12,
+          "changed_cases": 11,
+          "counts": {
+            "FN": 1,
+            "FP": 1,
+            "TN": 5,
+            "TP": 5,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.43649717781352987,
+              0.9699466302516935
+            ],
+            "denominator": 6,
+            "numerator": 5,
+            "rate": 0.8333333333333334
+          },
+          "recall": {
+            "ci95": [
+              0.43649717781352987,
+              0.9699466302516935
+            ],
+            "denominator": 6,
+            "numerator": 5,
+            "rate": 0.8333333333333334
+          },
+          "unknown_case_ids": []
+        },
+        "validation": {
+          "benign_flagged": {
+            "ci95": [
+              0.030053369748306635,
+              0.5635028221864702
+            ],
+            "denominator": 6,
+            "numerator": 1,
+            "rate": 0.16666666666666666
+          },
+          "cases": 12,
+          "changed_cases": 11,
+          "counts": {
+            "FN": 0,
+            "FP": 1,
+            "TN": 5,
+            "TP": 6,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.4868721707256811,
+              0.9743203756552565
+            ],
+            "denominator": 7,
+            "numerator": 6,
+            "rate": 0.8571428571428571
+          },
+          "recall": {
+            "ci95": [
+              0.6096657120978346,
+              1.0
+            ],
+            "denominator": 6,
+            "numerator": 6,
+            "rate": 1.0
+          },
+          "unknown_case_ids": []
+        }
+      }
+    },
+    "base64_wrapper": {
+      "all": {
+        "benign_flagged": {
+          "ci95": [
+            0.0,
+            0.13797620467498017
+          ],
+          "denominator": 24,
+          "numerator": 0,
+          "rate": 0.0
+        },
+        "cases": 48,
+        "changed_cases": 48,
+        "counts": {
+          "FN": 24,
+          "FP": 0,
+          "TN": 24,
+          "TP": 0,
+          "UNKNOWN": 0
+        },
+        "precision": {
+          "ci95": null,
+          "denominator": 0,
+          "numerator": 0,
+          "rate": null
+        },
+        "recall": {
+          "ci95": [
+            0.0,
+            0.13797620467498017
+          ],
+          "denominator": 24,
+          "numerator": 0,
+          "rate": 0.0
+        },
+        "unknown_case_ids": []
+      },
+      "by_split": {
+        "dev": {
+          "benign_flagged": {
+            "ci95": [
+              0.0,
+              0.24249400665524085
+            ],
+            "denominator": 12,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "cases": 24,
+          "changed_cases": 24,
+          "counts": {
+            "FN": 12,
+            "FP": 0,
+            "TN": 12,
+            "TP": 0,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": null,
+            "denominator": 0,
+            "numerator": 0,
+            "rate": null
+          },
+          "recall": {
+            "ci95": [
+              0.0,
+              0.24249400665524085
+            ],
+            "denominator": 12,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "unknown_case_ids": []
+        },
+        "test": {
+          "benign_flagged": {
+            "ci95": [
+              0.0,
+              0.3903342879021653
+            ],
+            "denominator": 6,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "cases": 12,
+          "changed_cases": 12,
+          "counts": {
+            "FN": 6,
+            "FP": 0,
+            "TN": 6,
+            "TP": 0,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": null,
+            "denominator": 0,
+            "numerator": 0,
+            "rate": null
+          },
+          "recall": {
+            "ci95": [
+              0.0,
+              0.3903342879021653
+            ],
+            "denominator": 6,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "unknown_case_ids": []
+        },
+        "validation": {
+          "benign_flagged": {
+            "ci95": [
+              0.0,
+              0.3903342879021653
+            ],
+            "denominator": 6,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "cases": 12,
+          "changed_cases": 12,
+          "counts": {
+            "FN": 6,
+            "FP": 0,
+            "TN": 6,
+            "TP": 0,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": null,
+            "denominator": 0,
+            "numerator": 0,
+            "rate": null
+          },
+          "recall": {
+            "ci95": [
+              0.0,
+              0.3903342879021653
+            ],
+            "denominator": 6,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "unknown_case_ids": []
+        }
+      }
+    },
+    "character_spacing": {
+      "all": {
+        "benign_flagged": {
+          "ci95": [
+            0.0,
+            0.13797620467498017
+          ],
+          "denominator": 24,
+          "numerator": 0,
+          "rate": 0.0
+        },
+        "cases": 48,
+        "changed_cases": 48,
+        "counts": {
+          "FN": 24,
+          "FP": 0,
+          "TN": 24,
+          "TP": 0,
+          "UNKNOWN": 0
+        },
+        "precision": {
+          "ci95": null,
+          "denominator": 0,
+          "numerator": 0,
+          "rate": null
+        },
+        "recall": {
+          "ci95": [
+            0.0,
+            0.13797620467498017
+          ],
+          "denominator": 24,
+          "numerator": 0,
+          "rate": 0.0
+        },
+        "unknown_case_ids": []
+      },
+      "by_split": {
+        "dev": {
+          "benign_flagged": {
+            "ci95": [
+              0.0,
+              0.24249400665524085
+            ],
+            "denominator": 12,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "cases": 24,
+          "changed_cases": 24,
+          "counts": {
+            "FN": 12,
+            "FP": 0,
+            "TN": 12,
+            "TP": 0,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": null,
+            "denominator": 0,
+            "numerator": 0,
+            "rate": null
+          },
+          "recall": {
+            "ci95": [
+              0.0,
+              0.24249400665524085
+            ],
+            "denominator": 12,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "unknown_case_ids": []
+        },
+        "test": {
+          "benign_flagged": {
+            "ci95": [
+              0.0,
+              0.3903342879021653
+            ],
+            "denominator": 6,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "cases": 12,
+          "changed_cases": 12,
+          "counts": {
+            "FN": 6,
+            "FP": 0,
+            "TN": 6,
+            "TP": 0,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": null,
+            "denominator": 0,
+            "numerator": 0,
+            "rate": null
+          },
+          "recall": {
+            "ci95": [
+              0.0,
+              0.3903342879021653
+            ],
+            "denominator": 6,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "unknown_case_ids": []
+        },
+        "validation": {
+          "benign_flagged": {
+            "ci95": [
+              0.0,
+              0.3903342879021653
+            ],
+            "denominator": 6,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "cases": 12,
+          "changed_cases": 12,
+          "counts": {
+            "FN": 6,
+            "FP": 0,
+            "TN": 6,
+            "TP": 0,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": null,
+            "denominator": 0,
+            "numerator": 0,
+            "rate": null
+          },
+          "recall": {
+            "ci95": [
+              0.0,
+              0.3903342879021653
+            ],
+            "denominator": 6,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "unknown_case_ids": []
+        }
+      }
+    },
+    "comment_wrapper": {
+      "all": {
+        "benign_flagged": {
+          "ci95": [
+            0.11999366228595004,
+            0.44899444005154004
+          ],
+          "denominator": 24,
+          "numerator": 6,
+          "rate": 0.25
+        },
+        "cases": 48,
+        "changed_cases": 48,
+        "counts": {
+          "FN": 3,
+          "FP": 6,
+          "TN": 18,
+          "TP": 21,
+          "UNKNOWN": 0
+        },
+        "precision": {
+          "ci95": [
+            0.5924307113336742,
+            0.8939276054763996
+          ],
+          "denominator": 27,
+          "numerator": 21,
+          "rate": 0.7777777777777778
+        },
+        "recall": {
+          "ci95": [
+            0.6899611872949993,
+            0.9565566591987655
+          ],
+          "denominator": 24,
+          "numerator": 21,
+          "rate": 0.875
+        },
+        "unknown_case_ids": []
+      },
+      "by_split": {
+        "dev": {
+          "benign_flagged": {
+            "ci95": [
+              0.13812009109121315,
+              0.6093779111272004
+            ],
+            "denominator": 12,
+            "numerator": 4,
+            "rate": 0.3333333333333333
+          },
+          "cases": 24,
+          "changed_cases": 24,
+          "counts": {
+            "FN": 2,
+            "FP": 4,
+            "TN": 8,
+            "TP": 10,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.4535091567010681,
+              0.8827862135542308
+            ],
+            "denominator": 14,
+            "numerator": 10,
+            "rate": 0.7142857142857143
+          },
+          "recall": {
+            "ci95": [
+              0.5519691377470266,
+              0.9530348578161463
+            ],
+            "denominator": 12,
+            "numerator": 10,
+            "rate": 0.8333333333333334
+          },
+          "unknown_case_ids": []
+        },
+        "test": {
+          "benign_flagged": {
+            "ci95": [
+              0.030053369748306635,
+              0.5635028221864702
+            ],
+            "denominator": 6,
+            "numerator": 1,
+            "rate": 0.16666666666666666
+          },
+          "cases": 12,
+          "changed_cases": 12,
+          "counts": {
+            "FN": 1,
+            "FP": 1,
+            "TN": 5,
+            "TP": 5,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.43649717781352987,
+              0.9699466302516935
+            ],
+            "denominator": 6,
+            "numerator": 5,
+            "rate": 0.8333333333333334
+          },
+          "recall": {
+            "ci95": [
+              0.43649717781352987,
+              0.9699466302516935
+            ],
+            "denominator": 6,
+            "numerator": 5,
+            "rate": 0.8333333333333334
+          },
+          "unknown_case_ids": []
+        },
+        "validation": {
+          "benign_flagged": {
+            "ci95": [
+              0.030053369748306635,
+              0.5635028221864702
+            ],
+            "denominator": 6,
+            "numerator": 1,
+            "rate": 0.16666666666666666
+          },
+          "cases": 12,
+          "changed_cases": 12,
+          "counts": {
+            "FN": 0,
+            "FP": 1,
+            "TN": 5,
+            "TP": 6,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.4868721707256811,
+              0.9743203756552565
+            ],
+            "denominator": 7,
+            "numerator": 6,
+            "rate": 0.8571428571428571
+          },
+          "recall": {
+            "ci95": [
+              0.6096657120978346,
+              1.0
+            ],
+            "denominator": 6,
+            "numerator": 6,
+            "rate": 1.0
+          },
+          "unknown_case_ids": []
+        }
+      }
+    },
+    "fullwidth": {
+      "all": {
+        "benign_flagged": {
+          "ci95": [
+            0.09244825352851857,
+            0.40470453253188665
+          ],
+          "denominator": 24,
+          "numerator": 5,
+          "rate": 0.20833333333333334
+        },
+        "cases": 48,
+        "changed_cases": 35,
+        "counts": {
+          "FN": 4,
+          "FP": 5,
+          "TN": 19,
+          "TP": 20,
+          "UNKNOWN": 0
+        },
+        "precision": {
+          "ci95": [
+            0.6086904963045967,
+            0.9113941531319742
+          ],
+          "denominator": 25,
+          "numerator": 20,
+          "rate": 0.8
+        },
+        "recall": {
+          "ci95": [
+            0.6414692935030095,
+            0.9332132367136705
+          ],
+          "denominator": 24,
+          "numerator": 20,
+          "rate": 0.8333333333333334
+        },
+        "unknown_case_ids": []
+      },
+      "by_split": {
+        "dev": {
+          "benign_flagged": {
+            "ci95": [
+              0.08894166839405471,
+              0.5323053349335657
+            ],
+            "denominator": 12,
+            "numerator": 3,
+            "rate": 0.25
+          },
+          "cases": 24,
+          "changed_cases": 13,
+          "counts": {
+            "FN": 2,
+            "FP": 3,
+            "TN": 9,
+            "TP": 10,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.49743624053272495,
+              0.9182047128150143
+            ],
+            "denominator": 13,
+            "numerator": 10,
+            "rate": 0.7692307692307693
+          },
+          "recall": {
+            "ci95": [
+              0.5519691377470266,
+              0.9530348578161463
+            ],
+            "denominator": 12,
+            "numerator": 10,
+            "rate": 0.8333333333333334
+          },
+          "unknown_case_ids": []
+        },
+        "test": {
+          "benign_flagged": {
+            "ci95": [
+              0.030053369748306635,
+              0.5635028221864702
+            ],
+            "denominator": 6,
+            "numerator": 1,
+            "rate": 0.16666666666666666
+          },
+          "cases": 12,
+          "changed_cases": 11,
+          "counts": {
+            "FN": 1,
+            "FP": 1,
+            "TN": 5,
+            "TP": 5,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.43649717781352987,
+              0.9699466302516935
+            ],
+            "denominator": 6,
+            "numerator": 5,
+            "rate": 0.8333333333333334
+          },
+          "recall": {
+            "ci95": [
+              0.43649717781352987,
+              0.9699466302516935
+            ],
+            "denominator": 6,
+            "numerator": 5,
+            "rate": 0.8333333333333334
+          },
+          "unknown_case_ids": []
+        },
+        "validation": {
+          "benign_flagged": {
+            "ci95": [
+              0.030053369748306635,
+              0.5635028221864702
+            ],
+            "denominator": 6,
+            "numerator": 1,
+            "rate": 0.16666666666666666
+          },
+          "cases": 12,
+          "changed_cases": 11,
+          "counts": {
+            "FN": 1,
+            "FP": 1,
+            "TN": 5,
+            "TP": 5,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.43649717781352987,
+              0.9699466302516935
+            ],
+            "denominator": 6,
+            "numerator": 5,
+            "rate": 0.8333333333333334
+          },
+          "recall": {
+            "ci95": [
+              0.43649717781352987,
+              0.9699466302516935
+            ],
+            "denominator": 6,
+            "numerator": 5,
+            "rate": 0.8333333333333334
+          },
+          "unknown_case_ids": []
+        }
+      }
+    },
+    "identity": {
+      "all": {
+        "benign_flagged": {
+          "ci95": [
+            0.11999366228595004,
+            0.44899444005154004
+          ],
+          "denominator": 24,
+          "numerator": 6,
+          "rate": 0.25
+        },
+        "cases": 48,
+        "changed_cases": 0,
+        "counts": {
+          "FN": 3,
+          "FP": 6,
+          "TN": 18,
+          "TP": 21,
+          "UNKNOWN": 0
+        },
+        "precision": {
+          "ci95": [
+            0.5924307113336742,
+            0.8939276054763996
+          ],
+          "denominator": 27,
+          "numerator": 21,
+          "rate": 0.7777777777777778
+        },
+        "recall": {
+          "ci95": [
+            0.6899611872949993,
+            0.9565566591987655
+          ],
+          "denominator": 24,
+          "numerator": 21,
+          "rate": 0.875
+        },
+        "unknown_case_ids": []
+      },
+      "by_split": {
+        "dev": {
+          "benign_flagged": {
+            "ci95": [
+              0.13812009109121315,
+              0.6093779111272004
+            ],
+            "denominator": 12,
+            "numerator": 4,
+            "rate": 0.3333333333333333
+          },
+          "cases": 24,
+          "changed_cases": 0,
+          "counts": {
+            "FN": 2,
+            "FP": 4,
+            "TN": 8,
+            "TP": 10,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.4535091567010681,
+              0.8827862135542308
+            ],
+            "denominator": 14,
+            "numerator": 10,
+            "rate": 0.7142857142857143
+          },
+          "recall": {
+            "ci95": [
+              0.5519691377470266,
+              0.9530348578161463
+            ],
+            "denominator": 12,
+            "numerator": 10,
+            "rate": 0.8333333333333334
+          },
+          "unknown_case_ids": []
+        },
+        "test": {
+          "benign_flagged": {
+            "ci95": [
+              0.030053369748306635,
+              0.5635028221864702
+            ],
+            "denominator": 6,
+            "numerator": 1,
+            "rate": 0.16666666666666666
+          },
+          "cases": 12,
+          "changed_cases": 0,
+          "counts": {
+            "FN": 1,
+            "FP": 1,
+            "TN": 5,
+            "TP": 5,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.43649717781352987,
+              0.9699466302516935
+            ],
+            "denominator": 6,
+            "numerator": 5,
+            "rate": 0.8333333333333334
+          },
+          "recall": {
+            "ci95": [
+              0.43649717781352987,
+              0.9699466302516935
+            ],
+            "denominator": 6,
+            "numerator": 5,
+            "rate": 0.8333333333333334
+          },
+          "unknown_case_ids": []
+        },
+        "validation": {
+          "benign_flagged": {
+            "ci95": [
+              0.030053369748306635,
+              0.5635028221864702
+            ],
+            "denominator": 6,
+            "numerator": 1,
+            "rate": 0.16666666666666666
+          },
+          "cases": 12,
+          "changed_cases": 0,
+          "counts": {
+            "FN": 0,
+            "FP": 1,
+            "TN": 5,
+            "TP": 6,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.4868721707256811,
+              0.9743203756552565
+            ],
+            "denominator": 7,
+            "numerator": 6,
+            "rate": 0.8571428571428571
+          },
+          "recall": {
+            "ci95": [
+              0.6096657120978346,
+              1.0
+            ],
+            "denominator": 6,
+            "numerator": 6,
+            "rate": 1.0
+          },
+          "unknown_case_ids": []
+        }
+      }
+    },
+    "long_prefix": {
+      "all": {
+        "benign_flagged": {
+          "ci95": [
+            0.11999366228595004,
+            0.44899444005154004
+          ],
+          "denominator": 24,
+          "numerator": 6,
+          "rate": 0.25
+        },
+        "cases": 48,
+        "changed_cases": 48,
+        "counts": {
+          "FN": 3,
+          "FP": 6,
+          "TN": 18,
+          "TP": 21,
+          "UNKNOWN": 0
+        },
+        "precision": {
+          "ci95": [
+            0.5924307113336742,
+            0.8939276054763996
+          ],
+          "denominator": 27,
+          "numerator": 21,
+          "rate": 0.7777777777777778
+        },
+        "recall": {
+          "ci95": [
+            0.6899611872949993,
+            0.9565566591987655
+          ],
+          "denominator": 24,
+          "numerator": 21,
+          "rate": 0.875
+        },
+        "unknown_case_ids": []
+      },
+      "by_split": {
+        "dev": {
+          "benign_flagged": {
+            "ci95": [
+              0.13812009109121315,
+              0.6093779111272004
+            ],
+            "denominator": 12,
+            "numerator": 4,
+            "rate": 0.3333333333333333
+          },
+          "cases": 24,
+          "changed_cases": 24,
+          "counts": {
+            "FN": 2,
+            "FP": 4,
+            "TN": 8,
+            "TP": 10,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.4535091567010681,
+              0.8827862135542308
+            ],
+            "denominator": 14,
+            "numerator": 10,
+            "rate": 0.7142857142857143
+          },
+          "recall": {
+            "ci95": [
+              0.5519691377470266,
+              0.9530348578161463
+            ],
+            "denominator": 12,
+            "numerator": 10,
+            "rate": 0.8333333333333334
+          },
+          "unknown_case_ids": []
+        },
+        "test": {
+          "benign_flagged": {
+            "ci95": [
+              0.030053369748306635,
+              0.5635028221864702
+            ],
+            "denominator": 6,
+            "numerator": 1,
+            "rate": 0.16666666666666666
+          },
+          "cases": 12,
+          "changed_cases": 12,
+          "counts": {
+            "FN": 1,
+            "FP": 1,
+            "TN": 5,
+            "TP": 5,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.43649717781352987,
+              0.9699466302516935
+            ],
+            "denominator": 6,
+            "numerator": 5,
+            "rate": 0.8333333333333334
+          },
+          "recall": {
+            "ci95": [
+              0.43649717781352987,
+              0.9699466302516935
+            ],
+            "denominator": 6,
+            "numerator": 5,
+            "rate": 0.8333333333333334
+          },
+          "unknown_case_ids": []
+        },
+        "validation": {
+          "benign_flagged": {
+            "ci95": [
+              0.030053369748306635,
+              0.5635028221864702
+            ],
+            "denominator": 6,
+            "numerator": 1,
+            "rate": 0.16666666666666666
+          },
+          "cases": 12,
+          "changed_cases": 12,
+          "counts": {
+            "FN": 0,
+            "FP": 1,
+            "TN": 5,
+            "TP": 6,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": [
+              0.4868721707256811,
+              0.9743203756552565
+            ],
+            "denominator": 7,
+            "numerator": 6,
+            "rate": 0.8571428571428571
+          },
+          "recall": {
+            "ci95": [
+              0.6096657120978346,
+              1.0
+            ],
+            "denominator": 6,
+            "numerator": 6,
+            "rate": 1.0
+          },
+          "unknown_case_ids": []
+        }
+      }
+    },
+    "zero_width": {
+      "all": {
+        "benign_flagged": {
+          "ci95": [
+            0.0,
+            0.13797620467498017
+          ],
+          "denominator": 24,
+          "numerator": 0,
+          "rate": 0.0
+        },
+        "cases": 48,
+        "changed_cases": 48,
+        "counts": {
+          "FN": 24,
+          "FP": 0,
+          "TN": 24,
+          "TP": 0,
+          "UNKNOWN": 0
+        },
+        "precision": {
+          "ci95": null,
+          "denominator": 0,
+          "numerator": 0,
+          "rate": null
+        },
+        "recall": {
+          "ci95": [
+            0.0,
+            0.13797620467498017
+          ],
+          "denominator": 24,
+          "numerator": 0,
+          "rate": 0.0
+        },
+        "unknown_case_ids": []
+      },
+      "by_split": {
+        "dev": {
+          "benign_flagged": {
+            "ci95": [
+              0.0,
+              0.24249400665524085
+            ],
+            "denominator": 12,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "cases": 24,
+          "changed_cases": 24,
+          "counts": {
+            "FN": 12,
+            "FP": 0,
+            "TN": 12,
+            "TP": 0,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": null,
+            "denominator": 0,
+            "numerator": 0,
+            "rate": null
+          },
+          "recall": {
+            "ci95": [
+              0.0,
+              0.24249400665524085
+            ],
+            "denominator": 12,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "unknown_case_ids": []
+        },
+        "test": {
+          "benign_flagged": {
+            "ci95": [
+              0.0,
+              0.3903342879021653
+            ],
+            "denominator": 6,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "cases": 12,
+          "changed_cases": 12,
+          "counts": {
+            "FN": 6,
+            "FP": 0,
+            "TN": 6,
+            "TP": 0,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": null,
+            "denominator": 0,
+            "numerator": 0,
+            "rate": null
+          },
+          "recall": {
+            "ci95": [
+              0.0,
+              0.3903342879021653
+            ],
+            "denominator": 6,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "unknown_case_ids": []
+        },
+        "validation": {
+          "benign_flagged": {
+            "ci95": [
+              0.0,
+              0.3903342879021653
+            ],
+            "denominator": 6,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "cases": 12,
+          "changed_cases": 12,
+          "counts": {
+            "FN": 6,
+            "FP": 0,
+            "TN": 6,
+            "TP": 0,
+            "UNKNOWN": 0
+          },
+          "precision": {
+            "ci95": null,
+            "denominator": 0,
+            "numerator": 0,
+            "rate": null
+          },
+          "recall": {
+            "ci95": [
+              0.0,
+              0.3903342879021653
+            ],
+            "denominator": 6,
+            "numerator": 0,
+            "rate": 0.0
+          },
+          "unknown_case_ids": []
+        }
+      }
+    }
+  },
+  "request_budget_sha256": "8a4bcd1283aa65ef5b872e26f137a0ef4981e47b60336ba0f697469553f48e78",
+  "ruff_check": "PASS",
+  "ruff_format": {
+    "files": 154,
+    "status": "PASS"
+  },
+  "source_observations": 416,
+  "source_sha256": {
+    "docs/d/evidence/D7_representation_protocol.json": "1a3e51b969309a3d8df405b229a496ac9e4329c2650cc00f1811fe0e95e82944",
+    "scripts/d7_representation_eval.py": "0437db33bc47f763499c1522b5fdb6cecb7bf0103535915fffdb9b282314f9ad",
+    "src/camel/core/__init__.py": "ec10ded0b6e8e566d35aff9e25ea9cf2f6c313bb2dca4a81565e99714e460ade",
+    "src/camel/core/contract.py": "e1b0c0cfb06fa2cc351b712d7701c0b4260f6e818fdd9a7bb8ec8084f9236aad",
+    "src/camel/core/decision.py": "2e6015b8f9b5dd0d9bbff056a280de4fefb9779483b33d2bf0aa433178f0b637",
+    "src/camel/core/effect.py": "640d1316f534f4242b53f64dce42f61c5f8d055471d48341b5cff3628ae72a6e",
+    "src/camel/core/events.py": "7776104e3931a0a7327abb3ffc84ee151b4bff96433822c30190c8173d58e0e0",
+    "src/camel/core/labels.py": "0b67f3d0b183cf70d23ab79a0f5bcf7ec82c69a17eb9c5d1f1179887d6948d5a",
+    "src/camel/detection/__init__.py": "9c7435d815b3617dc9dfaca6639f27a7cf048f6bdd22b7950e37ef04b3c490f5",
+    "src/camel/detection/gate.py": "05f972982336b3eb4e87019cd6b6e6292227c6fd74ad020b1a3ab20086cbbfa5",
+    "src/camel/detection/models.py": "5765daca78b5c485442ca41552bcaa185f4ecef768281d399ea1c4f2b277a179",
+    "src/camel/detection/parsing.py": "2770e1ce423eab135d5dbea9729f9dfe27f8041f620f1422dea12cb21d00c8ae",
+    "src/camel/detection/remote/__init__.py": "edff3ef0902681aac6fffaaf4599b36e36687ef17e63c9438d844999bbf37194",
+    "src/camel/detection/remote/client.py": "f359fc7014d393c1cbb413d4831997cfcc316506887a36590d5f708f955b67fa",
+    "src/camel/detection/remote/http_worker.py": "650c723a1f71bed5bede2e7920a009b507611975c9f2fc1e90a67c136f4892b8",
+    "src/camel/detection/remote/scoring.py": "2e3accc06a7909ce2e14ad990d53a3987832412ba061ecc2cb4b6acd4b2f1d3f",
+    "src/camel/detection/rules.py": "cd852d3881cb70bf60fd98d5d094f797492b3d2af2d0d266af9ded823288b4bd",
+    "src/camel/detection/worker.py": "9c06cd7c363d342a9156f40ff6c35cf80d6eee9d6b4ba129427d3c95a0e5576e",
+    "src/camel/evaluation/__init__.py": "f25f12a0e0f6e8fd39ad17a7f2b9c35d2264e7af70e71272e345921adc937047",
+    "src/camel/evaluation/ablation.py": "2da22a37f0cc22373c27af21d2a3c47c5b8bbcc8159037dae32b44357fbbed1d",
+    "src/camel/evaluation/component_cost.py": "d6189d9e0d67d6547f6963eee6e8f406090cad299862b6846c7986ec95c27b85",
+    "src/camel/evaluation/fixtures.py": "04e39990aaa7ed0d02224ec44ce87ad49258723427b6b9a3092280b6c42f64f1",
+    "src/camel/evaluation/integration.py": "4abb2716d179ab3439d22fd7b41998e84145a4d124f55474c48b7db7eb9f11ec",
+    "src/camel/evaluation/replay.py": "548df442bfd67add63158ca9217e032b19f531da427b1d15b9ef19a952813974",
+    "src/camel/evaluation/representation.py": "c6c0d1dccb131d7ce366258cc861f043596142244dc3add6a12620d9960e4af0",
+    "tests/unit/evaluation/test_representation.py": "62931a42b268e183c564406ebbdc6b02e7c8a863eb0652d0999b12c83d51bbd8"
+  },
+  "stage": "D7_partial_rule_representation_robustness",
+  "status": "PARTIAL_OFFLINE",
+  "user_selected_cases": 384
+}

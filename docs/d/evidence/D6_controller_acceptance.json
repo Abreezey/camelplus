@@ -1,0 +1,180 @@
+{
+  "ABC_modified_this_turn": false,
+  "ASR": null,
+  "OS_isolation_verified": false,
+  "actual_AgentDojo_episodes": 0,
+  "date": "2026-10-15",
+  "downloads": 0,
+  "environment_loads": 0,
+  "evidence_sha256": {
+    "artifacts/d/D6_control_format_final.txt": "debf470293ee11c643dd05e831e4171fd3c927211013470daa99a729612b2df0",
+    "artifacts/d/D6_control_independent_verification.json": "21f07d7513d9a645ce19c3bb60716958b447e1827467cf7b0b2fc9fac62fb4a4",
+    "artifacts/d/D6_control_linux_02/accounting.json": "55d45ce4e7c7c5351d0bada2357abf7f9eaa527748da82df8ffd2dc481e61601",
+    "artifacts/d/D6_control_linux_02/cancel/ledger.json": "c4cdec8b33ece9697274b5d06f8545004901ece693f922e909e306fca27a9441",
+    "artifacts/d/D6_control_linux_02/deadlines/ledger.json": "8b37d499bd31a2e028e63763bbe6b6ddb0eb18065eb3b141779f60a7c748ea26",
+    "artifacts/d/D6_control_linux_02/freeze.json": "39df3da160adf8ddc9e7018191dbd84f00a7d4daa9fc741c67fce7b7b615ea37",
+    "artifacts/d/D6_control_linux_02/global_budget/ledger.json": "ff7cb25090e6846155d93e348c656fc4a277109b3b0421a7c6b358987b8593af",
+    "artifacts/d/D6_control_linux_02/metrics.json": "33739dda4f1e19f70bf023a4f4f7bba5669373ddd303b11bb4aae037733a3e5a",
+    "artifacts/d/D6_control_linux_02/missing_usage/ledger.json": "1ca85c9cf4f3f74d4aa231cd57e7966a51865f07c8756f6649d01afde1740ba5",
+    "artifacts/d/D6_control_linux_02/normal/ledger.json": "d064994a359343cbd5c344784f4245c270446b0cbc2f15507d237ef3bd5da7d1",
+    "artifacts/d/D6_control_linux_02/normalized.json": "0c04550344b6c873fd86e1ffa23092366994245c80cc103d52469fec45437f3a",
+    "artifacts/d/D6_control_linux_02/role_budget/ledger.json": "51d327f3c99ff4b5d749bd56f30e75f5f61f31476355210826f4d4f03e5a312c",
+    "artifacts/d/D6_control_linux_02/summary.json": "cde707cd339fc7026e10398da207a3aac3809c14f37bc984a4290df47c50e58f",
+    "artifacts/d/D6_control_linux_02/total_deadline/ledger.json": "16763e323858f03001f251f661d163e9d592eb552d6582ac532f2fbf72b6f882",
+    "artifacts/d/D6_control_linux_02/usage/ledger.json": "bc7e13d11e940f03301d99537fe87abae067fb2f4995d27f8da6180ba09806a8",
+    "artifacts/d/D6_control_linux_tests_final.xml": "f5d1154807ce9071aa3fb1900e5208849d1afd8ad9196390111d9da604a4a67c",
+    "artifacts/d/D6_control_pyright_final.txt": "58782b3d775540bca8e6e54152a1451d72666ac6dd0143cc8e95b9b9e9f4809d",
+    "artifacts/d/D6_control_ruff_final.txt": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
+    "artifacts/d/D6_control_windows_02/accounting.json": "55d45ce4e7c7c5351d0bada2357abf7f9eaa527748da82df8ffd2dc481e61601",
+    "artifacts/d/D6_control_windows_02/cancel/ledger.json": "66f68f129d291dff4815a85e8e78dd844c9af9d7e4269a4db74b030df1011942",
+    "artifacts/d/D6_control_windows_02/deadlines/ledger.json": "d7f865f259379e6563ccf94b02334aef9e6c1f38ecb45a86d70a9a727db4878d",
+    "artifacts/d/D6_control_windows_02/freeze.json": "39df3da160adf8ddc9e7018191dbd84f00a7d4daa9fc741c67fce7b7b615ea37",
+    "artifacts/d/D6_control_windows_02/global_budget/ledger.json": "be69582018d1b80bfb9616cc7e3c6a9b2f90ad842b853b40265ebfce42f4547a",
+    "artifacts/d/D6_control_windows_02/metrics.json": "33739dda4f1e19f70bf023a4f4f7bba5669373ddd303b11bb4aae037733a3e5a",
+    "artifacts/d/D6_control_windows_02/missing_usage/ledger.json": "7bb69acb7afcb38f44bca1511f50874bd87e8fb4b606e1a5b98ef672c95cbc63",
+    "artifacts/d/D6_control_windows_02/normal/ledger.json": "bef46a5af0daba77d517f43d444689068f740a5884849afd90f7a30c796ec6d4",
+    "artifacts/d/D6_control_windows_02/normalized.json": "0c04550344b6c873fd86e1ffa23092366994245c80cc103d52469fec45437f3a",
+    "artifacts/d/D6_control_windows_02/role_budget/ledger.json": "fe97e9745edf2b5b1f8d54464f5b2adb990137b3ddb1be03a9eded54959f00b1",
+    "artifacts/d/D6_control_windows_02/summary.json": "7771acd49f8cc49d177aa4cd222727fc08be300b47ead990b74b98598a38a189",
+    "artifacts/d/D6_control_windows_02/total_deadline/ledger.json": "0321969a7e2da11116929b529c4de3833026462202f90d9b9b0a0ecd93874ea9",
+    "artifacts/d/D6_control_windows_02/usage/ledger.json": "db37f2bb83ae8120a1112b2021d8935f4d0c2a6c6c2c6065a60c44649269075a",
+    "artifacts/d/D6_control_windows_tests_final.xml": "186e9e2cc123eeda84bb9da1110df340bb70fba2bcf7dc5cea4539e5de125ea5",
+    "docs/d/D6_controller.md": "9ae0134831d47074336da4b0e997c858d2e108572d60b1bb1df4c8e062b53015",
+    "docs/d/evidence/D6_controller_protocol.json": "f8fd098482f70abe6d6be14583d986c432bb3f2872ce916c7d75f2b4ffa446aa"
+  },
+  "focused_full_tests_this_turn": false,
+  "formal_runs": [
+    "artifacts/d/D6_control_windows_02",
+    "artifacts/d/D6_control_linux_02"
+  ],
+  "full_D6_accepted": false,
+  "full_project_tests_this_turn": false,
+  "git_committed": false,
+  "independent_verification": {
+    "ABC_snapshot_files_unchanged": 25,
+    "cross_platform_accounting_equal": true,
+    "cross_platform_metrics_equal": true,
+    "cross_platform_normalized_equal": true,
+    "linux": {
+      "output_files_verified": 67,
+      "simulated_reserved_requests": 17,
+      "source_files_verified": 7,
+      "stopped_workers": 14,
+      "tests": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 32
+      }
+    },
+    "original_model_cache_files_unchanged": 61,
+    "previous_evidence_verified": {
+      "D6_oracle_precheck_acceptance.json": 15,
+      "D6_preparation_acceptance.json": 21,
+      "D6_result_adapter_acceptance.json": 25,
+      "D7_representation_acceptance.json": 19,
+      "D_offline_workflow_acceptance.json": 14
+    },
+    "raw_ledger_differences": {
+      "cancel/ledger.json": [
+        ".episodes.0.elapsed_seconds",
+        ".episodes.0.exit_code"
+      ],
+      "deadlines/ledger.json": [
+        ".episodes.0.elapsed_seconds",
+        ".episodes.0.exit_code",
+        ".episodes.1.elapsed_seconds",
+        ".episodes.1.exit_code"
+      ],
+      "global_budget/ledger.json": [
+        ".episodes.0.elapsed_seconds"
+      ],
+      "missing_usage/ledger.json": [
+        ".episodes.0.elapsed_seconds"
+      ],
+      "normal/ledger.json": [
+        ".episodes.0.elapsed_seconds",
+        ".episodes.1.elapsed_seconds",
+        ".episodes.2.elapsed_seconds",
+        ".episodes.3.elapsed_seconds",
+        ".episodes.4.elapsed_seconds"
+      ],
+      "role_budget/ledger.json": [
+        ".episodes.0.elapsed_seconds",
+        ".episodes.2.elapsed_seconds"
+      ],
+      "total_deadline/ledger.json": [
+        ".episodes.0.elapsed_seconds",
+        ".episodes.0.exit_code"
+      ],
+      "usage/ledger.json": [
+        ".episodes.0.elapsed_seconds"
+      ]
+    },
+    "status": "PASS_SYNTHETIC_CONTROLLER_ONLY",
+    "windows": {
+      "output_files_verified": 67,
+      "simulated_reserved_requests": 17,
+      "source_files_verified": 7,
+      "stopped_workers": 14,
+      "tests": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 32
+      }
+    }
+  },
+  "launched_stopped_synthetic_workers_per_platform": 14,
+  "observer_authenticated": false,
+  "planned_synthetic_episodes_per_platform": 20,
+  "production_controller_integrated": false,
+  "profile": "FIXED_SYNTHETIC_CHILD_ONLY",
+  "pyright": {
+    "errors": 0,
+    "informations": 0,
+    "warnings": 0
+  },
+  "real_model_requests": 0,
+  "real_token_or_currency_cap_verified": false,
+  "real_tool_calls": 0,
+  "remaining": [
+    "real model all-role call adapters and authorized budgets",
+    "trusted token and price accounting",
+    "production observer binding",
+    "B/C integration",
+    "process-tree and OS containment",
+    "formal D6 model evaluation"
+  ],
+  "ruff_check": "PASS",
+  "ruff_format": {
+    "files": 171,
+    "status": "PASS"
+  },
+  "simulated_reserved_requests_per_platform": 17,
+  "source_sha256": {
+    "docs/d/evidence/D6_controller_protocol.json": "f8fd098482f70abe6d6be14583d986c432bb3f2872ce916c7d75f2b4ffa446aa",
+    "scripts/d6_controller.py": "ff2a110323abe418c3aa48a87043105779536ca3032ee70e032244e9db5ffb45",
+    "src/camel/adapters/agentdojo/control_worker.py": "d9ee851ec6523944c42b08478e524152cf61047d77fb146a1f4abbc6884e44ff",
+    "src/camel/adapters/agentdojo/controller.py": "dfcb479a0bc79a9fcb186e6d981a721ca082b0f24197f0727797a898b276f6cf",
+    "src/camel/adapters/agentdojo/results.py": "d5726e91d04742431de82eadf8f1f3341eb95d6003dc855016af2050ab051ace",
+    "src/camel/evaluation/ablation.py": "2da22a37f0cc22373c27af21d2a3c47c5b8bbcc8159037dae32b44357fbbed1d",
+    "tests/unit/evaluation/test_agentdojo_controller.py": "1bfc10fa1a50b2467ba0d0f839c87fc8564c9458a1dc11bcbf107c234b1784a2"
+  },
+  "stage": "D6_offline_controller",
+  "status": "PASS_SYNTHETIC_CONTROLLER_ONLY",
+  "tests": {
+    "linux": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 32
+    },
+    "windows": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 32
+    }
+  }
+}

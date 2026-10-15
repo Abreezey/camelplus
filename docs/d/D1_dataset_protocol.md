@@ -66,7 +66,7 @@ RecordingTool 仅向内存账本追加记录，不调用文件、网络、Shell�
 
 ## 复现与后续
 
-在项目根目录，使用已冻结安装的项目 Python，默认只读取 dev：
+在项目根目录，使用已冻结安装的项目 Python，默认只回放 dev；加载器仍验证完整冻结文件、全体 Schema 和族划分，并非物理隔离 Test 文件内容：
 
 ```powershell
 $env:PYTHONPATH = 'src'

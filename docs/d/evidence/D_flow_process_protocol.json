@@ -1,0 +1,16 @@
+{
+  "stage": "D_offline_process_flow",
+  "version": 1,
+  "scope": "Fixed connected D workflow in a separate process; host completion, policy terminal and persisted simulated records are separate. No fabricated AgentDojo utility/security scores.",
+  "reuse": "Existing controller bounded JSON/fsync-and-replace protocol; unchanged connected.run_flow and actual planner/detection/Memory Gate/A policy. Fixed new worker only, no arbitrary command or model endpoint.",
+  "budgets": "Zero real model calls; sequential planned/start-count caps and monotonic total/per-episode deadlines. Start reservations persisted before launch, not refunded after failure. No model token/currency accounting is claimed.",
+  "record_observer": "Worker writes intent before RecordingTool and durable record afterward. Host independently checks persisted record identity/scope/payload, not policy decision or worker exit. Positives remain visible on timeout/cancel/error; pending intent never proves an effect or absence of effects.",
+  "scoring": "Only clean FINISHED host state with valid matching result/records and no error file or pending intent is COMPLETED. A policy-blocked workflow can complete normally; this is not task utility. Any recorder error remains ERROR even if raw workflow terminal is RECORDED.",
+  "failure_controls": ["hang before flow", "hang after persisted READ/result", "hang after intent before record", "nonzero exit after result", "recorder error with successful raw result", "host cancellation after result", "start budget exhaustion", "total deadline exhaustion"],
+  "persistence": "Fresh output per run; all planned jobs saved first. Fixed child terminate/kill/wait before collection. No retries/resume; interrupted parent leaves unresolved state. File fsync/replace is not a tested power-loss guarantee.",
+  "not_claimed": ["real tools or AgentDojo task runs", "ASR or utility", "production authentication", "B/C execution integration", "OS/process-tree isolation", "atomic refresh-and-execute", "token or currency hard caps"],
+  "real_model_requests": 0,
+  "real_tool_calls": 0,
+  "downloads": 0,
+  "full_D6_D7_D8_accepted": false
+}

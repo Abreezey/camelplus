@@ -1,0 +1,17 @@
+{
+  "stage": "D_connected_offline_flow",
+  "version": 1,
+  "scope": "13 deterministic engineering controls; not new benchmark data or held-out attacks. Real D compiler/IR/TDG, SQLite Memory Gate, fixed detection, existing A policy; B normalization fixture and recording-only effects.",
+  "sequence": "Compile trusted fixed READ scope; session A host-bound memory write; reopen B and retrieve; bind returned memory_text to existing plan slot; normalize fixture and validate; detect actual referenced source text and pass risks to A; reopen C immediately before synthetic effect, recheck lifecycle/integrity and snapshot; normalize/validate/detect again; record only after all stages allow.",
+  "memory_refresh": "Demonstrate sequential expiry, quarantine and content tamper after planning. No atomic revocation capability or absence of a concurrent TOCTOU gap is claimed.",
+  "authority": "Only trusted host compiles scope. Memory/document text is data; candidate cannot register push or widen resource authorization. Source registration/context/binding are synthetic host fixtures, not authenticated production ingress.",
+  "negative_results": "Keep benign quoted-rule false positive and zero-width rule miss. The latter reaches recording-only READ with untrusted data; this is not evidence of real-Agent resistance to encoded attacks.",
+  "failure": "Any denied memory read, failed planner validation, incomplete detection or non-ALLOW A assessment prevents recording. I/O/audit exceptions propagate and must not be treated as task success.",
+  "output": "Per-case actual stages, policy/risk evidence, memory events and synthetic ledger; SQLite files retained. Synthetic payload and response use the actual refreshed memory value, not a predeclared successful response.",
+  "limits": "Read-only template, at most two sources and one effect per control; input fields at most 16000 characters; new fixture DB per case. Fixed 2026-10-15 UTC engineering clock, explicit public synthetic HMAC key.",
+  "not_claimed": ["model or task utility", "ASR", "new test-set performance", "production normalization", "B/C runtime integration", "OS isolation", "trusted ingress/observer", "atomic refresh-and-execute", "controller subprocess integration"],
+  "model_requests": 0,
+  "real_tool_calls": 0,
+  "downloads": 0,
+  "full_D6_D7_D8_accepted": false
+}
