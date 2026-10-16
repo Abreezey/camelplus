@@ -1,0 +1,86 @@
+{
+  "B_D_pipeline_integration_completed": false,
+  "B_code_merged": true,
+  "D5_strict_failure_still_unresolved": true,
+  "agent_asr": null,
+  "artifacts_uploaded": false,
+  "checks": {
+    "D_test_new_unit_01": {
+      "errors": 0,
+      "failures": 0,
+      "junit_sha256": "19bb4b8cd699ef3b7a2e0e58a42ea84b319e41e95fe26892be7e7b0a089d2b54",
+      "passed": 22,
+      "skipped": 0
+    },
+    "D_test_regression_windows_01": {
+      "errors": 0,
+      "failures": 0,
+      "junit_sha256": "4dfa748affb89be78a82dd5c3ff2370bb71c2f2df8bc331112493cc2ff5eabae",
+      "passed": 739,
+      "skipped": 0
+    },
+    "D_test_release_full_linux_02": {
+      "errors": 0,
+      "failures": 0,
+      "junit_sha256": "d56ee2e477a0a63096d5cdff0e7e0a1714afd86d8b08c83c9bfbab76625b6044",
+      "passed": 1253,
+      "skipped": 0
+    },
+    "D_test_release_protocols_linux_02": {
+      "errors": 0,
+      "failures": 0,
+      "junit_sha256": "33d8e245bf1888fd4d709cbba22c4dda3f74e78db96714552aaff3e1231504b1",
+      "passed": 2,
+      "skipped": 0
+    }
+  },
+  "date": "2026-10-16",
+  "dependency_installation": {
+    "editable_build_backend_required": true,
+    "locked_B_dependencies_downloaded": true,
+    "model_downloads": 0,
+    "separate_from_experiment": true
+  },
+  "deployment_enabled": false,
+  "initial_linux_failure_preserved": {
+    "failed": 2,
+    "log_sha256": "f6cc0fdd5425d34a9994de256420742896531fd52a6a51e0da4a524805d113a3",
+    "passed": 1251,
+    "reason": "MCP children imported editable package from old source; reinstalled current checkout; source and assertions unchanged",
+    "tests": 1253
+  },
+  "model_requests": 0,
+  "phase_evidence_sha256": {
+    "docs/d/evidence/D_detection_followup_acceptance.json": "620b3d402dd161d36fb27f951f9b02dd21092cf419831c733d9ae2e120c7a7bc",
+    "docs/d/evidence/D_detection_v2_acceptance.json": "f31015f93e9e1fb2ab23bf395098d7951e7e142795ad273a02cdc3de79438ec2",
+    "docs/d/evidence/D_detection_v2_test_acceptance.json": "8e5cf86edcf136e834398504d625ef5e75a856ab4361c5aaa2b5f4de69e163e5",
+    "docs/d/evidence/D_detection_v2_validation_acceptance.json": "aa8339b265c86dd46d9958f6ffb468e822c67e5134e8e7fa34fdd704f99af6a8"
+  },
+  "real_agent_episodes": 0,
+  "source_snapshot": {
+    "canonical_git_index_bytes": true,
+    "files": 324,
+    "historical_python_line_endings_restored": 56,
+    "native_root": "/home/abreeze/camelplus-d-final-kli8c8jq/camelplus-release",
+    "sha256": "b18650d92ca791a08e904f3d29ccdfb0be940807a486d39b0892a80b33c144b1",
+    "tested_runtime_files_unchanged": 220
+  },
+  "static_checks": {
+    "pyright_errors": 0,
+    "pyright_informations": 0,
+    "pyright_warnings": 0,
+    "ruff_check": "PASS",
+    "ruff_format_files": 219
+  },
+  "status": "PASS_LOCAL_RELEASE_CHECKS_WITH_NEGATIVE_TEST_RESULT",
+  "target_branch": "dev",
+  "test_result": {
+    "baseline": "TP9 FP6 FN3 TN6",
+    "candidate": "TP9 FP6 FN3 TN6",
+    "case_classification_changes": 0,
+    "test_runs": 1,
+    "test_used_for_selection": false
+  },
+  "upstream_commit": "280c2c25007d4cd868e5fd060e5170de0523103f",
+  "user_untracked_overview_excluded": true
+}

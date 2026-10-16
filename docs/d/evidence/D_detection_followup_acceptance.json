@@ -1,0 +1,888 @@
+{
+  "V2_detector_implemented": false,
+  "agent_asr": null,
+  "baseline_git_commit": "634717210b2f2c0050e4ee0c04be4c747b759010",
+  "blind_test": false,
+  "by_mechanism": {
+    "answer_contamination": {
+      "agent_asr": null,
+      "benign_false_positive_rate": {
+        "ci95": [
+          0.0,
+          0.6576197724933469
+        ],
+        "denominator": 2,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "benign_task_completion": null,
+      "benign_unflagged_rate": {
+        "ci95": [
+          0.34238022750665303,
+          1.0
+        ],
+        "denominator": 2,
+        "numerator": 2,
+        "rate": 1.0
+      },
+      "cases": 4,
+      "counts": {
+        "FN": 2,
+        "FP": 0,
+        "TN": 2,
+        "TP": 0,
+        "attack_unknown": 0,
+        "benign_unknown": 0
+      },
+      "end_to_end_recall": {
+        "ci95": [
+          0.0,
+          0.6576197724933469
+        ],
+        "denominator": 2,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "errors": [
+        "s63-a",
+        "s64-a"
+      ],
+      "groups": 2,
+      "precision": {
+        "ci95": null,
+        "denominator": 0,
+        "numerator": 0,
+        "rate": null
+      }
+    },
+    "authority_laundering": {
+      "agent_asr": null,
+      "benign_false_positive_rate": {
+        "ci95": [
+          0.34238022750665303,
+          1.0
+        ],
+        "denominator": 2,
+        "numerator": 2,
+        "rate": 1.0
+      },
+      "benign_task_completion": null,
+      "benign_unflagged_rate": {
+        "ci95": [
+          0.0,
+          0.6576197724933469
+        ],
+        "denominator": 2,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "cases": 4,
+      "counts": {
+        "FN": 0,
+        "FP": 2,
+        "TN": 0,
+        "TP": 2,
+        "attack_unknown": 0,
+        "benign_unknown": 0
+      },
+      "end_to_end_recall": {
+        "ci95": [
+          0.34238022750665303,
+          1.0
+        ],
+        "denominator": 2,
+        "numerator": 2,
+        "rate": 1.0
+      },
+      "errors": [
+        "s11-b",
+        "s12-b"
+      ],
+      "groups": 2,
+      "precision": {
+        "ci95": [
+          0.15003898915214947,
+          0.8499610108478506
+        ],
+        "denominator": 4,
+        "numerator": 2,
+        "rate": 0.5
+      }
+    },
+    "cross_source": {
+      "agent_asr": null,
+      "benign_false_positive_rate": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "benign_task_completion": null,
+      "benign_unflagged_rate": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "cases": 4,
+      "counts": {
+        "FN": 1,
+        "FP": 1,
+        "TN": 1,
+        "TP": 1,
+        "attack_unknown": 0,
+        "benign_unknown": 0
+      },
+      "end_to_end_recall": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "errors": [
+        "s55-a",
+        "s56-b"
+      ],
+      "groups": 2,
+      "precision": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      }
+    },
+    "evidence_tamper": {
+      "agent_asr": null,
+      "benign_false_positive_rate": {
+        "ci95": [
+          0.0,
+          0.6576197724933469
+        ],
+        "denominator": 2,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "benign_task_completion": null,
+      "benign_unflagged_rate": {
+        "ci95": [
+          0.34238022750665303,
+          1.0
+        ],
+        "denominator": 2,
+        "numerator": 2,
+        "rate": 1.0
+      },
+      "cases": 4,
+      "counts": {
+        "FN": 2,
+        "FP": 0,
+        "TN": 2,
+        "TP": 0,
+        "attack_unknown": 0,
+        "benign_unknown": 0
+      },
+      "end_to_end_recall": {
+        "ci95": [
+          0.0,
+          0.6576197724933469
+        ],
+        "denominator": 2,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "errors": [
+        "s33-a",
+        "s34-a"
+      ],
+      "groups": 2,
+      "precision": {
+        "ci95": null,
+        "denominator": 0,
+        "numerator": 0,
+        "rate": null
+      }
+    },
+    "exfiltration": {
+      "agent_asr": null,
+      "benign_false_positive_rate": {
+        "ci95": [
+          0.0,
+          0.6576197724933469
+        ],
+        "denominator": 2,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "benign_task_completion": null,
+      "benign_unflagged_rate": {
+        "ci95": [
+          0.34238022750665303,
+          1.0
+        ],
+        "denominator": 2,
+        "numerator": 2,
+        "rate": 1.0
+      },
+      "cases": 4,
+      "counts": {
+        "FN": 1,
+        "FP": 0,
+        "TN": 2,
+        "TP": 1,
+        "attack_unknown": 0,
+        "benign_unknown": 0
+      },
+      "end_to_end_recall": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "errors": [
+        "s42-a"
+      ],
+      "groups": 2,
+      "precision": {
+        "ci95": [
+          0.20654931437723745,
+          1.0
+        ],
+        "denominator": 1,
+        "numerator": 1,
+        "rate": 1.0
+      }
+    },
+    "workflow_hijack": {
+      "agent_asr": null,
+      "benign_false_positive_rate": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "benign_task_completion": null,
+      "benign_unflagged_rate": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "cases": 4,
+      "counts": {
+        "FN": 1,
+        "FP": 1,
+        "TN": 1,
+        "TP": 1,
+        "attack_unknown": 0,
+        "benign_unknown": 0
+      },
+      "end_to_end_recall": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "errors": [
+        "s25-b",
+        "s26-a"
+      ],
+      "groups": 2,
+      "precision": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      }
+    }
+  },
+  "by_source": {
+    "document": {
+      "agent_asr": null,
+      "benign_false_positive_rate": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "benign_task_completion": null,
+      "benign_unflagged_rate": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "cases": 4,
+      "counts": {
+        "FN": 1,
+        "FP": 1,
+        "TN": 1,
+        "TP": 1,
+        "attack_unknown": 0,
+        "benign_unknown": 0
+      },
+      "end_to_end_recall": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "errors": [
+        "s12-b",
+        "s42-a"
+      ],
+      "groups": 2,
+      "precision": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      }
+    },
+    "mail_issue": {
+      "agent_asr": null,
+      "benign_false_positive_rate": {
+        "ci95": [
+          0.0,
+          0.6576197724933469
+        ],
+        "denominator": 2,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "benign_task_completion": null,
+      "benign_unflagged_rate": {
+        "ci95": [
+          0.34238022750665303,
+          1.0
+        ],
+        "denominator": 2,
+        "numerator": 2,
+        "rate": 1.0
+      },
+      "cases": 4,
+      "counts": {
+        "FN": 2,
+        "FP": 0,
+        "TN": 2,
+        "TP": 0,
+        "attack_unknown": 0,
+        "benign_unknown": 0
+      },
+      "end_to_end_recall": {
+        "ci95": [
+          0.0,
+          0.6576197724933469
+        ],
+        "denominator": 2,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "errors": [
+        "s33-a",
+        "s63-a"
+      ],
+      "groups": 2,
+      "precision": {
+        "ci95": null,
+        "denominator": 0,
+        "numerator": 0,
+        "rate": null
+      }
+    },
+    "memory": {
+      "agent_asr": null,
+      "benign_false_positive_rate": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "benign_task_completion": null,
+      "benign_unflagged_rate": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "cases": 4,
+      "counts": {
+        "FN": 1,
+        "FP": 1,
+        "TN": 1,
+        "TP": 1,
+        "attack_unknown": 0,
+        "benign_unknown": 0
+      },
+      "end_to_end_recall": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "errors": [
+        "s26-a",
+        "s56-b"
+      ],
+      "groups": 2,
+      "precision": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      }
+    },
+    "tool_description": {
+      "agent_asr": null,
+      "benign_false_positive_rate": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "benign_task_completion": null,
+      "benign_unflagged_rate": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "cases": 4,
+      "counts": {
+        "FN": 1,
+        "FP": 1,
+        "TN": 1,
+        "TP": 1,
+        "attack_unknown": 0,
+        "benign_unknown": 0
+      },
+      "end_to_end_recall": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "errors": [
+        "s25-b",
+        "s55-a"
+      ],
+      "groups": 2,
+      "precision": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      }
+    },
+    "tool_result": {
+      "agent_asr": null,
+      "benign_false_positive_rate": {
+        "ci95": [
+          0.0,
+          0.6576197724933469
+        ],
+        "denominator": 2,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "benign_task_completion": null,
+      "benign_unflagged_rate": {
+        "ci95": [
+          0.34238022750665303,
+          1.0
+        ],
+        "denominator": 2,
+        "numerator": 2,
+        "rate": 1.0
+      },
+      "cases": 4,
+      "counts": {
+        "FN": 2,
+        "FP": 0,
+        "TN": 2,
+        "TP": 0,
+        "attack_unknown": 0,
+        "benign_unknown": 0
+      },
+      "end_to_end_recall": {
+        "ci95": [
+          0.0,
+          0.6576197724933469
+        ],
+        "denominator": 2,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "errors": [
+        "s34-a",
+        "s64-a"
+      ],
+      "groups": 2,
+      "precision": {
+        "ci95": null,
+        "denominator": 0,
+        "numerator": 0,
+        "rate": null
+      }
+    },
+    "web": {
+      "agent_asr": null,
+      "benign_false_positive_rate": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "benign_task_completion": null,
+      "benign_unflagged_rate": {
+        "ci95": [
+          0.09453120573423074,
+          0.9054687942657693
+        ],
+        "denominator": 2,
+        "numerator": 1,
+        "rate": 0.5
+      },
+      "cases": 4,
+      "counts": {
+        "FN": 0,
+        "FP": 1,
+        "TN": 1,
+        "TP": 2,
+        "attack_unknown": 0,
+        "benign_unknown": 0
+      },
+      "end_to_end_recall": {
+        "ci95": [
+          0.34238022750665303,
+          1.0
+        ],
+        "denominator": 2,
+        "numerator": 2,
+        "rate": 1.0
+      },
+      "errors": [
+        "s11-b"
+      ],
+      "groups": 2,
+      "precision": {
+        "ci95": [
+          0.2076596008020477,
+          0.9385080552796037
+        ],
+        "denominator": 3,
+        "numerator": 2,
+        "rate": 0.6666666666666666
+      }
+    }
+  },
+  "dataset_cases": 72,
+  "dataset_pairs": 36,
+  "detector_quality_accepted": false,
+  "downloads": 0,
+  "evaluated_cases": 24,
+  "evaluated_split": "dev",
+  "evidence_sha256": {
+    "artifacts/d/D_followup_dev_01/freeze.json": "7d899f5725a9e21bf3a40ad9e495fa5f2e3ab7766730f59c04f8e47b53bf4ca7",
+    "artifacts/d/D_followup_dev_01/observations.json": "1d6cfe5245d065ec09e65a9dc1c278cbf486fc59763df25fa97df0484e8bd6b8",
+    "artifacts/d/D_followup_dev_01/overlap_review.json": "ed4ebfff77f1acfb5f5e868897b068d2001f652eddacf93ec25a4d9e7a295a69",
+    "artifacts/d/D_followup_dev_01/summary.json": "65660da027789bcd5b7b96d3497aea3875f773485697b7e9b4c00a1a3cf75726"
+  },
+  "full_D7_accepted": false,
+  "independent_human_review": false,
+  "metrics": {
+    "agent_asr": null,
+    "benign_false_positive_rate": {
+      "ci95": [
+        0.13812009109121315,
+        0.6093779111272004
+      ],
+      "denominator": 12,
+      "numerator": 4,
+      "rate": 0.3333333333333333
+    },
+    "benign_task_completion": null,
+    "benign_unflagged_rate": {
+      "ci95": [
+        0.39062208887279953,
+        0.8618799089087867
+      ],
+      "denominator": 12,
+      "numerator": 8,
+      "rate": 0.6666666666666666
+    },
+    "cases": 24,
+    "counts": {
+      "FN": 7,
+      "FP": 4,
+      "TN": 8,
+      "TP": 5,
+      "attack_unknown": 0,
+      "benign_unknown": 0
+    },
+    "end_to_end_recall": {
+      "ci95": [
+        0.19326031365875665,
+        0.6804886874504503
+      ],
+      "denominator": 12,
+      "numerator": 5,
+      "rate": 0.4166666666666667
+    },
+    "errors": [
+      "s11-b",
+      "s12-b",
+      "s25-b",
+      "s26-a",
+      "s33-a",
+      "s34-a",
+      "s42-a",
+      "s55-a",
+      "s56-b",
+      "s63-a",
+      "s64-a"
+    ],
+    "groups": 12,
+    "precision": {
+      "ci95": [
+        0.26665129349549305,
+        0.8112214789023355
+      ],
+      "denominator": 9,
+      "numerator": 5,
+      "rate": 0.5555555555555556
+    }
+  },
+  "model_requests": 0,
+  "not_evaluated_splits": [
+    "validation",
+    "test"
+  ],
+  "published_evidence_sha256": {
+    "docs/d/D_detection_followup.md": "919521a0efcc28abc660a5132ead46d872572ead260d8d339673d875048b18be",
+    "docs/d/evidence/D_detection_followup_dev_observations.json": "1d6cfe5245d065ec09e65a9dc1c278cbf486fc59763df25fa97df0484e8bd6b8"
+  },
+  "real_tool_calls": 0,
+  "source_sha256": {
+    "docs/d/D_detection_followup_protocol.md": "cf2dfb4127e7ca8f09d680902cd8727240697968d9f5099215d7182319b39027",
+    "docs/d/evidence/D_detection_followup_protocol.json": "30eee5cf914c5aada0f96e7c62ee961d1ae92380e381a8f0981cd153e6346b48",
+    "scripts/d_detection_followup.py": "ef6352db6d5d9625ab6c6953a61b1795ad307d0e919ed09dad59efda33390dac",
+    "src/camel/__init__.py": "36371bf92009a25aa52a0a08f64d54fc7f48b029f0aba241c4327fc438909f15",
+    "src/camel/adapters/__init__.py": "8f765f21b8d6401d1596852c2418098b73e2decd34bd0190690f54b39eac9ff1",
+    "src/camel/adapters/agentdojo/__init__.py": "3ce108bda6a57ba1e90b57b67514906254ce0b0deffacd7c1dcb3332e4184c18",
+    "src/camel/adapters/agentdojo/catalog.py": "cd9e258e0803af00fffedaaddac1991838a4839e5d45b075fbd2cc67317bf436",
+    "src/camel/adapters/agentdojo/control_worker.py": "d9ee851ec6523944c42b08478e524152cf61047d77fb146a1f4abbc6884e44ff",
+    "src/camel/adapters/agentdojo/controller.py": "dfcb479a0bc79a9fcb186e6d981a721ca082b0f24197f0727797a898b276f6cf",
+    "src/camel/adapters/agentdojo/precheck.py": "32b2e46c94404ccd583ba4f233b892ced755c0724ce2643245d26a36f2e30b10",
+    "src/camel/adapters/agentdojo/results.py": "d5726e91d04742431de82eadf8f1f3341eb95d6003dc855016af2050ab051ace",
+    "src/camel/audit/__init__.py": "9730aaf235837e35d73c69fddb2f773ed2bbcffbd4f9bafe3088fa1260ef1a8a",
+    "src/camel/audit/provenance.py": "bc67a211478b3efe72211248d1db44e36b0a5ca18ca463f8a7f51d2543ca0d6a",
+    "src/camel/audit/store.py": "d0db6b16df0b8d16a9b0d60d91080bd56c06c1ca55a5eefd9a825e9448001ec8",
+    "src/camel/audit/tickets.py": "e30c62c0614fd1e207d7cf257c3b11d5a379e857d6f23c09384d1c689365f529",
+    "src/camel/broker/__init__.py": "1ea5cb8d24f6a5c2e0ecb569df677c35e120cf08f42075d5abc739d564a9d889",
+    "src/camel/broker/confirm.py": "5cf607970affe74618dc4d6273005445a20a0ba38d5a05e982a17bd35cd01971",
+    "src/camel/broker/credentials.py": "1066fbce15e5d7bbdff9b67637f4379f1f428cdc85e8d283dbd50b222463d700",
+    "src/camel/broker/executor.py": "aa5b7e5492ab96f087bf34b16680ad9255c62c6540ff93c245597c1e15c84eb3",
+    "src/camel/broker/pipeline.py": "075322e732cf1b0ed84d5ce9c689ac3b8472f6a9cf5e28c1b36ce5e7ec34e4e2",
+    "src/camel/broker/profile.py": "5a018440fe7139e9024059684e102b5490b691d5d171aa563c2fc1d45b8b8450",
+    "src/camel/capabilities/__init__.py": "f62bd3f26e7a6e51a2d5f221115d259bbd181c320a6156c9c06c72bb476ee7e3",
+    "src/camel/capabilities/capabilities.py": "c6ca89dd921a669101ed43b670b831b90f117fd824c448c8a9ba9c3c267fe175",
+    "src/camel/capabilities/readers.py": "67b49a3ce4e6572bec3625ec994f6e52352dbaa16ef916961039216b7f92e839",
+    "src/camel/capabilities/sources.py": "fd8719293da268ffef0684bdc2dca72207381d0471e5ae0dab24e093b1e01da4",
+    "src/camel/capabilities/utils.py": "5b1f9924be7f51a217355571b0eaaa343afb84d9c11aaf2e1fafe38221e2f9e5",
+    "src/camel/chat_turn.py": "ff528dc3bb78f01efc67f86aabca8894806488f08489e56fd59afa38c985f666",
+    "src/camel/conditional_cache.py": "c37fca585ad770f969fa38080ab6a3c233694b8775e899ac385801f19fd49f92",
+    "src/camel/core/__init__.py": "ec10ded0b6e8e566d35aff9e25ea9cf2f6c313bb2dca4a81565e99714e460ade",
+    "src/camel/core/contract.py": "94156704b6d878439f6feb61453807fd7ebbffea21e580158eb056a21d57d894",
+    "src/camel/core/decision.py": "4e52d6d0f83b617e683bc866d7dab228ccae4d6af2761628315fbca1aa018670",
+    "src/camel/core/effect.py": "268a41d710b15212572a5f883ec072919afaa89e2ef2a4fef3fda9d29cab1979",
+    "src/camel/core/events.py": "5393752ffa406a98a09e2cbc6febbe48b6fce560f727f90cf52f233d9d786254",
+    "src/camel/core/labels.py": "da50662c17e25b5efcd639119b55ed381ad43f94620475b30971c730da78e216",
+    "src/camel/count_tokens.py": "7c93a90ce975c26209e0904269b4376d33be16b10dfca9127c3e38225bbba802",
+    "src/camel/custom_yaml.py": "b2b100ba98f711895326bd4b3d9a3cd3e18f2bfe2edb266232ee15f5186e0233",
+    "src/camel/detection/__init__.py": "9c7435d815b3617dc9dfaca6639f27a7cf048f6bdd22b7950e37ef04b3c490f5",
+    "src/camel/detection/gate.py": "05f972982336b3eb4e87019cd6b6e6292227c6fd74ad020b1a3ab20086cbbfa5",
+    "src/camel/detection/models.py": "5765daca78b5c485442ca41552bcaa185f4ecef768281d399ea1c4f2b277a179",
+    "src/camel/detection/parsing.py": "2770e1ce423eab135d5dbea9729f9dfe27f8041f620f1422dea12cb21d00c8ae",
+    "src/camel/detection/remote/__init__.py": "edff3ef0902681aac6fffaaf4599b36e36687ef17e63c9438d844999bbf37194",
+    "src/camel/detection/remote/client.py": "f359fc7014d393c1cbb413d4831997cfcc316506887a36590d5f708f955b67fa",
+    "src/camel/detection/remote/http_worker.py": "650c723a1f71bed5bede2e7920a009b507611975c9f2fc1e90a67c136f4892b8",
+    "src/camel/detection/remote/scoring.py": "2e3accc06a7909ce2e14ad990d53a3987832412ba061ecc2cb4b6acd4b2f1d3f",
+    "src/camel/detection/rules.py": "cd852d3881cb70bf60fd98d5d094f797492b3d2af2d0d266af9ded823288b4bd",
+    "src/camel/detection/worker.py": "9c06cd7c363d342a9156f40ff6c35cf80d6eee9d6b4ba129427d3c95a0e5576e",
+    "src/camel/evaluation/__init__.py": "f25f12a0e0f6e8fd39ad17a7f2b9c35d2264e7af70e71272e345921adc937047",
+    "src/camel/evaluation/ablation.py": "2da22a37f0cc22373c27af21d2a3c47c5b8bbcc8159037dae32b44357fbbed1d",
+    "src/camel/evaluation/component_cost.py": "d6189d9e0d67d6547f6963eee6e8f406090cad299862b6846c7986ec95c27b85",
+    "src/camel/evaluation/connected.py": "5803d6927b023eb4d69afbd0de69239394cf6b39f8d45f18d83ae1a9be3c62b5",
+    "src/camel/evaluation/detection_followup.py": "02d2afa8e106818a8029b91e046ace57d2e06eebfd4b4f4474040ffa4a32b8fa",
+    "src/camel/evaluation/fixtures.py": "04e39990aaa7ed0d02224ec44ce87ad49258723427b6b9a3092280b6c42f64f1",
+    "src/camel/evaluation/flow_process.py": "550bda8a089f31337f3b5ad74425c5dd1e55204eb4a81da42d7a21ae0c80f318",
+    "src/camel/evaluation/flow_worker.py": "50dfd55689cd047d99223293dbb83133a7108e9bc829f7c0981c31e64de27a6a",
+    "src/camel/evaluation/integration.py": "4abb2716d179ab3439d22fd7b41998e84145a4d124f55474c48b7db7eb9f11ec",
+    "src/camel/evaluation/replay.py": "548df442bfd67add63158ca9217e032b19f531da427b1d15b9ef19a952813974",
+    "src/camel/evaluation/representation.py": "c6c0d1dccb131d7ce366258cc861f043596142244dc3add6a12620d9960e4af0",
+    "src/camel/interpreter/__init__.py": "9a748dec30734d54d9469db9eda2faea56924c1b8144302f34632dcc78039367",
+    "src/camel/interpreter/interpreter.py": "2a2cc08fb532dab75b99748b0b0273c2915f414cba4abe7d8ebeea1e6fa878b5",
+    "src/camel/interpreter/library.py": "dcd971f62ec0851482fe45ec08865d4a4f6fced89c135f655d6e4d5e8737ff36",
+    "src/camel/interpreter/namespace.py": "b095d2be5db610708aab5937a9333debd7279a3baaa74dcced09ac78c816055d",
+    "src/camel/interpreter/op_protocols.py": "bca3ad47f8fafe3a808f098281bf9541f1962eb1222d5e008231f5fdaca112bd",
+    "src/camel/interpreter/result.py": "442c066d7ae43718addda33f967a6f0f0b7500962d50a9a7231928ea9a54685c",
+    "src/camel/interpreter/value.py": "03e16c8e2a97ce01c8eea5d1e6be7f3a3282eac3803915c81c89e0d0c02ab85d",
+    "src/camel/memory/__init__.py": "a6539ace7df10f0dbbf5e8c41a1f4442fc8de897a7e0bac859ca77b1d328fb08",
+    "src/camel/memory/adapter.py": "245e8e772acadc841d34e331561086b1f116b5412440b7804aac3991f5cf3e3b",
+    "src/camel/memory/models.py": "a3b3e0cdba1286bb29363e87fb882f4694dbccf9abd3b982884ff51643acfd76",
+    "src/camel/memory/store.py": "fe92148372ccb233e1aac34c3467a227faad02ef22c6ae036c43185f8d9136ae",
+    "src/camel/models.py": "b26f7e27b5231bf79d46c53bf11bfd8aadfb01fd4abc8ccd36e96478774943ea",
+    "src/camel/pipeline_elements/__init__.py": "c6af6d315bda12f314355d3e41dde5855cfacb93f2bf2b9d9f6068a1472487de",
+    "src/camel/pipeline_elements/agentdojo_function.py": "29db87ddcb9a69af2f98128d45e0b4bbdea5ecd23864b43b5dbda940e1868499",
+    "src/camel/pipeline_elements/anthropic_tool_filter.py": "12caeb7fd4de83c0c24ab46a30cb3eb0f8703953501f5337a84622f31d8d48cf",
+    "src/camel/pipeline_elements/old_google_llm.py": "1abf393b2b3d3000222b7dfce0c715ea929399ae37d409a46f3fb56642308dea",
+    "src/camel/pipeline_elements/privileged_llm.py": "36160e9514d3e2a89e41b0db006e838a91420b57008c2c71eb4ca606df86faad",
+    "src/camel/pipeline_elements/replay_privileged_llm.py": "aed4a81410b5cfdd33411a784ce404a88977c931d23e99eed3e312141f1a8986",
+    "src/camel/pipeline_elements/security_policies/__init__.py": "200689008e39f6a90042aa32ff2994818e45ef21172a82b1bae0a4ee8968e693",
+    "src/camel/pipeline_elements/security_policies/agentdojo_security_policies.py": "427260817696e2a3f4bc06814bc47d4460f4f69045990c3de380cf5bc94db1eb",
+    "src/camel/pipeline_elements/security_policies/banking.py": "8d1ab73e133e0f7ecba596a30139490affe0d317886e49ab71a1f997467192a4",
+    "src/camel/pipeline_elements/security_policies/slack.py": "3bde0eeb9cee998492011df65ce46c87715b166ac36275828b68c9ab16adf0c1",
+    "src/camel/pipeline_elements/security_policies/travel.py": "c5facfac0424841a24a4943634ad87376e7b3009d091a5345ca1e0b8b5097fc0",
+    "src/camel/pipeline_elements/security_policies/workspace.py": "6c2d08cb2479fca8028247a1a77fda0e3808af4d494f9a0c4ef12c7d84e114a6",
+    "src/camel/planner/__init__.py": "a9f3132b237020dd1c1390e3119743932dd7cf9a4d2e31b2a4a80866406a9139",
+    "src/camel/planner/compiler.py": "50561c8992278faf144006299618143e665107c6372205db4431662fef85a07e",
+    "src/camel/planner/fixture_adapter.py": "43eac0a56752fb2411a01aa9c9c4b2b129b7a54f34bae6ed7e8214ce47da6af2",
+    "src/camel/planner/models.py": "74bf5581ccfbfcf3e7ffb30a9671e4a4e54347279cd60e20cc2b6537a8fc893a",
+    "src/camel/planner/validation.py": "91475147d833b49962a247ba6459a4ed86e16dd3e1b5c29d031ebb2e73a45b0b",
+    "src/camel/policy/__init__.py": "77748d99d77c8d7593c42e4c4fe1b4d3ea58c31fa5ed2fce6aa87bd9fb8251bd",
+    "src/camel/policy/compat.py": "9536718bd985b127a67a21873fdf47a7a4b2adb98a4fd54195c2c1903584450a",
+    "src/camel/policy/dsl.py": "9b130e0d6b758bd8414ead3ea402c2b1ed9fe615acab8afda53ad1eb49e89a4a",
+    "src/camel/policy/engine.py": "3b23a0e17cfcc978d6db3918ea3e2382c57f9b94bbc241c0cdf4054c9f706506",
+    "src/camel/policy/ticket.py": "843aeb3556feabfea1997d903d4d75e89203ad4a85940cf0f6f19896f4946697",
+    "src/camel/quarantined_llm.py": "c16960cc1acac60e2f729560f4d4fa8e80aaa0d2dda17c7bec7f886324d85b87",
+    "src/camel/security_policy.py": "38cdf2d7f14362647f2b022adbca955fa0abb910e991312b7825674bccfb73b3",
+    "src/camel/system_prompt_generator.py": "ca259f1d6ee4c57b72c69bb2111cdf8cdf0dc2ad70e12a0624b33c5757cb50ea",
+    "tests/fixtures/d/d1_v1/cases.jsonl": "492961d3aff3edd6d790f943cb310e2d79a809e349c89fc8b1012ca3b66cf899",
+    "tests/fixtures/d/d1_v1/manifest.json": "b5f53ce57cd3c4761ceab28246b4dcee0531fea00d38f139b73d9a6bc405e74d",
+    "tests/fixtures/d/d1_v1/policy.yaml": "1bdf1e87b4828740dbf56313eded9e5eb87fd7d04e365d2980d78fe7223ea3ec",
+    "tests/fixtures/d/detection_v2/manifest.json": "9a875e22715cd33cbb9b2d24e3b5404ebc058643c93c6869298503531288d5e9",
+    "tests/fixtures/d/detection_v2/pairs.json": "208567ba15bb4d07d870a5c072aace327547aefb71532847b79a2536e138b1c8",
+    "tests/unit/evaluation/test_detection_followup.py": "61e90493647939b7e22148ff0f8cf4dcb08b5afb8c05180f3bd1b928dbfb2e79"
+  },
+  "stage": "DATA_AND_DEV_BASELINE",
+  "static_checks": {
+    "pyright_errors": 0,
+    "pyright_informations": 0,
+    "pyright_warnings": 0,
+    "ruff_check": "PASS",
+    "ruff_format_files": 182
+  },
+  "status": "PASS_INFRASTRUCTURE_WITH_DETECTOR_ERRORS",
+  "verification": {
+    "byte_identical": {
+      "D_followup_dev_02": {
+        "observations.json": "1d6cfe5245d065ec09e65a9dc1c278cbf486fc59763df25fa97df0484e8bd6b8",
+        "overlap_review.json": "ed4ebfff77f1acfb5f5e868897b068d2001f652eddacf93ec25a4d9e7a295a69",
+        "summary.json": "65660da027789bcd5b7b96d3497aea3875f773485697b7e9b4c00a1a3cf75726"
+      },
+      "D_followup_linux_dev_01": {
+        "observations.json": "1d6cfe5245d065ec09e65a9dc1c278cbf486fc59763df25fa97df0484e8bd6b8",
+        "overlap_review.json": "ed4ebfff77f1acfb5f5e868897b068d2001f652eddacf93ec25a4d9e7a295a69",
+        "summary.json": "65660da027789bcd5b7b96d3497aea3875f773485697b7e9b4c00a1a3cf75726"
+      }
+    },
+    "counts": {
+      "FN": 7,
+      "FP": 4,
+      "TN": 8,
+      "TP": 5,
+      "attack_unknown": 0,
+      "benign_unknown": 0
+    },
+    "frozen_files_checked": 100,
+    "max_trigram_overlap": {
+      "new_other_group": 0.17045454545454544,
+      "new_other_split": 0.17045454545454544,
+      "old": 0.14814814814814814
+    },
+    "observations_independently_recounted": true,
+    "status": "PASS",
+    "tests": {
+      "D_followup_linux_unit_01.xml": {
+        "passed": 18,
+        "sha256": "b4a9d65dd2a1b167c34f6b24de7c23167493c1b24483a062cc6ef2b39cfc53b7"
+      },
+      "D_followup_regression_01.xml": {
+        "passed": 657,
+        "sha256": "6c9c8efd343dd7394364db55acdec9079fd8794da72991cea663415712f57c4a"
+      },
+      "D_followup_unit_01.xml": {
+        "passed": 18,
+        "sha256": "100b5990ff8710103ab82cb974817e08a6454190802002f3c830db876132b260"
+      }
+    },
+    "validation_test_predictions_present": false
+  },
+  "version": "d_detection_scenarios_v2"
+}

@@ -1,0 +1,28 @@
+{
+  "version": "d_detection_scenarios_v2",
+  "status": "APPROVED_DATA_SCOPE_BASELINE_DEV_ONLY",
+  "pairs": 36,
+  "cases": 72,
+  "pairs_per_split": {"dev": 12, "validation": 12, "test": 12},
+  "mechanisms": ["authority_laundering", "workflow_hijack", "evidence_tamper", "exfiltration", "cross_source", "answer_contamination"],
+  "source_types": ["web", "document", "mail_issue", "tool_result", "tool_description", "memory"],
+  "detector_version": "d3a-fixed-rules-v1",
+  "operating_point": 0.75,
+  "rule_sha256_lf": "cd852d3881cb70bf60fd98d5d094f797492b3d2af2d0d266af9ded823288b4bd",
+  "allowed_evaluation_splits": ["dev"],
+  "max_case_characters": 4000,
+  "max_run_seconds": 60,
+  "model_requests": 0,
+  "real_tool_calls": 0,
+  "blind_test": false,
+  "independence_claim": "newly_authored_scenarios_not_proven_semantically_independent",
+  "future_validation_retention": {
+    "unknown_must_not_increase": true,
+    "fn_must_not_increase": true,
+    "fp_must_not_increase": true,
+    "fn_or_fp_must_strictly_decrease": true,
+    "grounded_evidence_required": true,
+    "cost_checked_on_dev_before_validation": true,
+    "p95_limit": "max(baseline_p95_times_2, 0.005_seconds)"
+  }
+}

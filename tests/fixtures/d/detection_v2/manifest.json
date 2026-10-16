@@ -1,0 +1,23 @@
+{
+  "authorship": "assistant_hand_authored_no_model_api",
+  "blind_test": false,
+  "cases": 72,
+  "independent_human_review": false,
+  "old_fixture_sha256": {
+    "cases.jsonl": "492961d3aff3edd6d790f943cb310e2d79a809e349c89fc8b1012ca3b66cf899",
+    "manifest.json": "b5f53ce57cd3c4761ceab28246b4dcee0531fea00d38f139b73d9a6bc405e74d",
+    "policy.yaml": "1bdf1e87b4828740dbf56313eded9e5eb87fd7d04e365d2980d78fe7223ea3ec"
+  },
+  "pairs": 36,
+  "pairs_per_split": {
+    "dev": 12,
+    "test": 12,
+    "validation": 12
+  },
+  "pairs_sha256": "208567ba15bb4d07d870a5c072aace327547aefb71532847b79a2536e138b1c8",
+  "protocol_sha256": {
+    "docs/d/D_detection_followup_protocol.md": "cf2dfb4127e7ca8f09d680902cd8727240697968d9f5099215d7182319b39027",
+    "docs/d/evidence/D_detection_followup_protocol.json": "30eee5cf914c5aada0f96e7c62ee961d1ae92380e381a8f0981cd153e6346b48"
+  },
+  "version": "d_detection_scenarios_v2"
+}
