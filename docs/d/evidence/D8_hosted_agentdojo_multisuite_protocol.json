@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "stage": "D8_hosted_agentdojo_multisuite_full",
+  "status": "READY_NOT_EXECUTED",
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "agentdojo_package": "0.1.34",
+  "benchmark_version": "v1.2",
+  "groups": [
+    "B0_original_agent",
+    "B1_original_camel",
+    "B3_ABCD"
+  ],
+  "attack_types": [
+    "direct",
+    "ignore_previous",
+    "system_message",
+    "injecagent",
+    "important_instructions",
+    "tool_knowledge"
+  ],
+  "tool_review_canonicalization": "sha256 of json.dumps({'read': sorted(read), 'write': sorted(write)}, sort_keys=True, separators=(',', ':')) over src/camel/adapters/agentdojo/runtime.py SUITE_TOOL_REVIEWS",
+  "suites": {
+    "workspace": {
+      "user_tasks": 40,
+      "injection_tasks": 14,
+      "per_group": {
+        "benign": 40,
+        "goal_control": 14,
+        "attack": 3360,
+        "total": 3414
+      },
+      "all_groups": 10242,
+      "max_http_requests_per_group": 12000,
+      "total_seconds_per_group": 64800,
+      "tool_review_sha256": "48af1096e960179d50eb09da42cf0b9f07bc9f28a8f12c82cb391b18c392e84c"
+    },
+    "travel": {
+      "user_tasks": 20,
+      "injection_tasks": 7,
+      "per_group": {
+        "benign": 20,
+        "goal_control": 7,
+        "attack": 840,
+        "total": 867
+      },
+      "all_groups": 2601,
+      "max_http_requests_per_group": 4000,
+      "total_seconds_per_group": 21600,
+      "tool_review_sha256": "b3a840c7180f8b8d864f30f54588de6b4a73aa2b17745259e3c46b378125d66c"
+    },
+    "banking": {
+      "user_tasks": 16,
+      "injection_tasks": 9,
+      "per_group": {
+        "benign": 16,
+        "goal_control": 9,
+        "attack": 864,
+        "total": 889
+      },
+      "all_groups": 2667,
+      "max_http_requests_per_group": 4000,
+      "total_seconds_per_group": 21600,
+      "tool_review_sha256": "889086f743dfb45f767e9aedacd504eb22c6f31f65b9d64124beae9345bf0da7"
+    },
+    "slack": {
+      "user_tasks": 21,
+      "injection_tasks": 5,
+      "per_group": {
+        "benign": 21,
+        "goal_control": 5,
+        "attack": 630,
+        "total": 656
+      },
+      "all_groups": 1968,
+      "max_http_requests_per_group": 3500,
+      "total_seconds_per_group": 18000,
+      "tool_review_sha256": "8af85645c1cc4d58e49abafc8930a5dc223f073940835582771c5bef87fb486e"
+    }
+  },
+  "episodes": {
+    "per_group_all_suites": 5826,
+    "all_groups_all_suites": 17478,
+    "fresh_environment_per_episode": true,
+    "repeats": 1
+  },
+  "execution": {
+    "assignment": "one suite per person; three groups in parallel within that suite",
+    "max_in_flight_model_requests_per_account": 3,
+    "run_suites_sequentially_per_account": true,
+    "sdk_retries": 0,
+    "request_reservation": "fsync before every HTTP attempt",
+    "request_refunds": false,
+    "resume": false
+  },
+  "metrics": {
+    "defense": "attack_goal ASR by suite, group and attack family with planned denominator and Wilson interval",
+    "independent_effect": "unexpected environment changes from AGENTDOJO_ENV_DIFF_V1",
+    "utility": "benign task completion, including the expected WRITE subset",
+    "usability": "B3 confirmation decisions / all B3 decisions",
+    "time": "per-episode and wall-clock duration",
+    "errors": "native errors, tool errors, timeouts and unrun episodes remain explicit unknowns"
+  },
+  "limitations": [
+    "tool_knowledge can raise when an injection ground truth lacks placeholder_args; such episodes remain NATIVE_ERROR in the planned denominator.",
+    "Fixed attacks use AgentDojo's own persona strings, which can be weaker when they do not match a suite persona.",
+    "This protocol document records a ready runner, not completed hosted results.",
+    "DoS, manual and important_instructions variants are outside the user-selected six-family matrix."
+  ],
+  "secret_policy": "DEEPSEEK_API_KEY only via environment/.env; never argv, trace, audit, protocol or committed evidence"
+}

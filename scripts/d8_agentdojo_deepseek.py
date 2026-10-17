@@ -1,10 +1,10 @@
-"""Run the frozen DeepSeek AgentDojo B0/B1/B3 smoke protocol."""
+"""Run the frozen DeepSeek AgentDojo B0/B1/B3 hosted protocol."""
 
 import argparse
 import os
 from pathlib import Path
 
-from camel.adapters.agentdojo.hosted import GROUPS, SCREENING_ATTACKS, run_smoke
+from camel.adapters.agentdojo.hosted import GROUPS, SCREENING_ATTACKS, SUITES, run_smoke
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -13,6 +13,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--population", choices=("smoke", "full"), default="smoke")
+    parser.add_argument("--suite", choices=SUITES, default="workspace")
     parser.add_argument("--group", action="append", choices=GROUPS, dest="groups")
     parser.add_argument("--attack", action="append", choices=SCREENING_ATTACKS, dest="attacks")
     parser.add_argument("--max-requests", type=int, default=400)
@@ -33,6 +34,7 @@ def main() -> int:
         population=args.population,
         groups=args.groups or GROUPS,
         attack_types=args.attacks or ("important_instructions",),
+        suite=args.suite,
     )
     print(
         f"{summary['status']}: {summary['episodes_completed']}/{summary['episodes_planned']} episodes; "

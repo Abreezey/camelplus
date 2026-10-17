@@ -21,7 +21,7 @@ from camel.adapters.agentdojo.catalog import PROPOSED_INJECTIONS, PROPOSED_USERS
 from camel.adapters.agentdojo.controller import write_json
 from camel.adapters.agentdojo.deepseek import DeepSeekStructuredModel
 from camel.adapters.agentdojo.results import Episode, Observation, aggregate, load_episode, validate_population
-from camel.adapters.agentdojo.runtime import WORKSPACE_WRITE_TOOLS, WorkspaceGatewayRuntime
+from camel.adapters.agentdojo.runtime import SUITE_TOOL_REVIEWS, AgentDojoGatewayRuntime
 from camel.adapters.agentdojo.state_observer import (
     expected_environment,
     ground_truth_functions,
@@ -46,6 +46,7 @@ SCREENING_ATTACKS = (
     "important_instructions",
     "tool_knowledge",
 )
+SUITES = ("workspace", "travel", "banking", "slack")
 
 
 class BudgetExceededError(RuntimeError):
@@ -219,9 +220,19 @@ def planned_episodes(attack_types: Sequence[str] = ("important_instructions",)) 
     return episodes
 
 
-def full_episodes() -> list[Episode]:
-    """All workspace user tasks crossed with every injection task in each group."""
-    suite = get_suite("v1.2", "workspace")
+def full_episodes(
+    suite_name: str = "workspace", attack_types: Sequence[str] = ("important_instructions",)
+) -> list[Episode]:
+    """All of one suite's user tasks crossed with every injection task and attack family."""
+    if suite_name not in SUITES:
+        raise ValueError("unknown_suite:" + suite_name)
+    if (
+        not attack_types
+        or len(set(attack_types)) != len(attack_types)
+        or any(attack not in SCREENING_ATTACKS for attack in attack_types)
+    ):
+        raise ValueError("invalid_attack_types")
+    suite = get_suite("v1.2", suite_name)
     users = sorted(suite.user_tasks, key=lambda value: int(value.rsplit("_", 1)[1]))
     injections = sorted(suite.injection_tasks, key=lambda value: int(value.rsplit("_", 1)[1]))
     episodes = []
@@ -237,6 +248,7 @@ def full_episodes() -> list[Episode]:
                     user_task_id=injection,
                     injection_task_id=None,
                     attack_type=None,
+                    suite=suite_name,
                 )
             )
         for user in users:
@@ -249,20 +261,23 @@ def full_episodes() -> list[Episode]:
                     user_task_id=user,
                     injection_task_id=None,
                     attack_type=None,
+                    suite=suite_name,
                 )
             )
             for injection in injections:
-                episodes.append(
-                    Episode(
-                        episode_id=f"{group}-{user}-{injection}-attack",
-                        group=group,
-                        pipeline_name=pipeline,
-                        kind="attack",
-                        user_task_id=user,
-                        injection_task_id=injection,
-                        attack_type="important_instructions",
+                for attack_type in attack_types:
+                    episodes.append(
+                        Episode(
+                            episode_id=f"{group}-{user}-{injection}-{attack_type}-attack",
+                            group=group,
+                            pipeline_name=pipeline,
+                            kind="attack",
+                            user_task_id=user,
+                            injection_task_id=injection,
+                            attack_type=attack_type,
+                            suite=suite_name,
+                        )
                     )
-                )
     validate_population(episodes)
     return episodes
 
@@ -303,21 +318,22 @@ class RuntimeFactory:
     def __init__(self, root: Path, episode: Episode) -> None:
         self.root = root
         self.episode = episode
-        self.instances: list[WorkspaceGatewayRuntime] = []
+        self.instances: list[AgentDojoGatewayRuntime] = []
 
-    def __call__(self, functions: Sequence[Function]) -> WorkspaceGatewayRuntime:
-        runtime = WorkspaceGatewayRuntime(
+    def __call__(self, functions: Sequence[Function]) -> AgentDojoGatewayRuntime:
+        runtime = AgentDojoGatewayRuntime(
             functions,
             root=self.root,
             model_version=MODEL,
             session_id=self.episode.episode_id,
             auto_approve_writes=self.episode.kind == "benign",
+            suite=self.episode.suite,
         )
         self.instances.append(runtime)
         return runtime
 
 
-def _pipeline(group: str, clients: DeepSeekClients):
+def _pipeline(group: str, clients: DeepSeekClients, suite: str):
     pipeline = make_tools_pipeline(
         MODEL_ID,  # type: ignore[arg-type]
         group == "B0_original_agent",
@@ -325,7 +341,7 @@ def _pipeline(group: str, clients: DeepSeekClients):
         "important_instructions",
         "medium",
         None,
-        "workspace",
+        suite,
         None,
         MetadataEvalMode.NORMAL,
         None,
@@ -371,9 +387,8 @@ def run_episode(episode: Episode, output: Path, pipeline) -> tuple[dict, dict | 
     expected_error = None
     expected_write = False
     try:
-        expected_write = bool(
-            ground_truth_functions(user_task.ground_truth(initial_environment)) & WORKSPACE_WRITE_TOOLS
-        )
+        write_tools = SUITE_TOOL_REVIEWS[episode.suite][1]
+        expected_write = bool(ground_truth_functions(user_task.ground_truth(initial_environment)) & write_tools)
         expected = expected_environment(user_task, prompt, initial_environment, suite.tools)
     except Exception as error:
         expected_error = f"{type(error).__name__}: {error}"
@@ -444,6 +459,7 @@ def run_smoke(
     population: Literal["smoke", "full"] = "smoke",
     groups: Sequence[str] = GROUPS,
     attack_types: Sequence[str] = ("important_instructions",),
+    suite: str = "workspace",
 ) -> dict:
     selected_groups = tuple(groups)
     if (
@@ -456,15 +472,18 @@ def run_smoke(
         or not attack_types
         or len(set(attack_types)) != len(attack_types)
         or any(attack not in SCREENING_ATTACKS for attack in attack_types)
-        or (population == "full" and tuple(attack_types) != ("important_instructions",))
+        or suite not in SUITES
+        or (population == "smoke" and suite != "workspace")
     ):
         raise ValueError("invalid_or_existing_hosted_output")
     output.mkdir(parents=True)
-    population_episodes = planned_episodes(attack_types) if population == "smoke" else full_episodes()
+    population_episodes = (
+        planned_episodes(attack_types) if population == "smoke" else full_episodes(suite, attack_types)
+    )
     episodes = [episode for episode in population_episodes if episode.group in selected_groups]
     budget = RequestBudget(output / "request_budget.json", max_requests)
     clients = deepseek_clients(api_key, budget, base_url=base_url)
-    pipelines = {group: _pipeline(group, clients) for group in selected_groups}
+    pipelines = {group: _pipeline(group, clients, suite) for group in selected_groups}
     started = time.monotonic()
     rows = []
     security_rows = []
@@ -501,6 +520,8 @@ def run_smoke(
         "experiment": f"D8 hosted AgentDojo DeepSeek {population}",
         "status": "COMPLETE" if stopped is None else "PARTIAL",
         "model": MODEL,
+        "suite": suite,
+        "attack_types": list(attack_types),
         "groups": list(selected_groups),
         "episodes_planned": len(episodes),
         "episodes_completed": sum(row["status"] == "COMPLETED" for row in rows),

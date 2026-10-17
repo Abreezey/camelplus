@@ -273,9 +273,16 @@ result = run_real_flow(case, directory, workspace=..., scratch=..., audit=..., s
 `deepseek-flash` 的隔离结构化输出固定关闭 thinking：PydanticAI 用 `tool_choice=required` 返回
 typed output，而 DeepSeek thinking 模式拒绝该组合。主规划保持 provider 默认模式。
 
-`WorkspaceGatewayRuntime` 是 B3 的 AgentDojo 执行边界：
+`AgentDojoGatewayRuntime`（v3 前身 `WorkspaceGatewayRuntime`）是 B3 的 AgentDojo 执行边界，
+按套件（workspace / travel / banking / slack）参数化：
 
-- 24 个 workspace 工具必须完整落在审阅过的 READ / WRITE 二分清单，出现新工具即拒绝启动；
+- 每个套件的全部工具必须完整落在冻结的 READ / WRITE 二分审阅表（`SUITE_TOOL_REVIEWS`，
+  来源 = `pipeline_elements/security_policies/{workspace,travel,banking,slack}.py` 的既有
+  no_side_effect_tools（读）与 policies 注册（写）），出现新工具即拒绝启动：
+  - workspace：24 = 14 读 + 10 写；
+  - travel：28 = 22 读 + 6 写（send_email、create/reserve/cancel_calendar_event、reserve_hotel/car_rental/restaurant）；
+  - banking：11 = 6 读 + 5 写（send_money、schedule_transaction、update_scheduled_transaction、update_password、update_user_info）；
+  - slack：11 = 5 读 + 6 写（add_user_to_channel、invite_user_to_slack、remove_user_from_slack、send_direct_message、send_channel_message、post_webpage）；`get_webpage` 是带 is_public 策略的读，按 READ 分类（结果标签本就 UNTRUSTED）；
 - READ 经 B `EffectNormalizer`、A `PolicyEngine`、C 持久 ticket/audit、真实上游虚拟环境调用、
   B `ToolResultEnvelope`、D `DetectionSink` 返回；
 - AgentDojo 的结构化结果完整、未截断地序列化为一个确定性 JSON detection view；原生对象仍返回
@@ -283,14 +290,21 @@ typed output，而 DeepSeek thinking 模式拒绝该组合。主规划保持 pro
   JSON 超过单 view 字符预算仍 fail closed；
 - WRITE 进入 CONFIRM；benchmark 无可信确认 UI，因此返回结构化“被策略阻断”结果且不调用上游，
   这不是 tool error，也不会把被防御阻断的攻击从 ASR 分母删除；
-- AgentDojo 邮箱/日历/云盘是一次复合的内存 RPC，依照 §6 的既有职责由 Gateway 派发。
-  C Broker 只执行真实本地 READ/WRITE/EGRESS；不得为追求“全链”把虚拟工具伪装成本地 IO 或重复执行。
-  C 在此路径提供持久 ticket 使用计数与 hash-chain audit，故 B3 仍覆盖 A/B/C/D。
+- AgentDojo 的邮箱/日历/云盘/预订/账户/频道都是一次复合的内存 RPC，依照 §6 的既有职责由 Gateway
+  派发。C Broker 只执行真实本地 READ/WRITE/EGRESS；不得为追求“全链”把虚拟工具伪装成本地 IO 或
+  重复执行。C 在此路径提供持久 ticket 使用计数与 hash-chain audit，故 B3 仍覆盖 A/B/C/D。
 
 托管 smoke 的冻结人口为 AgentDojo 0.1.34、benchmark v1.2、workspace、5 个只读用户任务、
 `injection_task_0`、`important_instructions`，以及 B0/B1/B3 三组：每组 5 benign + 5 attack +
 1 goal control，共 33 episodes。每个实际 HTTP 尝试须在发送前 fsync 预约，请求失败不退款；错误、超时、
 预算耗尽保持 unknown，不能伪装成攻击被阻断。主指标同时报告 benign utility、ASR、B3 confirm rate 和耗时。
+
+v3 全矩阵（2026-10-17 冻结）：4 套件 × 6 攻击族（direct / ignore_previous / system_message /
+injecagent / important_instructions / tool_knowledge）× B0/B1/B3。每套件×组人口 =
+用户良性 + 注入 goal control + 用户 × 注入 × 攻击族；全套件三组共 17478 episodes
+（每组分摊 workspace 3414 / travel 867 / banking 889 / slack 656）。`tool_knowledge`
+要求注入 ground truth 带 placeholder_args，不满足的组合诚实记 NATIVE_ERROR 并在报告计数，
+不静默剔除。同一 DeepSeek 账户的并发运行 ≤3（每套件内 3 组并行、套件间串行）。
 
 ## 9. 破坏性变更流程
 

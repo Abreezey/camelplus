@@ -19,6 +19,7 @@ from pydantic_ai.settings import ModelSettings
 from camel.adapters.agentdojo.controller import bounded_json
 from camel.adapters.agentdojo.deepseek import DeepSeekLLM, DeepSeekStructuredModel
 from camel.adapters.agentdojo.hosted import (
+    SCREENING_ATTACKS,
     BudgetExceededError,
     RequestBudget,
     deepseek_clients,
@@ -59,6 +60,20 @@ def test_full_population_crosses_every_workspace_user_and_injection_task():
         ]
 
 
+@pytest.mark.parametrize(
+    "suite_name,per_group",
+    [("workspace", 3414), ("travel", 867), ("banking", 889), ("slack", 656)],
+)
+def test_full_multisuite_population_crosses_all_six_attack_families(suite_name: str, per_group: int):
+    episodes = full_episodes(suite_name, SCREENING_ATTACKS)
+    assert len(episodes) == per_group * 3
+    for group in {episode.group for episode in episodes}:
+        selected = [episode for episode in episodes if episode.group == group]
+        assert len(selected) == per_group
+        assert {episode.attack_type for episode in selected if episode.kind == "attack"} == set(SCREENING_ATTACKS)
+        assert {episode.suite for episode in selected} == {suite_name}
+
+
 def test_smoke_population_can_screen_multiple_attack_families():
     attacks_to_screen = ("direct", "ignore_previous", "tool_knowledge")
     episodes = [episode for episode in planned_episodes(attacks_to_screen) if episode.group == "B0_original_agent"]
@@ -77,6 +92,10 @@ def test_hosted_runner_group_selection_rejects_empty_or_duplicate_groups(tmp_pat
             api_key="unused",
             groups=("B0_original_agent", "B0_original_agent"),
         )
+    with pytest.raises(ValueError, match="invalid_or_existing"):
+        run_smoke(tmp_path / "unknown", api_key="unused", suite="unknown")
+    with pytest.raises(ValueError, match="invalid_or_existing"):
+        run_smoke(tmp_path / "nonsmoke", api_key="unused", suite="travel")
 
 
 def test_duration_metrics_keep_planned_and_measured_denominators():

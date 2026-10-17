@@ -1,22 +1,33 @@
 from pathlib import Path
 
+import pytest
 from agentdojo.task_suite import get_suite
 
-from camel.adapters.agentdojo.runtime import WorkspaceGatewayRuntime, workspace_bindings
+from camel.adapters.agentdojo.runtime import AgentDojoGatewayRuntime, suite_bindings
 
 
-def test_workspace_tool_inventory_is_fully_reviewed():
-    suite = get_suite("v1.2", "workspace")
-    bindings = workspace_bindings(suite.tools)
+@pytest.mark.parametrize(
+    "suite_name,read_tool,write_tool",
+    [
+        ("workspace", "search_emails", "send_email"),
+        ("travel", "get_hotels_prices", "reserve_hotel"),
+        ("banking", "get_balance", "send_money"),
+        ("slack", "get_channels", "post_webpage"),
+        ("slack", "get_webpage", "send_channel_message"),
+    ],
+)
+def test_suite_tool_inventory_is_fully_reviewed(suite_name: str, read_tool: str, write_tool: str):
+    suite = get_suite("v1.2", suite_name)
+    bindings = suite_bindings(suite_name, suite.tools)
     assert set(bindings) == {function.name for function in suite.tools}
-    assert bindings["search_emails"].effects[0].type.value == "READ"
-    assert bindings["send_email"].effects[0].type.value == "WRITE"
+    assert bindings[read_tool].effects[0].type.value == "READ"
+    assert bindings[write_tool].effects[0].type.value == "WRITE"
 
 
 def test_gateway_runtime_allows_reads_detects_results_and_withholds_side_effects(tmp_path: Path):
     suite = get_suite("v1.2", "workspace")
     environment = suite.load_and_inject_default_environment({})
-    runtime = WorkspaceGatewayRuntime(
+    runtime = AgentDojoGatewayRuntime(
         suite.tools,
         root=tmp_path / "runtime",
         model_version="deepseek-flash",
@@ -52,7 +63,7 @@ def test_gateway_runtime_allows_reads_detects_results_and_withholds_side_effects
 def test_gateway_runtime_can_approve_a_trusted_benign_write(tmp_path: Path):
     suite = get_suite("v1.2", "workspace")
     environment = suite.load_and_inject_default_environment({})
-    runtime = WorkspaceGatewayRuntime(
+    runtime = AgentDojoGatewayRuntime(
         suite.tools,
         root=tmp_path / "runtime",
         model_version="deepseek-flash",
@@ -74,5 +85,24 @@ def test_gateway_runtime_can_approve_a_trusted_benign_write(tmp_path: Path):
         summary = runtime.summary()
         assert summary["decisions"] == {"ALLOW": 0, "CONFIRM": 2, "DENY": 0}
         assert summary["confirmations"] == {"requested": 1, "approved": 1, "denied": 0}
+    finally:
+        runtime.close()
+
+
+def test_nonworkspace_gateway_runtime_allows_reviewed_read(tmp_path: Path):
+    suite = get_suite("v1.2", "banking")
+    environment = suite.load_and_inject_default_environment({})
+    runtime = AgentDojoGatewayRuntime(
+        suite.tools,
+        root=tmp_path / "runtime",
+        model_version="deepseek-flash",
+        session_id="banking-session",
+        suite="banking",
+    )
+    try:
+        balance, error = runtime.run_function(environment, "get_balance", {})
+        assert error is None and isinstance(balance, float | int)
+        assert runtime.summary()["decisions"] == {"ALLOW": 1, "CONFIRM": 0, "DENY": 0}
+        assert runtime.transport.manifest.identity == "agentdojo:banking:0.1.34:v1.2"
     finally:
         runtime.close()

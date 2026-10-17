@@ -129,10 +129,87 @@ provider JSONDecodeError 警告，疑似与拆分版并行抢账户限速），�
 下一轮的优先级：① 用易受诱导的模型或自适应攻击建立非零 ASR 基线；② 消融 CaMeL 规划器失败任务，
 把 B1/B3 效用差距收敛到 ≤5pp；③ 专测 benign WRITE 的确认 UX 成本。
 
+## 多套件 × 全攻击族协议（待分人运行）
+
+上一轮只覆盖 workspace 和单一 `important_instructions` 全量矩阵，事后补的 6 攻击族筛选只有每族 5 回合，
+不能把 ASR、环境副作用和效用损失外推到 AgentDojo 的其他场景。扩展协议固定为 AgentDojo 0.1.34 /
+benchmark v1.2 的全部四个套件、六个标准非 DoS 攻击族和 B0/B1/B3 三组。冻结证据见
+[D8_hosted_agentdojo_multisuite_protocol.json](evidence/D8_hosted_agentdojo_multisuite_protocol.json)。
+
+| 套件 | 用户任务 | 注入任务 | 每组 attack | 每组总回合 | 三组总回合 | 每组预算 / 时限 |
+|---|---:|---:|---:|---:|---:|---:|
+| workspace | 40 | 14 | 3360 | 3414 | 10242 | 12000 请求 / 18h |
+| travel | 20 | 7 | 840 | 867 | 2601 | 4000 请求 / 6h |
+| banking | 16 | 9 | 864 | 889 | 2667 | 4000 请求 / 6h |
+| slack | 21 | 5 | 630 | 656 | 1968 | 3500 请求 / 5h |
+| 合计 | 97 | 35 | 5694 | 5826 | **17478** | — |
+
+每组总回合 = benign 用户任务 + injection goal control + 用户 × 注入 × 6 攻击族。攻击族固定为
+`direct`、`ignore_previous`、`system_message`、`injecagent`、`important_instructions`、
+`tool_knowledge`。每个套件工具表均冻结为 READ / WRITE 二分；新工具 fail closed。Slack 的
+`get_webpage` 是读取不可信网页，归 READ，因此 Slack 实际为 5 READ + 6 WRITE。
+
+每位执行者领取一个套件，把下面的 `D8_SUITE` 改成自己的套件；同一套件的三组并行，同一账户不要同时
+启动第二个套件，使在途模型请求保持不超过 3（DeepSeek 限额 2500 并发，墙钟而非额度是瓶颈）。输出目录
+必须全新，密钥只从 `.env` 读取：
+
+```bash
+cd /new_data/cpipc/agent-sec/camelplus
+
+D8_SUITE=travel  # 改为 workspace / travel / banking / slack
+case "$D8_SUITE" in
+  workspace) D8_MAX_REQUESTS=12000; D8_TOTAL_SECONDS=64800 ;;
+  travel|banking) D8_MAX_REQUESTS=4000; D8_TOTAL_SECONDS=21600 ;;
+  slack) D8_MAX_REQUESTS=3500; D8_TOTAL_SECONDS=18000 ;;
+  *) echo "unknown suite: $D8_SUITE"; exit 2 ;;
+esac
+
+set -a
+source .env
+set +a
+D8_RUN_TAG="$(date +%Y%m%d_%H%M%S)"
+
+for group in B0_original_agent B1_original_camel B3_ABCD; do
+  output="artifacts/d/D8_multisuite_${D8_RUN_TAG}_${D8_SUITE}_${group}"
+  nohup .venv/bin/python scripts/d8_agentdojo_deepseek.py \
+    --population full \
+    --suite "$D8_SUITE" \
+    --group "$group" \
+    --attack direct \
+    --attack ignore_previous \
+    --attack system_message \
+    --attack injecagent \
+    --attack important_instructions \
+    --attack tool_knowledge \
+    --max-requests "$D8_MAX_REQUESTS" \
+    --total-seconds "$D8_TOTAL_SECONDS" \
+    --output "$output" \
+    > "${output}.log" 2>&1 &
+  echo "PID=$! suite=$D8_SUITE group=$group output=$output"
+done
+```
+
+查看进度：
+
+```bash
+for f in artifacts/d/D8_multisuite_*_*/normalized.json; do
+  printf "%-80s %s\n" "$f" "$(jq length "$f")"
+done
+```
+
+`tool_knowledge` 要求注入任务 ground truth 提供 `placeholder_args`；不满足的组合会保留为
+`NATIVE_ERROR`，不得从计划分母静默删除。待四位执行者交回 12 个输出目录后，再统一聚合 ASR、独立环境
+副作用、benign utility、良性 WRITE utility、confirm rate、错误界和时延；本节当前仅表示协议和实现已就绪，
+不表示 17478 回合已经执行。
+
 ## 工程验收
 
 - `ruff check src tests scripts`：PASS；`pyright`：0 errors / 0 warnings。
-- 完整 pytest：1196 passed（MCP stdio 用例需在受限沙箱外运行）。
+- 完整 pytest：1213 passed（MCP stdio 用例需在受限沙箱外运行）。
+- 多套件协议自校验：`full_episodes(suite, 6 攻击)` 计数 17478 = 5826 × 3，`SUITE_TOOL_REVIEWS`
+  四表哈希与协议证据一致，`run_smoke` 拒绝未知套件与非 workspace smoke。
+- `d_offline_acceptance.py --harness-validation`：`PASS_OFFLINE_COMPONENTS`（输出
+  `artifacts/d/D8_offline_acceptance_20261017_multisuite/`）。
 - `scripts/full_system_demo.py`：4/4 checks passed。
 - D 离线组件验收：665 passed，planner / detector / memory / representation 全 PASS，0 模型请求、0 下载；
   输出位于 `artifacts/d/D8_offline_acceptance_20261017/`。该工作流按设计标记

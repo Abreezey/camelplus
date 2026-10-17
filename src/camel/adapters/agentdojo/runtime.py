@@ -1,4 +1,4 @@
-"""AgentDojo workspace runtime behind the real A/B/C/D gateway chain.
+"""AgentDojo suite runtime behind the real A/B/C/D gateway chain.
 
 AgentDojo tools mutate an in-memory benchmark environment, so they remain one
 composite upstream RPC owned by the B gateway.  C contributes the durable
@@ -57,6 +57,94 @@ WORKSPACE_WRITE_TOOLS = frozenset(
         "share_file",
     }
 )
+# Per-suite frozen tool review.  Source of truth: the existing reviewed sets in
+# pipeline_elements/security_policies/{workspace,travel,banking,slack}.py —
+# no_side_effect_tools (READ) and the registered policies (WRITE).  Slack's
+# get_webpage carries an is_public policy but is a read of untrusted web
+# content, so it is classified READ here (result labels are UNTRUSTED anyway).
+SUITE_TOOL_REVIEWS: dict[str, tuple[frozenset[str], frozenset[str]]] = {
+    "workspace": (WORKSPACE_READ_TOOLS, WORKSPACE_WRITE_TOOLS),
+    "travel": (
+        frozenset(
+            {
+                "get_user_information",
+                "get_all_hotels_in_city",
+                "get_hotels_prices",
+                "get_rating_reviews_for_hotels",
+                "get_hotels_address",
+                "get_all_restaurants_in_city",
+                "get_cuisine_type_for_restaurants",
+                "get_restaurants_address",
+                "get_rating_reviews_for_restaurants",
+                "get_dietary_restrictions_for_all_restaurants",
+                "get_contact_information_for_restaurants",
+                "get_price_for_restaurants",
+                "check_restaurant_opening_hours",
+                "get_all_car_rental_companies_in_city",
+                "get_car_types_available",
+                "get_rating_reviews_for_car_rental",
+                "get_car_fuel_options",
+                "get_car_rental_address",
+                "get_car_price_per_day",
+                "search_calendar_events",
+                "get_day_calendar_events",
+                "get_flight_information",
+            }
+        ),
+        frozenset(
+            {
+                "send_email",
+                "create_calendar_event",
+                "cancel_calendar_event",
+                "reserve_hotel",
+                "reserve_car_rental",
+                "reserve_restaurant",
+            }
+        ),
+    ),
+    "banking": (
+        frozenset(
+            {
+                "get_iban",
+                "get_balance",
+                "get_most_recent_transactions",
+                "get_scheduled_transactions",
+                "read_file",
+                "get_user_info",
+            }
+        ),
+        frozenset(
+            {
+                "send_money",
+                "schedule_transaction",
+                "update_scheduled_transaction",
+                "update_password",
+                "update_user_info",
+            }
+        ),
+    ),
+    "slack": (
+        frozenset(
+            {
+                "get_channels",
+                "read_channel_messages",
+                "read_inbox",
+                "get_users_in_channel",
+                "get_webpage",
+            }
+        ),
+        frozenset(
+            {
+                "add_user_to_channel",
+                "send_direct_message",
+                "send_channel_message",
+                "invite_user_to_slack",
+                "remove_user_from_slack",
+                "post_webpage",
+            }
+        ),
+    ),
+}
 
 _POLICY = """\
 id: agentdojo-read
@@ -84,12 +172,12 @@ def _json_value(value: FunctionReturnType) -> Any:
 class AgentDojoTransport:
     """Trusted gateway transport for one benchmark episode."""
 
-    def __init__(self, functions: Sequence[Function]) -> None:
+    def __init__(self, functions: Sequence[Function], suite: str = "workspace") -> None:
         self._runtime = FunctionsRuntime(functions)
         self.environment: TaskEnvironment | None = None
         self.last_value: FunctionReturnType = None
         self.manifest = ServerManifest(
-            identity="agentdojo:workspace:0.1.34:v1.2",
+            identity=f"agentdojo:{suite}:0.1.34:v1.2",
             tools=tuple(
                 ToolManifest(
                     name=function.name,
@@ -122,10 +210,13 @@ class AgentDojoTransport:
         }
 
 
-def workspace_bindings(functions: Sequence[Function]) -> dict[str, ToolBinding]:
-    """Freeze every workspace tool as read-only or confirmation-required."""
+def suite_bindings(suite: str, functions: Sequence[Function]) -> dict[str, ToolBinding]:
+    """Freeze every suite tool as read-only or confirmation-required (fail closed on new tools)."""
+    if suite not in SUITE_TOOL_REVIEWS:
+        raise ValueError("unreviewed_agentdojo_suite:" + suite)
+    read_tools, write_tools = SUITE_TOOL_REVIEWS[suite]
     names = {function.name for function in functions}
-    unknown = names - WORKSPACE_READ_TOOLS - WORKSPACE_WRITE_TOOLS
+    unknown = names - read_tools - write_tools
     if unknown:
         raise ValueError("unreviewed_agentdojo_tools:" + ",".join(sorted(unknown)))
     result_label = TrustLabel(integrity=Integrity.UNTRUSTED, authority=Authority.DATA_ONLY)
@@ -134,7 +225,7 @@ def workspace_bindings(functions: Sequence[Function]) -> dict[str, ToolBinding]:
             adapter="mcp",
             effects=(
                 EffectSpec(
-                    type=EffectType.READ if name in WORKSPACE_READ_TOOLS else EffectType.WRITE,
+                    type=EffectType.READ if name in read_tools else EffectType.WRITE,
                     operation="agentdojo_" + name,
                 ),
             ),
@@ -144,7 +235,7 @@ def workspace_bindings(functions: Sequence[Function]) -> dict[str, ToolBinding]:
     }
 
 
-class WorkspaceGatewayRuntime(FunctionsRuntime):
+class AgentDojoGatewayRuntime(FunctionsRuntime):
     """Synchronous AgentDojo runtime interposed by the production gateway."""
 
     def __init__(
@@ -155,6 +246,7 @@ class WorkspaceGatewayRuntime(FunctionsRuntime):
         model_version: str,
         session_id: str,
         auto_approve_writes: bool = False,
+        suite: str = "workspace",
     ) -> None:
         super().__init__(functions)
         self.root = root.resolve()
@@ -162,7 +254,8 @@ class WorkspaceGatewayRuntime(FunctionsRuntime):
         self.audit = AuditStore(self.root / "audit.sqlite")
         self.tickets = SQLiteTicketStore(self.root / "tickets.sqlite")
         self.detection = DetectionSink()
-        self.transport = AgentDojoTransport(functions)
+        self.suite = suite
+        self.transport = AgentDojoTransport(functions, suite)
         self._sequence = 0
         self._session_id = session_id
         self._model_version = model_version
@@ -184,11 +277,11 @@ class WorkspaceGatewayRuntime(FunctionsRuntime):
         )
         self.manifest_digest = asyncio.run(
             self.gateway.register(
-                "workspace",
+                suite,
                 self.transport,
                 expected_identity=self.transport.manifest.identity,
                 expected_digest=self.transport.manifest.digest,
-                bindings=workspace_bindings(functions),
+                bindings=suite_bindings(suite, functions),
                 context=self._context,
             )
         )
@@ -214,7 +307,7 @@ class WorkspaceGatewayRuntime(FunctionsRuntime):
 
             async def dispatch():
                 result = await self.gateway.call_tool(
-                    "workspace", function, copy.deepcopy(dict(kwargs)), context=context
+                    self.suite, function, copy.deepcopy(dict(kwargs)), context=context
                 )
                 if result.confirmation_id is not None and self._auto_approve_writes:
                     result = await self.gateway.resolve(result.confirmation_id, approved=True, context=context)
