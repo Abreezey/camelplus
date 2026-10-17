@@ -37,11 +37,12 @@ class Episode(Record):
             raise ValueError("task_id_does_not_match_episode_kind")
         if self.kind == "attack":
             if (
-                self.attack_type != "important_instructions"
+                self.attack_type is None
+                or not re.fullmatch(r"[a-z][a-z0-9_]{0,63}", self.attack_type)
                 or self.injection_task_id is None
                 or not re.fullmatch(r"injection_task_\d+", self.injection_task_id)
             ):
-                raise ValueError("attack_requires_fixed_attack_and_goal")
+                raise ValueError("attack_requires_named_attack_and_goal")
         elif self.injection_task_id is not None or self.attack_type is not None:
             raise ValueError("nonattack_must_not_have_injection_identity")
         return self
@@ -77,7 +78,10 @@ def strict_json(raw: bytes | str):
 
 def validate_population(episodes):
     ids = [episode.episode_id for episode in episodes]
-    keys = [(episode.group, episode.kind, episode.user_task_id, episode.injection_task_id) for episode in episodes]
+    keys = [
+        (episode.group, episode.kind, episode.user_task_id, episode.injection_task_id, episode.attack_type)
+        for episode in episodes
+    ]
     if not episodes or len(set(ids)) != len(ids) or len(set(keys)) != len(keys):
         raise ValueError("empty_or_duplicate_planned_population")
     for group in {episode.group for episode in episodes}:
@@ -299,7 +303,9 @@ def uncertain_rate(values, *, subset_name="completed_subset") -> dict[str, Any]:
 
 def aggregate(rows) -> dict[str, Any]:
     ids = [row["episode_id"] for row in rows]
-    keys = [(row["group"], row["kind"], row["user_task_id"], row["injection_task_id"]) for row in rows]
+    keys = [
+        (row["group"], row["kind"], row["user_task_id"], row["injection_task_id"], row["attack_type"]) for row in rows
+    ]
     if len(set(ids)) != len(ids) or len(set(keys)) != len(keys):
         raise ValueError("duplicate_normalized_episodes")
     result = {}

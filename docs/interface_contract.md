@@ -211,7 +211,88 @@ HTTP 下游使用每请求认证的无状态 JSON Streamable HTTP；必须配置
 上游 HTTP 禁代理、禁重定向，校验 DNS 后连接已批准 IP，并保留 Host/TLS SNI。
 上游 stdio 绑定可执行文件及显式绝对脚本文件摘要、参数和环境。部署方负责代码、依赖、凭据与进程隔离。
 
-## 7. 破坏性变更流程
+## 7. D 生产适配器与检测桥（v1，2026-10-16）
+
+> D 真实链路接入 B/C 的增量接口。`NormalizedCall`、`ToolResultEnvelope`、网关签名均未改动。
+
+### 7.1 D 生产适配器（`camel.planner.production_adapter`）
+
+```python
+from camel.planner.production_adapter import PRODUCTION_TOOLS, normalize_production
+
+normalized = normalize_production(compiled, plan, sources, workspace=Path("/ws"))
+# 每节点调用 B 真实 EffectNormalizer（fs read 绑定），再投影为 D 的严格 TDG 效果：
+#   backend="production_adapter"、effect_id=node.effect_refs[0]、operation="read_file"、
+#   data_refs 恰为 source 标签、derived_from=node.source_ids
+```
+
+投影语义：真实归约用于**验证**（blocked / 效果数 ≠ 1 / 非 READ / `resources != (node.resource_id,)`
+/ confidence 非 EXACT / resource_id 非 realpath 规范形 → `PlanError`，fail closed），通过后按 D 的
+`validate_plan` 冻结契约重述为确定性效果。operation 字面量 `read_file`（D 侧）与 B 的 `file_read`
+是同一动作的两个命名约定，映射固定在此处。`NormalizedCall` 不加 arguments 字段：只读 fs 模板下
+执行输入由 `effect.resources[0]` 完全决定；B 自留 `NormalizationResult.arguments` 供其派发。
+
+### 7.2 result_sink 检测桥（`camel.detection.gateway_bridge`）
+
+```python
+from camel.detection.gateway_bridge import DetectionSink
+
+sink = DetectionSink()
+gateway = MCPSecurityGateway(..., result_sink=sink)   # 网关签名零改动
+sink.results  # dict[event_id, DetectionResult]
+```
+
+- `content_views(envelope)`：每个 `text_views` 指针产出一个 D3 `ContentView`（raw=original、
+  normalized=normalized、整文 SpanMap、label=envelope.labels + source_id 入 provenance）。
+- 语义：检测**发现只记录不阻断**（保留 D 良性误报契约，post-hoc 不升风险）；检测失败或超预算
+  （>16 views / >32k 字每 view / >64k 总字符）→ `raise GatewayError("detection_failed_content_withheld")`，
+  网关既有语义使 envelope 不返回 Agent（fail closed）。
+- v1 不在 sink 内写审计（envelope v1 无 trace_id，内存台账按 event_id 关联）；envelope v2 增
+  trace 字段后再接审计链。
+
+### 7.3 D 真实执行流（`camel.evaluation.real_chain`）
+
+```python
+from camel.evaluation.real_chain import run_real_flow
+
+result = run_real_flow(case, directory, workspace=..., scratch=..., audit=..., signing_key=...,
+                       model_version=..., code_commit=...)
+# run_flow 注入 executor/normalize/tools/documents（默认值 = 原夹具路径，字节级不变）；
+# real_tool_calls = 实际经 SecureExecutionPipeline 执行的效果数
+```
+
+审计供数：真实链路构造 `AuditContext(model_version=..., tool_manifest_digest=digest(PRODUCTION_TOOLS), code_commit=...)`
+透传进每个 `pipeline.run`，决策与执行 payload 均携带 context。
+
+## 8. AgentDojo 托管评测接缝（v2，2026-10-17）
+
+`make_tools_pipeline` 接受 `deepseek:<model>`；默认从 `DEEPSEEK_API_KEY` 取密钥、从
+`DEEPSEEK_BASE_URL` 取 OpenAI 兼容基址（默认 `https://api.deepseek.com`），SDK 重试固定为 0。
+可选的 `provider_client` / `quarantined_model` 只用于托管评测把主规划和隔离解析的每次 HTTP
+尝试接到同一个持久请求预算；密钥不得进入 argv、审计、trace 或 git 文件。
+`deepseek-flash` 的隔离结构化输出固定关闭 thinking：PydanticAI 用 `tool_choice=required` 返回
+typed output，而 DeepSeek thinking 模式拒绝该组合。主规划保持 provider 默认模式。
+
+`WorkspaceGatewayRuntime` 是 B3 的 AgentDojo 执行边界：
+
+- 24 个 workspace 工具必须完整落在审阅过的 READ / WRITE 二分清单，出现新工具即拒绝启动；
+- READ 经 B `EffectNormalizer`、A `PolicyEngine`、C 持久 ticket/audit、真实上游虚拟环境调用、
+  B `ToolResultEnvelope`、D `DetectionSink` 返回；
+- AgentDojo 的结构化结果完整、未截断地序列化为一个确定性 JSON detection view；原生对象仍返回
+  benchmark。这样 D 对完整内容扫描，同时避免列表的每个字符串字段错误消耗一个 view 配额；若完整
+  JSON 超过单 view 字符预算仍 fail closed；
+- WRITE 进入 CONFIRM；benchmark 无可信确认 UI，因此返回结构化“被策略阻断”结果且不调用上游，
+  这不是 tool error，也不会把被防御阻断的攻击从 ASR 分母删除；
+- AgentDojo 邮箱/日历/云盘是一次复合的内存 RPC，依照 §6 的既有职责由 Gateway 派发。
+  C Broker 只执行真实本地 READ/WRITE/EGRESS；不得为追求“全链”把虚拟工具伪装成本地 IO 或重复执行。
+  C 在此路径提供持久 ticket 使用计数与 hash-chain audit，故 B3 仍覆盖 A/B/C/D。
+
+托管 smoke 的冻结人口为 AgentDojo 0.1.34、benchmark v1.2、workspace、5 个只读用户任务、
+`injection_task_0`、`important_instructions`，以及 B0/B1/B3 三组：每组 5 benign + 5 attack +
+1 goal control，共 33 episodes。每个实际 HTTP 尝试须在发送前 fsync 预约，请求失败不退款；错误、超时、
+预算耗尽保持 unknown，不能伪装成攻击被阻断。主指标同时报告 benign utility、ASR、B3 confirm rate 和耗时。
+
+## 9. 破坏性变更流程
 
 1. 提出方在群里贴变更点 + 影响面（哪些模块的哪些调用）；
 2. 更新本文对应小节（含版本注记）；

@@ -269,6 +269,15 @@ def test_duplicate_population_and_mixed_group_configuration_are_rejected():
     assert set(aggregate([normalize(spec, trace(spec)) for spec in [one, other]])) == {"test", "other"}
 
 
+def test_attack_family_is_part_of_population_identity():
+    one = episode()
+    other = episode(episode_id="two", attack_type="direct")
+    validate_population([one, other])
+    assert (
+        aggregate([normalize(one, trace(one)), normalize(other, trace(other))])["test"]["attack_goal"]["planned"] == 2
+    )
+
+
 def test_episode_and_observer_metadata_are_strict():
     with pytest.raises(ValidationError):
         episode(injection_task_id=None)

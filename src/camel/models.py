@@ -8,8 +8,11 @@ from agentdojo.agent_pipeline.agent_pipeline import load_system_message
 from agentdojo.models import MODEL_NAMES
 from google import genai
 from openai.types.chat import ChatCompletionReasoningEffort
+from pydantic_ai import models as pydantic_models
 from pydantic_ai.models import KnownModelName
+from pydantic_ai.providers.deepseek import DeepSeekProvider
 
+from camel.adapters.agentdojo.deepseek import DeepSeekLLM, DeepSeekStructuredModel
 from camel.interpreter.interpreter import MetadataEvalMode
 from camel.pipeline_elements.anthropic_tool_filter import AnthropicLLMToolFilter
 from camel.pipeline_elements.privileged_llm import PrivilegedLLM
@@ -47,6 +50,7 @@ _supported_model_names = {
     "gpt-4o-mini-2024-07-18": "GPT-4",
     "gpt-4.1-2025-04-14": "ChatGPT",
     "gpt-4.1-nano-2025-04-14": "ChatGPT",
+    "deepseek-flash": "DeepSeek",
 } | _oai_thinking_models_with_effort
 suffixes = ["", "+camel", "+camel+secpol", "+camel+secpol+strict"]
 
@@ -95,7 +99,10 @@ def make_tools_pipeline(
     suite: str,
     ad_defense: str | None,
     eval_mode: MetadataEvalMode,
-    q_llm: KnownModelName | None,
+    q_llm: KnownModelName | pydantic_models.Model | None,
+    *,
+    provider_client: openai.OpenAI | None = None,
+    quarantined_model: pydantic_models.Model | None = None,
 ) -> agent_pipeline.AgentPipeline:
     if "google" in model:
         # vertexai.init(project=os.getenv("GCP_PROJECT"), location=os.getenv("GCP_LOCATION"))
@@ -107,8 +114,28 @@ def make_tools_pipeline(
         else:
             max_tokens = 65535
         llm = agent_pipeline.GoogleLLM(model.split(":")[1], client, max_tokens=max_tokens)
+    elif model.startswith("deepseek:"):
+        api_key = os.getenv("DEEPSEEK_API_KEY")
+        if provider_client is None and not api_key:
+            raise ValueError("DEEPSEEK_API_KEY is required")
+        client = provider_client or openai.OpenAI(
+            api_key=api_key,
+            base_url=os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
+            max_retries=0,
+        )
+        llm = DeepSeekLLM(client, model.split(":", 1)[1])
+        if quarantined_model is None:
+            async_client = openai.AsyncOpenAI(
+                api_key=api_key,
+                base_url=os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
+                max_retries=0,
+            )
+            quarantined_model = DeepSeekStructuredModel(
+                model.split(":", 1)[1],
+                provider=DeepSeekProvider(openai_client=async_client),
+            )
     elif "openai" in model:
-        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        client = provider_client or openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         # reasoning models do not support temperature and their "system" message is called "developer" message
         if _is_oai_reasoning_model(model):
             llm = agent_pipeline.OpenAILLM(client, model.split(":")[1], reasoning_effort, None)
@@ -197,7 +224,7 @@ def make_tools_pipeline(
                 PrivilegedLLM(
                     llm,
                     ADNoSecurityPolicyEngine,
-                    q_llm or model,
+                    quarantined_model or q_llm or model,
                 ),
             ]
         )
@@ -209,7 +236,7 @@ def make_tools_pipeline(
         else:
             tools_pipeline.name = f"{model.split(':')[1]}+camel"
 
-        if q_llm:
+        if isinstance(q_llm, str):
             tools_pipeline.name += f"-q:{q_llm.split(':')[1]}"
 
     return tools_pipeline

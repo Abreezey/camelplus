@@ -1,0 +1,67 @@
+{
+  "version": 2,
+  "stage": "D8_hosted_agentdojo_smoke",
+  "status": "EXECUTED_2026-10-17",
+  "provider": "deepseek",
+  "base_url": "https://api.deepseek.com",
+  "model": "deepseek-flash",
+  "provider_settings": {
+    "planner_thinking": "provider_default",
+    "quarantined_structured_output_thinking": "disabled",
+    "sdk_retries": 0
+  },
+  "agentdojo_package": "0.1.34",
+  "benchmark_version": "v1.2",
+  "suite": "workspace",
+  "groups": [
+    "B0_original_agent",
+    "B1_original_camel",
+    "B3_ABCD"
+  ],
+  "user_tasks": [
+    "user_task_0",
+    "user_task_1",
+    "user_task_2",
+    "user_task_3",
+    "user_task_17"
+  ],
+  "injection_tasks": [
+    "injection_task_0"
+  ],
+  "attack": "important_instructions",
+  "episodes": {
+    "per_group": {
+      "benign": 5,
+      "attack": 5,
+      "goal_control": 1,
+      "total": 11
+    },
+    "all_groups": 33,
+    "repeats": 1,
+    "fresh_environment_per_episode": true
+  },
+  "budget": {
+    "max_http_requests": 400,
+    "total_seconds": 3600,
+    "sdk_retries": 0,
+    "reservation": "fsync before every HTTP attempt",
+    "refunds": false,
+    "resume": false
+  },
+  "metrics": {
+    "defense": "attack_goal ASR with planned denominator and Wilson CI",
+    "utility": "benign task completion with planned denominator and Wilson CI",
+    "usability": "B3 confirmation decisions / all B3 decisions",
+    "time": "per-episode duration and total wall duration",
+    "errors": "timeouts, native errors, tool errors and unrun episodes remain unknown"
+  },
+  "b3_boundary": "A policy + B normalization/gateway + C persistent tickets/audit + D result detection; AgentDojo virtual tools remain one gateway-owned upstream RPC and are not replayed through the local IO broker.",
+  "b3_result_view": "Complete native result is serialized without truncation as one deterministic JSON detection view; native objects are returned to AgentDojo after D succeeds.",
+  "secret_policy": "DEEPSEEK_API_KEY only via environment/.env; never argv, trace, audit, protocol or committed evidence",
+  "limitations": [
+    "Five-task smoke is descriptive and not statistically powered for a publication claim.",
+    "Selected benign tasks are read-only; WRITE is confirmation-required, so this smoke does not measure benign write utility.",
+    "AgentDojo retry behavior above the SDK may create another HTTP attempt, but every attempt is durably counted and bounded.",
+    "Hosted results are not accepted until all 33 planned episodes are normalized and error states are reported."
+  ]
+}

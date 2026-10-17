@@ -17,7 +17,7 @@
 import dataclasses
 import time
 from collections.abc import Callable, Iterable, Sequence
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 import pydantic
 import yaml
@@ -29,6 +29,7 @@ from agentdojo.default_suites.v1.travel.task_suite import TravelEnvironment
 from agentdojo.default_suites.v1.workspace.task_suite import (
     WorkspaceEnvironment,
 )
+from pydantic_ai import models as pydantic_models
 from pydantic_ai.models import KnownModelName
 
 from camel import quarantined_llm, system_prompt_generator
@@ -191,8 +192,10 @@ def _highlight_exception_code(
     return highlighted_code
 
 
-def _get_quarantined_llm(model: KnownModelName) -> KnownModelName:
-    if "openai" in model and "o1" in model:
+def _get_quarantined_llm(
+    model: KnownModelName | pydantic_models.Model,
+) -> KnownModelName | pydantic_models.Model:
+    if isinstance(model, str) and "openai" in model and "o1" in model:
         return "openai:gpt-4o"
     return model
 
@@ -213,7 +216,7 @@ class PrivilegedLLM(agent_pipeline.BasePipelineElement):
         self,
         llm: agent_pipeline.BasePipelineElement,
         security_policy_engine: type[AgentDojoSecurityPolicyEngine],
-        quarantined_llm_model: KnownModelName,
+        quarantined_llm_model: KnownModelName | pydantic_models.Model,
         system_prompt_generator: Callable[
             [Iterable[functions_runtime.Function], set[str]], str
         ] = system_prompt_generator.default_system_prompt_generator,
@@ -230,7 +233,7 @@ class PrivilegedLLM(agent_pipeline.BasePipelineElement):
         self.dummy_runtime = functions_runtime.FunctionsRuntime()
         self.max_attempts = max_attempts
         # Gemini thinking and o1-* do not support JSON mode, so we fall back to base base Gemini/4o
-        self.quarantined_llm_model: KnownModelName = _get_quarantined_llm(quarantined_llm_model)
+        self.quarantined_llm_model = _get_quarantined_llm(quarantined_llm_model)
 
     def run_code(
         self,
@@ -418,7 +421,7 @@ class PrivilegedLLM(agent_pipeline.BasePipelineElement):
 
         def query_ai_assistant(query: str, output_schema: type[_T]) -> _T:
             return quarantined_llm.query_quarantined_llm(
-                llm=(self.quarantined_llm_model),
+                llm=cast(pydantic_models.KnownModelName | pydantic_models.Model, self.quarantined_llm_model),
                 query=query,
                 output_schema=output_schema,
                 retries=self.quarantined_llm_retries,

@@ -1,0 +1,39 @@
+{
+  "experiment": "ABC system component cost",
+  "status": "PASS",
+  "model_requests": 0,
+  "protocol": {
+    "warmup": 100,
+    "iterations": 1000,
+    "clock": "perf_counter_ns",
+    "percentile": "nearest_rank",
+    "outliers_removed": 0
+  },
+  "p95_ms": {
+    "policy_decision": 0.00654,
+    "broker_pipeline": 0.540463,
+    "gateway_raw_stub": 0.011351,
+    "gateway_secured_stub": 0.860509,
+    "gateway_increment": 0.849158
+  },
+  "gates": {
+    "policy_decision_p95_lt_20ms": true,
+    "gateway_increment_p95_lt_150ms": true
+  },
+  "environment": {
+    "python": "3.10.22",
+    "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+    "logical_cpus": 22,
+    "httpx": "0.28.1",
+    "pydantic": "2.11.5"
+  },
+  "source_sha256": {
+    "scripts/system_component_cost.py": "94d5b24f331a879d89031d2a4866345518130d0a13616c2b08a11b11c8ffaecf",
+    "src/camel/broker/executor.py": "442237f3051e14b698d1182d06c6f3f59412fce1a592d0cc31b92e493d93782b",
+    "src/camel/broker/pipeline.py": "2f01dc803cf13605a757bb094c7ba84cc82aa10783dcb80d1a6ecd579082b331",
+    "src/camel/evaluation/component_cost.py": "d6189d9e0d67d6547f6963eee6e8f406090cad299862b6846c7986ec95c27b85",
+    "src/camel/gateway/gateway.py": "f6d8d8ae3ca3d10791f849c064295db3510c0827fa4137a42f4d4e8e3003138e",
+    "src/camel/policy/engine.py": "1a30d1d34bd4412967743b210d2cda07884e8e15f894c071d7c86bc46c47d2ba"
+  },
+  "limitations": "In-process microbenchmark with deterministic stub upstream; excludes model and external network latency. Repeated observations are correlated, not independent security trials."
+}
