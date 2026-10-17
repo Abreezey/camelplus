@@ -95,10 +95,25 @@ broker = ExecutionBroker(signing_key=key, profile=profile,
 result = broker.execute(effect, ticket, subject=..., trace_id=..., session_id=...,
                         content=..., parent_ids=..., audit_context=audit_context)
 # 校验顺序（不可重排）：静态沙箱 → verify_ticket → 凭据派生 → IO → 审计
-# v0 仅 READ/WRITE；其余效果 UnsupportedEffectError（fail closed + 审计 rejected）
+# v0.6 支持 READ/WRITE/EGRESS；EXEC / REPO_MUTATE / 其余 UnsupportedEffectError（fail closed + 审计 rejected）
 # WRITE 需要 POSIX O_NOFOLLOW；缺少该能力时在票据消费和 IO 前 UnsupportedEffectError，审计 rejected
 # 配置 vault 时：票据校验后 HMAC 派生短期凭据（绑定票据、随票据过期），
 #   result.credential_handle 与审计 payload 只记 opaque handle（"cred_" 前缀），secret（SecretBytes）绝不外泄
+
+# ---- EGRESS 执行（v0.6，2026-10-16）----
+from camel.normalization import NetworkPolicy  # 复用 B 的网络边界，不扩展 SandboxProfile
+broker = ExecutionBroker(..., network=NetworkPolicy(allowed_hosts={"api.example.com"}),
+                         resolver=...,        # Callable[[host, port], tuple[str, ...]]，默认真实 DNS，测试可注入
+                         transport=...,       # httpx.BaseTransport | None，测试注入点；作为固定 IP 传输的内层（镜像 B 的 PinnedHTTPTransport）
+                         timeout=30.0, max_response_bytes=1_048_576)
+# EGRESS 效果（destination=URL，operation="http_<method>"）执行语义：
+#   烧票前静态校验（拒绝不烧票）：destination 必填、operation 须为 http_<method>、
+#     network 未配置 → UnsupportedEffectError、NetworkPolicy.target() 允许表/DNS/私网/元数据检查（拒绝记 rejected）
+#   执行时：revalidate 复验 DNS（地址集变化 = 重绑定 → failed）、连接固定到已批准 IP
+#     并保留原 Host 头与 TLS SNI、3xx 重定向一律 failed（授权不继承）、响应有界读取（超限 failed）
+#   配置 vault 时注入 `Authorization: Bearer <secret>`（固定方案，无配置项）；secret 绝不入审计/日志
+#   result.output = 响应体 bytes；data_refs 标签不在 Broker 复查（A 的 IFC 已在裁决层硬拒秘密外发）
+# EXEC 仍 fail closed（等内核级沙箱）
 
 # ---- 确认流 ----
 confirmations = ConfirmationAuthority(signing_key=key, audit=audit)   # ticket_ttl 默认 5 分钟

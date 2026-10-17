@@ -1,17 +1,20 @@
 """Execution broker: OS-level execution of approved effects (arch.md §6.9).
 
-The broker is the only component that touches the filesystem on behalf of
-the agent. Every execution requires a valid, unexpired, unconsumed
+The broker is the only component that touches the filesystem or network on
+behalf of the agent. Every execution requires a valid, unexpired, unconsumed
 capability ticket (I5) — verification failure always raises (fail closed,
 see ``camel/policy/ticket.py``).
 
-v0 effect support (fail closed for everything else):
+v0.6 effect support (fail closed for everything else):
 
-- ``READ``  — read one file inside the sandbox read roots;
-- ``WRITE`` — write caller-provided bytes inside the sandbox write dirs;
-- ``EXEC`` / ``EGRESS`` / ``REPO_MUTATE`` / … — unsupported until the kernel
-  sandbox and egress proxy exist; attempting them raises
-  :class:`UnsupportedEffectError` and is audited as ``rejected``.
+- ``READ``   — read one file inside the sandbox read roots;
+- ``WRITE``  — write caller-provided bytes inside the sandbox write dirs;
+- ``EGRESS`` — one pinned-IP HTTP request through a configured
+  :class:`~camel.normalization.NetworkPolicy` (see ``egress.py``); the
+  vault-derived credential is injected as ``Authorization: Bearer``;
+- ``EXEC`` / ``REPO_MUTATE`` / … — unsupported until the kernel sandbox
+  exists; attempting them raises :class:`UnsupportedEffectError` and is
+  audited as ``rejected``.
 
 Check order: static sandbox validation happens *before* ticket verification
 (pure path math, no side effects, does not burn a ticket use); authorization
@@ -25,12 +28,15 @@ import os
 from collections.abc import Callable
 from datetime import datetime, timezone
 
+import httpx
 from pydantic import BaseModel, ConfigDict
 
 from camel.audit.store import AuditContext, AuditStore, execution_event, execution_payload
 from camel.broker.credentials import InjectedCredential, KeyVault
+from camel.broker.egress import ALLOWED_METHODS, EgressClient, EgressError
 from camel.broker.profile import SandboxProfile, SandboxViolationError
 from camel.core.effect import CanonicalEffect, EffectType
+from camel.normalization.net import NetworkPolicy, NormalizationError, Resolver, resolve_dns
 from camel.policy.ticket import CapabilityTicket, TicketStore, TicketVerificationError, verify_ticket
 
 
@@ -81,6 +87,11 @@ class ExecutionBroker:
         audit: AuditStore,
         now_fn: Callable[[], datetime] | None = None,
         vault: KeyVault | None = None,
+        network: NetworkPolicy | None = None,
+        resolver: Resolver = resolve_dns,
+        transport: httpx.BaseTransport | None = None,
+        timeout: float = 30.0,
+        max_response_bytes: int = 1_048_576,
     ) -> None:
         self._key = signing_key
         self._profile = profile
@@ -88,6 +99,15 @@ class ExecutionBroker:
         self._audit = audit
         self._now = now_fn or _utcnow
         self._vault = vault
+        self._egress: EgressClient | None = None
+        if network is not None:
+            self._egress = EgressClient(
+                network,
+                resolver=resolver,
+                transport=transport,
+                timeout=timeout,
+                max_response_bytes=max_response_bytes,
+            )
 
     def execute(
         self,
@@ -177,8 +197,8 @@ class ExecutionBroker:
         )
         parent_ids = (intent.event_id,)
         try:
-            output = self._do_execute(effect, content)
-        except OSError as err:
+            output = self._do_execute(effect, content, credential)
+        except (OSError, EgressError) as err:
             try:
                 self._audit_attempt(
                     effect,
@@ -232,14 +252,43 @@ class ExecutionBroker:
                 raise ValueError("WRITE effect requires content")
             self._profile.resolve_write(effect.resources[0])
             _write_flags()
+        elif effect.type is EffectType.EGRESS:
+            self._validate_egress(effect)
         else:
             raise UnsupportedEffectError(
                 f"effect type {effect.type.value} is not executable in broker v0 (fail closed)"
             )
 
-    def _do_execute(self, effect: CanonicalEffect, content: bytes | None) -> bytes | None:
+    def _validate_egress(self, effect: CanonicalEffect) -> None:
+        """Allowlist/DNS validation before the ticket is burned; rechecked at send time."""
+        if not effect.destination:
+            raise SandboxViolationError("EGRESS effect without a destination")
+        if self._egress is None:
+            raise UnsupportedEffectError("EGRESS execution requires a configured NetworkPolicy (fail closed)")
+        method = effect.operation.removeprefix("http_")
+        if not effect.operation.startswith("http_") or method.upper() not in ALLOWED_METHODS:
+            raise UnsupportedEffectError(f"unsupported EGRESS operation {effect.operation!r}")
+        try:
+            self._egress.validate(effect.destination)
+        except NormalizationError as err:
+            raise SandboxViolationError(str(err)) from err
+
+    def _do_execute(
+        self, effect: CanonicalEffect, content: bytes | None, credential: InjectedCredential | None
+    ) -> bytes | None:
         if effect.type is EffectType.READ:
             return self._profile.resolve_read(effect.resources[0]).read_bytes()
+        if effect.type is EffectType.EGRESS:
+            if self._egress is None:
+                raise UnsupportedEffectError("EGRESS execution requires a configured NetworkPolicy (fail closed)")
+            if effect.destination is None:  # _validate_egress enforces this; defense in depth
+                raise SandboxViolationError("EGRESS effect without a destination")
+            return self._egress.send(
+                url=effect.destination,
+                method=effect.operation.removeprefix("http_").upper(),
+                content=content,
+                credential=credential,
+            )
         if content is None:
             raise ValueError("WRITE effect requires content")
         target = self._profile.resolve_write(effect.resources[0])

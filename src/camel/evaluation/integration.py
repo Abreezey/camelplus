@@ -85,9 +85,9 @@ class ObservedBroker(ExecutionBroker):
         super().__init__(**kwargs)
         self.io_effects: list[str] = []
 
-    def _do_execute(self, effect, content):
+    def _do_execute(self, effect, content, credential=None):
         self.io_effects.append(effect.effect_id)
-        return super()._do_execute(effect, content)
+        return super()._do_execute(effect, content, credential)
 
 
 class Probe:

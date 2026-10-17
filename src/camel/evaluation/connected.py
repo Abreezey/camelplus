@@ -71,12 +71,14 @@ def opened(path, case_id):
         gate.close()
 
 
-def compile_scope(case_id):
+def compile_scope(case_id, documents=None):
+    document = DOCUMENT if documents is None else documents["document"]
+    other = OTHER_DOCUMENT if documents is None else documents["other"]
     organization = Organization(
         policy_id="d-connected-readonly-v1",
         resources=(
-            Resource(resource_id=DOCUMENT, kind="document"),
-            Resource(resource_id=OTHER_DOCUMENT, kind="document"),
+            Resource(resource_id=document, kind="document"),
+            Resource(resource_id=other, kind="document"),
         ),
         forbidden_data_classes=frozenset({"credentials"}),
         max_ttl_seconds=600,
@@ -85,7 +87,7 @@ def compile_scope(case_id):
         task_id=case_id,
         principal=OWNER,
         template="read_document",
-        resource_ids=(DOCUMENT,),
+        resource_ids=(document,),
         expires_at=NOW + timedelta(seconds=600),
     )
     result = compile_task(task, organization, now=NOW)
@@ -108,12 +110,14 @@ def sources_for(memory, case):
     return tuple(sources)
 
 
-def candidate(compiled, sources, fault):
+def candidate(compiled, sources, fault, tools=TOOLS, documents=None):
+    document = DOCUMENT if documents is None else documents["document"]
+    other = OTHER_DOCUMENT if documents is None else documents["other"]
     node = ToolNode(
         node_id="read",
-        tool_id="unregistered_push" if fault == "push" else TOOLS[0].tool_id,
-        tool_version=TOOLS[0].version,
-        resource_id=OTHER_DOCUMENT if fault == "scope" else DOCUMENT,
+        tool_id="unregistered_push" if fault == "push" else tools[0].tool_id,
+        tool_version=tools[0].version,
+        resource_id=other if fault == "scope" else document,
         effect_refs=("read-effect",),
         source_ids=tuple(source.source_id for source in sources),
         depends_on=(),
@@ -122,10 +126,10 @@ def candidate(compiled, sources, fault):
     return CandidatePlan(task_id=compiled.task.task_id, nodes=(node,))
 
 
-def evaluate(compiled, plan, sources, engine, now, *, detector_fault=False):
-    normalized = normalize_fixture(compiled, plan, sources)
+def evaluate(compiled, plan, sources, engine, now, *, detector_fault=False, normalize=normalize_fixture, tools=TOOLS):
+    normalized = normalize(compiled, plan, sources)
     validated = validate_plan(
-        compiled, plan, sources=sources, tools=TOOLS, normalized=normalized, engine=engine, now=now
+        compiled, plan, sources=sources, tools=tools, normalized=normalized, engine=engine, now=now
     )
     views = tuple(
         identity_view(
@@ -148,7 +152,21 @@ def evaluate(compiled, plan, sources, engine, now, *, detector_fault=False):
     return validated, detection, assessments
 
 
-def run_flow(case: FlowCase, directory: Path, *, recorder: RecordingTool | None = None) -> dict[str, Any]:
+def run_flow(
+    case: FlowCase,
+    directory: Path,
+    *,
+    recorder: RecordingTool | None = None,
+    executor=None,
+    normalize=normalize_fixture,
+    tools=TOOLS,
+    engine: PolicyEngine | None = None,
+    documents: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    """Run the connected flow; injected executor/normalize/tools switch to the real chain.
+
+    Default arguments reproduce the offline fixture path exactly (real_tool_calls=0).
+    """
     recorder = recorder if recorder is not None else RecordingTool()
     if recorder.ledger:
         raise ValueError("fresh_recording_tool_required")
@@ -169,11 +187,11 @@ def run_flow(case: FlowCase, directory: Path, *, recorder: RecordingTool | None 
             stages=stages,
             memory_events=events,
             ledger=stable(recorder.ledger),
-            real_tool_calls=0,
+            real_tool_calls=len(recorder.ledger) if executor is not None else 0,
             model_requests=0,
         )
 
-    compiled = compile_scope(case.case_id)
+    compiled = compile_scope(case.case_id, documents)
     note("trusted_compile", compiled)
     label = TrustLabel(
         provenance=frozenset({"host-source"}),
@@ -205,20 +223,28 @@ def run_flow(case: FlowCase, directory: Path, *, recorder: RecordingTool | None 
         return finish("MEMORY_BLOCKED", memory.reasons)
     snapshot = fingerprint(dict(entry=memory.entry, content=memory.content))
     sources = sources_for(memory, case)
-    plan = candidate(compiled, sources, case.fault)
+    plan = candidate(compiled, sources, case.fault, tools=tools, documents=documents)
     note("bound_plan", dict(plan=plan, sources=sources, snapshot=snapshot))
-    engine = PolicyEngine(
-        load_rules("""id: allow-registered-document-read
+    if engine is None:
+        engine = PolicyEngine(
+            load_rules("""id: allow-registered-document-read
 when:
   effect.type: READ
   effect.operation: read_file
   effect.resource_matches: file:///workspace/**
 then: ALLOW
 """)
-    )
+        )
     try:
         validated, detection, assessments = evaluate(
-            compiled, plan, sources, engine, NOW + timedelta(seconds=1), detector_fault=case.fault == "detector"
+            compiled,
+            plan,
+            sources,
+            engine,
+            NOW + timedelta(seconds=1),
+            detector_fault=case.fault == "detector",
+            normalize=normalize,
+            tools=tools,
         )
     except PlanError as error:
         return finish("PLAN_INVALID", (str(error),))
@@ -246,14 +272,21 @@ then: ALLOW
     if fingerprint(dict(entry=refreshed.entry, content=refreshed.content)) != snapshot:
         return finish("SNAPSHOT_CHANGED", ("memory_value_or_metadata_changed",))
     refreshed_sources = sources_for(refreshed, case)
-    validation, detection, assessments = evaluate(compiled, plan, refreshed_sources, engine, NOW + timedelta(seconds=3))
+    validation, detection, assessments = evaluate(
+        compiled, plan, refreshed_sources, engine, NOW + timedelta(seconds=3), normalize=normalize, tools=tools
+    )
     note("revalidation_and_detection_C", dict(validation=validation, detection=detection, assessments=assessments))
     if validation.status != "READY" or not all(item.executable for item in assessments):
         return finish("REFRESH_VALIDATION_BLOCKED", validation.reasons)
     focus = refreshed_sources[0].fields[0].value
-    for effect in validation.effects:
-        recorder.invoke(effect, focus, focus)
-    note("recording_only", dict(count=len(recorder.ledger), payload_ref=digest(focus)))
+    if executor is not None:
+        for effect in validation.effects:
+            recorder.ledger.append(executor(effect, focus))
+        note("real_execution", dict(count=len(recorder.ledger)))
+    else:
+        for effect in validation.effects:
+            recorder.invoke(effect, focus, focus)
+        note("recording_only", dict(count=len(recorder.ledger), payload_ref=digest(focus)))
     return finish("RECORDED")
 
 

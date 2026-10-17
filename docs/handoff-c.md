@@ -109,15 +109,15 @@ pipeline.resolve(result.confirmation, approved=False, subject="user:alice", trac
 
 1. **ALLOW 分支也走票据**：arch §7 序列图中 ALLOW 不经票据、CONFIRM 才经票据。为统一 I5（每个已执行效果都有可验证授权），pipeline 在 ALLOW 时也现签**单次**票据再执行，执行后立即失效。
 2. **沙箱是 Python 层强制**（realpath 包含检查 + `O_NOFOLLOW` 写入），非内核级（Landlock/seccomp/容器）——无 sudo 环境下的 v0 取舍，见 §7。
-3. **v0 只支持 READ/WRITE**：`EXEC` / `EGRESS` / `REPO_MUTATE` 直接 fail closed，等 B 的网关与 egress 代理就位后再放行。
+3. **v0.6 支持 READ/WRITE/EGRESS**：`EGRESS` 经 `broker/egress.py` 固定 IP 传输执行（复用 B 的 `NetworkPolicy`，烧票前静态校验 + 发送时 DNS 复验，凭据注入 `Authorization: Bearer`，见 interface_contract §4）；`EXEC` / `REPO_MUTATE` 仍直接 fail closed，等内核级沙箱。
 4. **确认 UI 是 `render()` 纯文本**（资源/目的地/后果/原因/安全替代/策略版本），Web UI 留给后续；过期请求 `approve` 时抛 `ConfirmationExpiredError`。
 
 ## 7. 已知问题与留给后续的事
 
 1. **审计字段数据源待接线**：字段机制已完备（v0.5 `AuditContext` 全链路透传，未供数诚实记 null），但模型版本（D）、工具 manifest digest（B）、代码提交（部署方）尚未实际供数——B/D 就位后设 `CAMEL_MODEL_VERSION` / `CAMEL_TOOL_MANIFEST_DIGEST` / `CAMEL_CODE_COMMIT` 或显式传 `audit_context` 即可，C 侧无需再改。
 2. **TOCTOU 残余竞态**：`resolve_read` 的 realpath 检查与实际读 IO 之间理论上存在符号链接替换窗口；写路径已用 `O_NOFOLLOW` 缓解，读路径 v0 未做同等处理。生产建议内核级沙箱。
-3. **无网络隔离（egress 代理）**：arch.md §6.9 的 egress 控制是 v0 非目标；当前"无网"靠效果类型白名单（只放 READ/WRITE）间接保证。
-4. **凭据注入消费端未接**：v0.5 已落"派生 + 注入点 + 审计引用"骨架（`KeyVault` HMAC 派生、票据校验后注入、审计只记 opaque handle）；工具进程拿 secret 消费（EXEC/EGRESS 场景）等 B 的网关定义进程模型后接入；`CAMEL_MASTER_KEY` 生产分发属部署方（环境变量入口已约定）。
+3. **网络隔离为应用层固定 IP 传输**（v0.6）：EGRESS 复用 B 的 `NetworkPolicy`（允许表 + 全量 DNS 答案检查 + 私网/元数据拒绝 + 重绑定拒绝 + 3xx 拒绝），不是内核级网络沙箱；EXEC 场景的网络约束仍待内核沙箱。
+4. **凭据注入消费端已接（v0.6，仅 EGRESS）**：票据校验后派生的 secret 作为 `Authorization: Bearer` 头注入 egress 请求（`broker/egress.py`）；审计仍只记 opaque handle，secret 绝不入审计。EXEC 场景的凭据注入等内核沙箱；`CAMEL_MASTER_KEY` 生产分发属部署方（环境变量入口已约定）。
 5. `AuditStore` SQLite 单写者；多进程高并发写需 WAL 模式或外部队列（票据计数已是跨进程安全的原子 SQL）。
 6. `ConfirmationRequest` 不持久化（内存对象），进程重启后未决请求丢失，需用户重新走 `run`。
 7. `ExecutionResult.output` 是 `bytes | None`，大文件读全量载入内存；流式读取留给后续。

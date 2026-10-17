@@ -7,6 +7,7 @@ from camel.broker.confirm import (
     ConfirmationStateError,
 )
 from camel.broker.credentials import InjectedCredential, KeyVault
+from camel.broker.egress import EgressClient, EgressError
 from camel.broker.executor import ExecutionAuditError, ExecutionBroker, ExecutionResult, UnsupportedEffectError
 from camel.broker.pipeline import PipelineResult, SecureExecutionPipeline
 from camel.broker.profile import SandboxProfile, SandboxViolationError, to_path
@@ -16,6 +17,8 @@ __all__ = [
     "ConfirmationExpiredError",
     "ConfirmationRequest",
     "ConfirmationStateError",
+    "EgressClient",
+    "EgressError",
     "ExecutionAuditError",
     "ExecutionBroker",
     "ExecutionResult",
