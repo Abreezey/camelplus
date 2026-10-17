@@ -208,7 +208,13 @@ done
 ## 工程验收
 
 - `ruff check src tests scripts`：PASS；`pyright`：0 errors / 0 warnings。
-- 完整 pytest：1213 passed（MCP stdio 用例需在受限沙箱外运行）。
+- 完整 pytest：1311 passed，另有 2 failed 来自上游 `0aa4bb5` 自带的冻结 pin
+  （`test_detection_validation.py::test_real_frozen_pin_still_matches_without_running_detector`、
+  `test_detection_test.py::test_actual_validation_selection_matches_without_test_predictions`，
+  报 `candidate_pin_changed_or_outside_root:src/camel/__init__.py`：pin 期望
+  `36371bf9…`，而该文件在 `280c2c2` / `0aa4bb5` / `890eab9` 三个 ref 上均为 `7acc6d52…`）。
+  已在 `0aa4bb5` 的干净 worktree 上复现，与本模块三次提交无关；需由 pin 作者重新生成或补上
+  漏提交的 `src/camel/__init__.py` 改动（MCP stdio 用例需在受限沙箱外运行）。
 - 多套件协议自校验：`full_episodes(suite, 6 攻击)` 计数 17478 = 5826 × 3，`SUITE_TOOL_REVIEWS`
   四表哈希与协议证据一致，`run_smoke` 拒绝未知套件与非 workspace smoke。
 - `d_offline_acceptance.py --harness-validation`：`PASS_OFFLINE_COMPONENTS`（输出
