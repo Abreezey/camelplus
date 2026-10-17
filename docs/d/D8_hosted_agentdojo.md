@@ -90,7 +90,10 @@ smoke 之后按组拆分跑满 workspace 全量人口：每组 614 回合（14 g
 `artifacts/d/D8_full_3way_20261017_124346_{B0,B1,B3}/`。请求用量 1880 / 1207 / 1723（上限各 3000）。
 同日另有一个合并目录 `D8_deepseek_full_20261017_01`：进程中途死亡（无 summary.json，日志止于
 provider JSONDecodeError 警告，疑似与拆分版并行抢账户限速），其 502 个 B0 回合与拆分版冗余，
-**以拆分版为准**。紧凑证据见 [D8_hosted_agentdojo_full.json](evidence/D8_hosted_agentdojo_full.json)。
+**以拆分版为准**。紧凑证据见 [D8_hosted_agentdojo_full.json](evidence/D8_hosted_agentdojo_full.json)；
+逐组运行日志与 `summary.json` 已入库：[runs/](evidence/D8_hosted_agentdojo_runs/)（B0 完成
+547/614、B1 614/614、B3 614/614，六攻击族筛选 29/36；逐回合 `episodes/` 仍只留在
+`artifacts/d/`）。
 
 ### 三维结果
 
